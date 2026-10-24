@@ -2,7 +2,7 @@
 //   createCharacter() -> THREE.Group, feet at y = 0, facing +Z,
 //   group.userData.rig = { root, body, feet:[l,r], eyes:[l,r] } used by player.js for animation.
 import * as THREE from 'three';
-import { createInkMaterial, addOutline, INK_COLOR, OVERLAY_LAYER } from './ink.js';
+import { createInkMaterial, addOutline, INK_COLOR, OVERLAY_LAYER } from '../../engine/ink.js';
 
 // ---- tunables --------------------------------------------------------------
 const BODY_COLOR = 0xf6b9c8; // pastel pink
@@ -26,7 +26,7 @@ function onBody(mesh, az, el, depth = 1) {
   return mesh;
 }
 
-export function createCharacter() {
+export function createCharacter(ink) { // `ink` (engine/ink.js namespace) is accepted for the world contract but unused here
   const group = new THREE.Group();
   const root = new THREE.Group(); // squash/stretch pivot, sits at the feet
   group.add(root);
@@ -97,3 +97,6 @@ export function createCharacter() {
   group.userData.rig = { root, body, feet, eyes };
   return group;
 }
+
+export const createHero = createCharacter;
+export default createCharacter;

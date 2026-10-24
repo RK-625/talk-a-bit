@@ -1,3 +1,8 @@
+/**
+ * engine/input.js: createInput(canvas) -> { read() } where read() returns and resets
+ *   { moveX (+1 right), moveY (+1 forward), jump (held), lookDX, lookDY (px since last read), zoom (+ = out, fractional) }.
+ *   Keyboard WASD/arrows/Space, mouse drag, wheel; touch devices get a hand-drawn joystick + jump button. Also exports isTouchDevice.
+ */
 // Keyboard + mouse + touch input -> { moveX, moveY, jump, lookDX, lookDY, zoom }
 //   moveX: +1 right, moveY: +1 forward, jump: held, lookDX/DY: pixels since last read,
 //   zoom: fractional distance change since last read (+ = zoom out).

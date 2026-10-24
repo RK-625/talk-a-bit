@@ -1,8 +1,13 @@
+/**
+ * engine/camera.js: third-person follow camera for a spherical world.
+ * createCameraRig(camera, player, planet) -> { heading, zoom01, update(dt, input) }
+ *   heading: tangent unit vector the camera looks along (movement is relative to it); zoom01: 0 default .. 1 max zoom-out.
+ *   Orbit with input.lookDX/DY, zoom with input.zoom (distance 7..125, default 14).
+ */
 // Third-person follow camera for a spherical world.
 // The camera owns a tangent `heading` vector (where it looks along the ground). It is re-projected
 // onto the player's tangent plane each frame (parallel transport), so it is pole-safe.
 import * as THREE from 'three';
-import { getSurfaceRadius } from './planet.js';
 
 // ---- tunables --------------------------------------------------------------
 const DEFAULT_DISTANCE = 14;
@@ -23,8 +28,8 @@ const FOV_FAR = 55;
 
 const ball_ = (d) => THREE.MathUtils.smoothstep(d, 40, MAX_DISTANCE);
 
-export function createCameraRig(camera, player) {
-  const heading = new THREE.Vector3(0, 0, -1);
+export function createCameraRig(camera, player, planet) {
+  const heading = player.face.clone(); // start looking where the hero faces
   const camUp = player.up.clone();
   let pitch = DEFAULT_PITCH;
   let distTarget = DEFAULT_DISTANCE;
@@ -72,7 +77,7 @@ export function createCameraRig(camera, player) {
       else camera.position.lerp(_desired, 1 - Math.exp(-FOLLOW * dt));
 
       // never sink into the planet
-      const minR = getSurfaceRadius(camera.position) + SURFACE_MARGIN;
+      const minR = planet.getSurfaceRadius(camera.position) + SURFACE_MARGIN;
       const len = camera.position.length();
       if (len < minR) camera.position.multiplyScalar(minR / len);
 

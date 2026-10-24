@@ -1,3 +1,7 @@
+/**
+ * engine/quality.js: QUALITY = { pixelRatio, shadowSize, msaa, edges (crease-line pass), edgeScale, tufts, propScale, flowerShadows }.
+ * Lower on touch devices; gate any heavy world content on it.
+ */
 // One place to scale the expensive bits. Touch devices get the cheap settings.
 import { isTouchDevice } from './input.js';
 

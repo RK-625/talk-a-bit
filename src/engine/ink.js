@@ -1,3 +1,28 @@
+/**
+ * engine/ink.js: the shared ballpoint-pen + colored-pencil look. Every world and asset uses these.
+ *
+ * INK_COLOR (0x2b2440), PAPER_COLOR (0xece6d6), AMBIENT_INTENSITY (the AmbientLight intensity ink shading assumes)
+ * OVERLAY_LAYER   layer for things drawn in the main pass but skipped by the crease-line normal pass
+ *                 (outline hulls, sky sprites, face stickers). `obj.layers.set(OVERLAY_LAYER)`.
+ *
+ * createInkMaterial({ color=0xffffff, vertexColors=false, hatchSpacing=0.14, hatchColor=null, hatchStrength=1,
+ *                     lightHatch=0, hatchAttribute=false }) -> MeshLambertMaterial
+ *     toon-banded lit material; pencil hatch in object space (triplanar, no UVs, doesn't swim).
+ *     hatchSpacing = object units between strokes (smaller for small things: character 0.06, flowers 0.04).
+ *     hatchColor null = derived darker saturated shade of the albedo. lightHatch>0 adds sparse strokes in light;
+ *     hatchAttribute = geometry has vec2 attribute `aHatch` (amount, angle) that modulates it (planet ground).
+ *     Works with vertexColors and InstancedMesh (instanceColor).
+ * addOutline(mesh, { thickness=2.4 (px), color=INK_COLOR, wobble=1, wobbleFreq=1.5, geometry=null }) -> outline Mesh
+ *     inverted-hull ink line with time-stepped "boiling" wobble; child of `mesh`, works on InstancedMesh (shares
+ *     instanceMatrix). `geometry` = alternative geometry to inflate (e.g. only the body parts, no face stickers).
+ * smoothOutlineGeometry(geometry) -> welded smooth-normal copy used for hulls
+ * createDecal(canvas, w, h, { depth=0.05, thickness=2, frame=0xf3edda }) -> Group
+ *     a flat painted plaque (sign, poster, mural): `canvas` (Canvas 2D, any size, aspect should match w:h) painted
+ *     on the front of a thin outlined slab, facing +Z, centred on its origin. Use engine/doodle.js to paint it.
+ * createPaperPass(normalPass|null) -> ShaderPass       grain/fibres/vignette (+ crease lines if NormalPass given)
+ * NormalPass(scene, camera, scale)                     normal pre-pass feeding the crease lines
+ * updateInk(renderer, camera, time)                    per frame: feeds time + pixel scale to outline shaders
+ */
 // The shared ballpoint-pen + colored-pencil look.
 //   createInkMaterial()   toon-banded lit material with object-space (triplanar) pencil hatching
 //   addOutline()          inverted-hull ink line with time-stepped "boiling" wobble
@@ -326,6 +351,26 @@ export class NormalPass extends Pass {
     this.scene.background = bg;
   }
   dispose() { this.target.dispose(); this.material.dispose(); }
+}
+
+// ---- Decal ------------------------------------------------------------------
+export function createDecal(canvas, w, h, { depth = 0.05, thickness = 2, frame = 0xf3edda } = {}) {
+  const g = new THREE.Group();
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(w, h, depth), createInkMaterial({ color: frame, hatchSpacing: 0.05 }));
+  slab.castShadow = true;
+  slab.receiveShadow = true;
+  addOutline(slab, { thickness, wobbleFreq: 2 });
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  const face = new THREE.Mesh(
+    new THREE.PlaneGeometry(w * 0.96, h * 0.96),
+    new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.02, polygonOffset: true, polygonOffsetFactor: -1 })
+  );
+  face.position.z = depth / 2 + 0.002;
+  face.layers.set(OVERLAY_LAYER); // painted detail: no crease lines
+  g.add(slab, face);
+  return g;
 }
 
 // ---- Paper post pass (+ optional inner lines) ---------------------------------

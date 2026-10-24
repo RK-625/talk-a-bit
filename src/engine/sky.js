@@ -1,117 +1,34 @@
-// Paper sky: faint cream gradient + hand-doodled sun, moon, clouds and stars (Canvas 2D sprites),
-// plus the lights. The sun light follows the player (parallel-transported), so it is always day nearby.
+/**
+ * engine/sky.js: paper sky (faint gradient quad), hand-doodled sun / moon / sleepy clouds / stars / bunting as
+ * camera-facing sprites on a shell around the player, plus the lights (warm sun with shadow map + ambient).
+ * The sun light follows the player, so it is always daytime nearby. Sprites live on OVERLAY_LAYER.
+ *
+ * createSky(scene, { shadowMapSize=2048, paper='#ece6d6',
+ *                    doodles={ sun:true, moon:true, clouds:10, stars:44, bunting:true },
+ *                    extra(skyApi) }) -> { sun (DirectionalLight), update(dt, playerPos, up, zoom01) }
+ *
+ * skyApi passed to extra(), so a world can add sprites (kites, birds...) to the same shell:
+ *   skyApi.scene
+ *   skyApi.add(sprite, az, el, speed=0, dist=300) -> item   place by azimuth/elevation (radians) in the
+ *                    player's local frame (az 0 = toward the sun, el 0 = horizon; use -0.25..0.1 for
+ *                    "just above the horizon in the default view"); speed = azimuth drift rad/s; item.az/el/dist mutable
+ *   skyApi.makeSprite(texture, size, aspect=1) -> Sprite   (size = height in world units; ~60 is a big cloud)
+ *   skyApi.items     live array of all shell items; set item.onUpdate = (item, t) => {} for flapping etc.
+ *   skyApi.rnd       seeded rng () => [0,1)
+ *   skyApi.doodle    the engine/doodle.js module namespace (draw textures with it)
+ */
 import * as THREE from 'three';
-import { PAPER_COLOR, INK_COLOR, AMBIENT_INTENSITY, OVERLAY_LAYER } from './ink.js';
-import { PLANET_RADIUS } from './planet.js';
+import { PAPER_COLOR, AMBIENT_INTENSITY, OVERLAY_LAYER } from './ink.js';
+import * as doodle from './doodle.js';
+import { INK, rng, makeCanvas, wobblyPath, circlePts, drawShape, drawFace, drawZ, toTexture } from './doodle.js';
 
 // ---- tunables --------------------------------------------------------------
-const INK = '#' + INK_COLOR.toString(16).padStart(6, '0');
 const SUN_LIGHT_UP = 0.8; // light direction = up * this + sunTangent * SUN_LIGHT_T (about 57 deg elevation)
 const SUN_LIGHT_T = 0.5;
 const SKY_DISTANCE = 300; // doodle shell radius around the player (or the planet centre when zoomed out)
 const DEG = Math.PI / 180;
 const SHADOW_HALF = 26; // half-size of the shadow camera box around the player
-const CLOUD_COUNT = 10;
-const STAR_COUNT = 44;
-
-// ---- tiny seeded RNG for hand wobble ----------------------------------------
-function rng(seed) {
-  let s = seed;
-  return () => ((s = (s * 16807) % 2147483647) / 2147483647);
-}
-
-// ---- Canvas 2D doodle toolkit -------------------------------------------------
-function makeCanvas(w, h) {
-  const c = document.createElement('canvas');
-  c.width = w; c.height = h;
-  const ctx = c.getContext('2d');
-  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  return { c, ctx };
-}
-
-/** Smooth closed/open path through jittered points (a hand-drawn line). */
-function wobblyPath(ctx, pts, closed, r, amp) {
-  const p = pts.map(([x, y]) => [x + (r() - 0.5) * amp, y + (r() - 0.5) * amp]);
-  const n = p.length;
-  ctx.beginPath();
-  if (closed) {
-    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-    const s = mid(p[n - 1], p[0]);
-    ctx.moveTo(s[0], s[1]);
-    for (let i = 0; i < n; i++) {
-      const m = mid(p[i], p[(i + 1) % n]);
-      ctx.quadraticCurveTo(p[i][0], p[i][1], m[0], m[1]);
-    }
-    ctx.closePath();
-  } else {
-    ctx.moveTo(p[0][0], p[0][1]);
-    for (let i = 1; i < n - 1; i++) {
-      const m = [(p[i][0] + p[i + 1][0]) / 2, (p[i][1] + p[i + 1][1]) / 2];
-      ctx.quadraticCurveTo(p[i][0], p[i][1], m[0], m[1]);
-    }
-    ctx.lineTo(p[n - 1][0], p[n - 1][1]);
-  }
-}
-const circlePts = (cx, cy, rad, n = 12) =>
-  Array.from({ length: n }, (_, i) => [cx + Math.cos((i / n) * Math.PI * 2) * rad, cy + Math.sin((i / n) * Math.PI * 2) * rad]);
-
-/** Pencil fill (flat pastel + diagonal hatch) then a double ballpoint outline. */
-function drawShape(ctx, pts, { fill, hatch, w = 256, h = 256, r, closed = true, amp = 3, lw = 3.2 }) {
-  if (fill) {
-    wobblyPath(ctx, pts, closed, r, 0);
-    ctx.fillStyle = fill;
-    ctx.fill();
-    if (hatch) {
-      ctx.save();
-      ctx.clip();
-      ctx.strokeStyle = hatch; ctx.lineWidth = 1.6; ctx.globalAlpha = 0.55;
-      for (let x = -h; x < w + h; x += 7) {
-        ctx.beginPath();
-        ctx.moveTo(x + (r() - 0.5) * 2, 0);
-        ctx.lineTo(x - h * 0.8 + (r() - 0.5) * 3, h);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-  }
-  ctx.strokeStyle = INK;
-  for (let pass = 0; pass < 2; pass++) {
-    ctx.lineWidth = pass ? lw * 0.55 : lw;
-    ctx.globalAlpha = pass ? 0.6 : 1;
-    wobblyPath(ctx, pts, closed, r, amp);
-    ctx.stroke();
-  }
-  ctx.globalAlpha = 1;
-}
-
-/** Cute face: dot or sleepy eyes, pink blush, small smile. */
-function drawFace(ctx, cx, cy, s, { sleepy = false, r }) {
-  ctx.fillStyle = INK; ctx.strokeStyle = INK; ctx.lineWidth = 3 * (s / 20);
-  for (const sx of [-1, 1]) {
-    const ex = cx + sx * s * 0.9, ey = cy;
-    if (sleepy) {
-      ctx.beginPath(); ctx.arc(ex, ey - s * 0.1, s * 0.34, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
-    } else {
-      ctx.beginPath(); ctx.arc(ex, ey, s * 0.22, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.fillStyle = 'rgba(244,140,165,0.75)';
-    ctx.beginPath(); ctx.ellipse(cx + sx * s * 1.5, cy + s * 0.55, s * 0.36, s * 0.22, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = INK;
-  }
-  ctx.beginPath(); ctx.arc(cx, cy + s * 0.5, s * 0.34, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
-}
-
-function drawZ(ctx, x, y, s) {
-  ctx.strokeStyle = INK; ctx.lineWidth = s * 0.14;
-  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + s, y); ctx.lineTo(x, y + s); ctx.lineTo(x + s, y + s); ctx.stroke();
-}
-
-const toTexture = (c) => {
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 4;
-  return t;
-};
+const DEFAULT_DOODLES = { sun: true, moon: true, clouds: 10, stars: 44, bunting: true };
 
 // ---- the doodles ---------------------------------------------------------------
 function sunTexture() {
@@ -228,8 +145,9 @@ function makeSprite(tex, size, aspect = 1) {
 }
 
 // ---- sky -------------------------------------------------------------------------
-export function createSky(scene, { shadowMapSize = 2048 } = {}) {
-  scene.background = new THREE.Color(PAPER_COLOR);
+export function createSky(scene, { shadowMapSize = 2048, paper = PAPER_COLOR, doodles = {}, extra = null } = {}) {
+  const cfg = { ...DEFAULT_DOODLES, ...doodles };
+  scene.background = new THREE.Color(paper);
 
   // faint warm gradient: a full-screen quad behind everything
   const grad = new THREE.Mesh(
@@ -264,23 +182,24 @@ export function createSky(scene, { shadowMapSize = 2048 } = {}) {
   const items = []; // { s, az, el, speed, dist, bob }
   const add = (s, az, el, speed = 0, dist = SKY_DISTANCE) => { scene.add(s); items.push({ s, az, el, speed, dist, bob: rnd() * 6 }); return items[items.length - 1]; };
 
-  const sunSprite = makeSprite(sunTexture(), 78);
-  const moonSprite = makeSprite(moonTexture(), 66);
-  add(sunSprite, 0, -7 * DEG);
-  add(moonSprite, Math.PI + 0.25, -9 * DEG);
-  
-  for (let i = 0; i < CLOUD_COUNT; i++) {
+  let sunSprite = null, moonSprite = null;
+  if (cfg.sun) { sunSprite = makeSprite(sunTexture(), 78); add(sunSprite, 0, -7 * DEG); }
+  if (cfg.moon) { moonSprite = makeSprite(moonTexture(), 66); add(moonSprite, Math.PI + 0.25, -9 * DEG); }
+
+  const cloudCount = cfg.clouds || 0;
+  for (let i = 0; i < cloudCount; i++) {
     const size = 52 + rnd() * 34;
-    add(makeSprite(cloudTexture(i + 2), size, 1.6), (i / CLOUD_COUNT) * Math.PI * 2 + rnd() * 0.3 + 0.5, (-13 + rnd() * 14) * DEG, 0.004 + rnd() * 0.006, 230 + rnd() * 80);
+    add(makeSprite(cloudTexture(i + 2), size, 1.6), (i / cloudCount) * Math.PI * 2 + rnd() * 0.3 + 0.5, (-13 + rnd() * 14) * DEG, 0.004 + rnd() * 0.006, 230 + rnd() * 80);
   }
-  add(makeSprite(buntingTexture(), 60, 3.76), -0.95, -13 * DEG, 0.003, 280);
+  if (cfg.bunting) add(makeSprite(buntingTexture(), 60, 3.76), -0.95, -13 * DEG, 0.003, 280);
   const starTex = [starTexture(1), starTexture(2), starTexture(3)];
-  for (let i = 0; i < STAR_COUNT; i++) {
+  for (let i = 0; i < (cfg.stars || 0); i++) {
     const low = i % 3 === 0; // a third of them hug the horizon band so some are always in frame
     const st = makeSprite(starTex[i % 3], 16 + rnd() * 16);
     st.material.rotation = rnd() * 0.8 - 0.4;
     add(st, rnd() * Math.PI * 2, (low ? -16 + rnd() * 18 : 5 + rnd() * 60) * DEG, 0.002, 380);
   }
+  if (extra) extra({ scene, add, makeSprite, items, rnd, doodle });
 
   // sun tangent is transported with the player so light/shadow direction stays consistent
   const sunT = new THREE.Vector3(0.45, 0, -0.9).normalize(); // sun starts ahead and a bit right of the spawn view
@@ -312,9 +231,10 @@ export function createSky(scene, { shadowMapSize = 2048 } = {}) {
           .addScaledVector(side, Math.cos(el) * Math.sin(az))
           .addScaledVector(up, Math.sin(el));
         it.s.position.copy(centre).addScaledVector(dir, it.dist);
+        if (it.onUpdate) it.onUpdate(it, t);
       }
-      sunSprite.material.rotation = Math.sin(t * 0.3) * 0.05;
-      moonSprite.material.rotation = Math.sin(t * 0.25 + 1) * 0.06;
+      if (sunSprite) sunSprite.material.rotation = Math.sin(t * 0.3) * 0.05;
+      if (moonSprite) moonSprite.material.rotation = Math.sin(t * 0.25 + 1) * 0.06;
     },
   };
 }

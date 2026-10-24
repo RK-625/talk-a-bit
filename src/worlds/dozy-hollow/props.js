@@ -1,17 +1,9 @@
-// Trees, rocks, flowers and mushrooms scattered over the planet.
-// Each species is ONE merged vertex-coloured geometry drawn with an InstancedMesh (+ an instanced
-// outline), so ~100 props cost a few dozen draw calls.
+// Dozy Hollow props: trees, rocks, pebbles, flowers, mushrooms, grass tufts.
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { createInkMaterial, addOutline, INK_COLOR } from './ink.js';
-import { QUALITY } from './quality.js';
-import { getSurfaceRadius, getSurfaceNormal, PLANET_RADIUS } from './planet.js';
+import { createInkMaterial, INK_COLOR } from '../../engine/ink.js';
+import { Parts, mulberry32, sphere, cyl, cone, buildInstanced } from '../../engine/scatter.js';
 
 // ---- tunables --------------------------------------------------------------
-const SEED = 1234;
-const SPAWN_CLEAR = 6; // keep this many units clear around the spawn point (north pole)
-const SPAWN_DIR = new THREE.Vector3(0, 1, 0);
-const EXTRA_SPACING = 0.6;
 // Props are placed in clusters (groves, meadows, rock piles) with empty meadows in between.
 // group: which set of cluster centres to use; frac: share placed in clusters; sigma: cluster size (units)
 const KINDS = {
@@ -21,54 +13,14 @@ const KINDS = {
   flower: { count: 110, group: 'meadow', frac: 0.88, sigma: 5.5 },
   mushroom: { count: 30, group: 'grove', frac: 0.7, sigma: 5 },
 };
-const GROUPS = { grove: 8, pile: 6, meadow: 7 };
+export const GROUPS = { grove: 8, pile: 6, meadow: 7 };
+export const SPAWN_CLEAR = 6;
+export const EXTRA_SPACING = 0.6;
 
-// ---- helpers ---------------------------------------------------------------
-function mulberry32(a) {
-  return () => {
-    a |= 0; a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/** Collects coloured parts; `outline` parts also go into the geometry used for the ink hull. */
-class Parts {
-  constructor() { this.all = []; this.hull = []; }
-  add(geo, color, { pos = [0, 0, 0], rot = [0, 0, 0], scale = [1, 1, 1], outline = true } = {}) {
-    let g = geo.index ? geo.toNonIndexed() : geo.clone();
-    g.deleteAttribute('uv');
-    g.applyMatrix4(
-      new THREE.Matrix4().compose(
-        new THREE.Vector3(...pos),
-        new THREE.Quaternion().setFromEuler(new THREE.Euler(...rot)),
-        new THREE.Vector3(...scale)
-      )
-    );
-    const col = new THREE.Color(color);
-    const arr = new Float32Array(g.attributes.position.count * 3);
-    for (let i = 0; i < arr.length; i += 3) { arr[i] = col.r; arr[i + 1] = col.g; arr[i + 2] = col.b; }
-    g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
-    this.all.push(g);
-    if (outline) {
-      const h = g.clone();
-      h.deleteAttribute('color'); h.deleteAttribute('normal');
-      this.hull.push(h);
-    }
-    return this;
-  }
-  build() {
-    return { geometry: mergeGeometries(this.all), hull: mergeGeometries(this.hull) };
-  }
-}
-
-const sphere = (r, w = 14, h = 10) => new THREE.SphereGeometry(r, w, h);
-const cyl = (rt, rb, h, s = 8) => new THREE.CylinderGeometry(rt, rb, h, s);
-const cone = (r, h, s = 9) => new THREE.ConeGeometry(r, h, s);
 const INK = INK_COLOR;
 const PINK = 0xee7f9b;
 const WHITE = 0xfaf6ea;
+
 
 // Sleepy face (closed-eye arcs, blush, small mouth) on a surface facing +Z (sgn -1: facing -Z).
 function sleepyFace(p, { z, y, spread, s, sgn = 1 }) {
@@ -211,110 +163,38 @@ function grassTuft() {
   return p;
 }
 
-// ---- main ------------------------------------------------------------------
-/** Returns { group, colliders } where colliders = [{ dir, radius, height }] (dir is a unit Vector3). */
-export function createScatter() {
-  const rnd = mulberry32(SEED);
+
+/** Places everything and returns the static colliders. ctx = { scene, planet, quality, rng, placer } */
+export function buildProps({ scene, quality, placer, rng: rnd }) {
   const group = new THREE.Group();
   const colliders = [];
-  const placed = []; // { dir, r } for spacing
-
-  const tmpN = new THREE.Vector3();
-  const tmpQ = new THREE.Quaternion();
-  const yawQ = new THREE.Quaternion();
-  const Y = new THREE.Vector3(0, 1, 0);
-  const m = new THREE.Matrix4();
-  const ax = new THREE.Vector3();
-
-  const randDir = () => {
-    const z = rnd() * 2 - 1, a = rnd() * Math.PI * 2, rr = Math.sqrt(1 - z * z);
-    return new THREE.Vector3(rr * Math.cos(a), z, rr * Math.sin(a));
-  };
-  const farFromSpawn = (d, r) => d.angleTo(SPAWN_DIR) * PLANET_RADIUS >= SPAWN_CLEAR + r;
-
-  // cluster centres per group (groves, rock piles, meadows), away from the spawn
-  const centres = {};
-  for (const [name, n] of Object.entries(GROUPS)) {
-    centres[name] = [];
-    while (centres[name].length < n) { const d = randDir(); if (farFromSpawn(d, 4)) centres[name].push(d); }
-  }
-  // gaussian scatter around a random centre of the group, along the sphere
-  const clusterDir = (name, sigma) => {
-    const c = centres[name][Math.floor(rnd() * centres[name].length)];
-    const gauss = Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(rnd() * Math.PI * 2);
-    ax.copy(randDir()).addScaledVector(c, -c.dot(ax)).normalize(); // random axis perpendicular to c
-    return c.clone().applyQuaternion(tmpQ.setFromAxisAngle(ax, (Math.abs(gauss) * sigma) / PLANET_RADIUS));
-  };
-
-  const instance = (dir, scale, yaw) => {
-    getSurfaceNormal(dir, tmpN);
-    tmpQ.setFromUnitVectors(Y, tmpN);
-    yawQ.setFromAxisAngle(Y, yaw);
-    tmpQ.multiply(yawQ);
-    const p = dir.clone().multiplyScalar(getSurfaceRadius(dir) - 0.05);
-    return m.compose(p, tmpQ, new THREE.Vector3(scale, scale, scale)).clone();
-  };
-
-  const finish = (parts, mat, matrices, { thickness, castShadow = true, wobbleFreq = 1.4 }) => {
-    if (!matrices.length) return;
-    const { geometry, hull } = parts.build();
-    const mesh = new THREE.InstancedMesh(geometry, mat, matrices.length);
-    matrices.forEach((mt, j) => mesh.setMatrixAt(j, mt));
-    mesh.instanceMatrix.needsUpdate = true;
-    mesh.castShadow = castShadow;
-    mesh.receiveShadow = true;
-    mesh.frustumCulled = false;
-    addOutline(mesh, { thickness, geometry: hull, wobbleFreq });
-    group.add(mesh);
-  };
 
   for (const [kind, cfg] of Object.entries(KINDS)) {
     const species = SPECIES[kind].map((b) => b());
-    const buckets = species.map(() => []);
     const mats = species.map(() => createInkMaterial({ vertexColors: true, hatchSpacing: HATCH_SPACING[kind], hatchStrength: 0.9 }));
-    const count = Math.round(cfg.count * QUALITY.propScale);
-
-    let n = 0;
-    for (let tries = 0; n < count && tries < count * 40; tries++) {
-      const dir = rnd() < cfg.frac ? clusterDir(cfg.group, cfg.sigma) : randDir();
-      const si = Math.floor(rnd() * species.length);
-      const sp = species[si];
-      const [s0, s1] = sp.scale;
-      const scale = s0 + rnd() * (s1 - s0);
-      const radius = sp.bodyRadius * scale;
-
-      if (!farFromSpawn(dir, radius)) continue;
-      let ok = true;
-      for (const q of placed) {
-        const minD = (radius + q.r + EXTRA_SPACING) / PLANET_RADIUS;
-        if (dir.dot(q.dir) > Math.cos(minD)) { ok = false; break; }
-      }
-      if (!ok) continue;
-
-      buckets[si].push(instance(dir, scale, rnd() * Math.PI * 2));
-      placed.push({ dir, r: radius });
-      if (sp.collide) colliders.push({ dir, radius: sp.collide.radius * scale, height: sp.collide.height * scale });
-      n++;
-    }
+    const count = Math.round(cfg.count * quality.propScale);
+    const { buckets, colliders: cols } = placer.place({ count, group: cfg.group, frac: cfg.frac, sigma: cfg.sigma, species });
+    colliders.push(...cols);
     species.forEach((sp, i) =>
-      finish(sp.parts, mats[i], buckets[i], {
+      buildInstanced(group, sp.parts, mats[i], buckets[i], {
         thickness: kind === 'flower' ? 1.6 : kind === 'pebble' ? 1.8 : 2.2,
-        castShadow: kind === 'flower' ? QUALITY.flowerShadows : true,
+        castShadow: kind === 'flower' ? quality.flowerShadows : true,
       })
     );
   }
 
   // grass tufts: cheap texture, no spacing/collision
   const tufts = [];
-  while (tufts.length < QUALITY.tufts) {
-    const d = randDir();
-    if (!farFromSpawn(d, 1)) continue;
-    tufts.push(instance(d, 0.8 + rnd() * 0.9, rnd() * Math.PI * 2));
+  while (tufts.length < quality.tufts) {
+    const d = placer.randDir();
+    if (!placer.farFromSpawn(d, 1)) continue;
+    tufts.push(placer.instance(d, 0.8 + rnd() * 0.9, rnd() * Math.PI * 2));
   }
-  finish(grassTuft(), createInkMaterial({ vertexColors: true, hatchSpacing: 0.04, hatchStrength: 0.5 }), tufts, {
+  buildInstanced(group, grassTuft(), createInkMaterial({ vertexColors: true, hatchSpacing: 0.04, hatchStrength: 0.5 }), tufts, {
     thickness: 1.3,
     castShadow: false,
     wobbleFreq: 2.5,
   });
+  scene.add(group);
   return { group, colliders };
 }
