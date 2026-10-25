@@ -13,6 +13,7 @@ import { PATHS, MARINE, GEO, R, stepAlong, tangentTo, dist, shorePoint, polar, b
 import { resolveAt, placed, JUHU } from './layout.js';
 import { frameAt, localToDir } from '../../engine/place.js';
 import { flagShadows } from './world.js';
+import { talkHook } from './talkHook.js';
 
 const POLE = new THREE.Vector3(0, 1, 0);
 const _q = new THREE.Quaternion(), _m = new THREE.Matrix4(), _v = new THREE.Vector3(), _s = new THREE.Sphere();
@@ -37,9 +38,11 @@ export function npcs(W, S) {
   // every person goes through the crowd LOD (full / far merged / hidden by distance) and a static or moving collider
   const crowd = createCrowdLOD([], W.dens < 0.7 ? { near: 14, hide: 54 } : { near: 24, hide: 62 }); // touch: the far (merged) body sooner
   let lodT = 0;
+  const talkers = talkHook(W); // conversations: every person is talkable, dialogue by placement id or role
   function register(g, n) {
     list.push(n);
     crowd.add(g);
+    talkers.register(g, n);
     return n;
   }
   /** put a ready-made person/group on the sphere (feet at `radius` or the ground) */
@@ -48,7 +51,7 @@ export function npcs(W, S) {
     flagShadows(g);
     W.add(g, { dir, fwd, radius: o.radius ?? null, collide: false, walkable: false, noAnim: true, cull: false, occlude: false, height: 3 });
     if (o.collide !== false) W.colliders.add({ dir: dir.clone(), radius: g.userData.radius ?? 0.5, height: 2.4 });
-    return register(g, { g, dir: dir.clone(), role: o.role ?? g.userData.role, wave: !!o.wave, waved: false, waveCool: 0, look: false, lookAt: o.lookAt !== false, sitting: !!o.sitting });
+    return register(g, { g, id: o.id, convo: o.convo, dir: dir.clone(), role: o.role ?? g.userData.role, wave: !!o.wave, waved: false, waveCool: 0, look: false, lookAt: o.lookAt !== false, sitting: !!o.sitting });
   }
   // touch devices: skip every second extra (the original cast, seeds < 40, always stays)
   const skip = (o, seed) => W.dens < 0.7 && (seed ?? o.seed ?? 0) >= 40 && Math.floor(seed ?? o.seed ?? 0) % 3 === 0;
@@ -71,7 +74,7 @@ export function npcs(W, S) {
   // ---- stall people (anchors from the props) -----------------------------------------------------------------------
   const tapri = itemFrame('tapri');
   if (tapri) {
-    person('chaiwalaUncle', { seed: 3, wave: true }, tapri.anchor('uncle'), tapri.fr.fwd);
+    person('chaiwalaUncle', { seed: 3, wave: true, convo: true }, tapri.anchor('uncle'), tapri.fr.fwd);
     // stray dog napping by the bench
     const dd = tapri.at(-3.7, 2.2);
     const dog = createDog(ink, 2);
@@ -80,7 +83,7 @@ export function npcs(W, S) {
     list.push({ g: dog, item: W.culler.items[W.culler.items.length - 1], dir: dd, role: 'dog', lookAt: false });
   }
   const vada = itemFrame('vada');
-  if (vada) person('vadaPavWala', { seed: 5, wave: true }, vada.anchor('vendor'), vada.fr.fwd);
+  if (vada) person('vadaPavWala', { seed: 5, wave: true, convo: true }, vada.anchor('vendor'), vada.fr.fwd);
   const news = itemFrame('news');
   if (news) person('newspaperVendor', { seed: 4 }, news.anchor('vendor'), news.fr.fwd);
   const fruit = itemFrame('fruit');
@@ -88,38 +91,38 @@ export function npcs(W, S) {
 
   // ---- the chowk: Bollywood hopeful at the film posters; gully cricket ------------------------------------------------
   const sp = (right, fwd) => resolveAt({ sp: [right, fwd] });
-  person('bollywoodHopeful', { seed: 2, wave: true }, sp(2.6, -10.6).dir, sp(2.6, -10.6).fwd);
+  person('bollywoodHopeful', { seed: 2, wave: true, convo: true }, sp(2.6, -10.6).dir, sp(2.6, -10.6).fwd);
   const pitchA = sp(-14, -2.0), pitchB = sp(-14, 3.6);
-  person('cricketKid', { seed: 11, variant: 'batter', wave: true }, pitchA.dir, pitchA.fwd);
+  person('cricketKid', { seed: 11, variant: 'batter', wave: true, convo: true }, pitchA.dir, pitchA.fwd);
   person('cricketKid', { seed: 12, variant: 'bowler' }, pitchB.dir, pitchB.fwd.clone().negate());
   const field = sp(-18.5, 0.5);
   if (W.dens >= 0.7) person('cricketKid', { seed: 13, variant: 'batter' }, field.dir, tangentTo(field.dir, pitchA.dir));
 
   // ---- the Fort: bus stop conductor, parked taxi + driver, dabbawala, cop -------------------------------------------------
   const bus = itemFrame('busStopFort');
-  if (bus) person('busConductor', { seed: 6, wave: true }, bus.at(-3.4, 0.2), bus.fr.fwd);
+  if (bus) person('busConductor', { seed: 6, wave: true, convo: true }, bus.at(-3.4, 0.2), bus.fr.fwd);
   const taxi = itemFrame('parkedTaxi');
   if (taxi) {
     const side = taxi.fr.right.clone();
     const d = taxi.at(1.95, 0.4);
-    person('taxiDriver', { seed: 8, wave: true }, d, side);
+    person('taxiDriver', { seed: 8, wave: true, convo: true }, d, side);
   }
   const dabba = itemFrame('dabbaBike');
-  if (dabba) person('dabbawala', { seed: 9 }, dabba.at(1.6, 0.4), dabba.fr.fwd.clone().applyAxisAngle(dabba.fr.up, 0.9));
+  if (dabba) person('dabbawala', { seed: 9, convo: true }, dabba.at(1.6, 0.4), dabba.fr.fwd.clone().applyAxisAngle(dabba.fr.up, 0.9));
   const cop = resolveAt({ road: 'great', s: 12.5, lat: 6.3 });
-  person('trafficCop', { seed: 10, wave: true }, cop.dir, tangentTo(cop.dir, PATHS.great.at(12.5).dir ?? cop.dir));
+  person('trafficCop', { seed: 10, wave: true, convo: true }, cop.dir, tangentTo(cop.dir, PATHS.great.at(12.5).dir ?? cop.dir));
 
   // ---- the Gateway: balloon seller, pigeons ------------------------------------------------------------------------------
   const bal = itemFrame('balloons');
   if (bal) {
-    person('balloonSeller', { seed: 14, wave: true }, bal.at(-1.2, 0.2), bal.fr.fwd);
+    person('balloonSeller', { seed: 14, wave: true, convo: true }, bal.at(-1.2, 0.2), bal.fr.fwd);
   }
   const gw = itemFrame('gateway');
   if (gw) {
     // Koli fisherwoman on the quay beside the boats
     const sh = shoreToward(GEO.harbour.c, gw.fr.up.clone());
     const quay = stepAlong(sh.dir, sh.heading, 2.6); // a little inland of the waterline, facing the boats
-    person('koliFisherwoman', { seed: 15, wave: true }, quay, sh.heading.clone().negate());
+    person('koliFisherwoman', { seed: 15, wave: true, convo: true }, quay, sh.heading.clone().negate());
     // pigeon flock on the plaza in front of the arch
     const nP = Math.round(10 * Math.max(0.5, W.dens));
     for (let i = 0; i < nP; i++) {
@@ -134,11 +137,11 @@ export function npcs(W, S) {
     const away = tangentTo(spot, POLE).negate(); // toward the sea
     // the stall itself is placed by scenery.js; here only the vendor
     const vendorDir = stepAlong(spot, away, -1.1);
-    person(kind === 'bhel' ? 'bhelWala' : 'golaWala', { seed: kind === 'bhel' ? 16 : 17, wave: true }, vendorDir, away);
+    person(kind === 'bhel' ? 'bhelWala' : 'golaWala', { seed: kind === 'bhel' ? 16 : 17, wave: true, convo: true }, vendorDir, away);
   }
 
   // ---- walkers: aunty with sabzi, students on the promenade and footpaths -------------------------------------------------
-  walker('auntyWithSabzi', { seed: 18 }, pathLine('great', 21, 58, 5.5), 1.25);
+  walker('auntyWithSabzi', { seed: 18, convo: true }, pathLine('great', 21, 58, 5.5), 1.25);
   walker('collegeStudent', { seed: 19, variant: 0 }, pathLine('east', 14, 52, -4.0), 1.5);
   if (W.dens >= 0.7) walker('collegeStudent', { seed: 20, variant: 1 }, pathLine('east', 16, 54, -5.1), 1.5, 0.12);
   walker('auntyWithSabzi', { seed: 21 }, pathArc(-38, 24, 3.0), 1.1);
@@ -163,7 +166,7 @@ export function npcs(W, S) {
     flagShadows(g);
     W.root.add(g);
     const actor = W.actors.add(g, { type: 'spline', dirs, speed, closed: !!o.closed, phase }, { radiusFn: (d) => planet.getWalkRadius(d) + (o.lift ?? 0), collider: o.solid === false ? null : { radius: g.userData.radius ?? 0.45, height: 2.4 } });
-    return register(g, { g, dir: actor.dir, role, walker: true, solid: o.solid !== false, actor, speed, lookAt: o.lookAt !== false, wave: !!o.wave, waved: false, waveCool: 0, look: false });
+    return register(g, { g, id: o.id, convo: o.convo, dir: actor.dir, role, walker: true, solid: o.solid !== false, actor, speed, lookAt: o.lookAt !== false, wave: !!o.wave, waved: false, waveCool: 0, look: false });
   }
 
   // ---- birds: pigeons on the plaza, crows on wires and roofs -------------------------------------------------------------
@@ -230,6 +233,7 @@ export function npcs(W, S) {
           if (n.blocked > 1.3) { n.speed = -n.speed; n.blocked = 0; n.actor.speed = n.speed; }
         } else { n.actor.speed = n.speed; n.blocked = 0; }
       }
+      if (n.talking && n.walker) n.actor.speed = 0; // in conversation: stand still
       n.g.getWorldPosition(_v);
       _s.set(_v, 2.5);
       if (!frustum.intersectsSphere(_s)) continue; // off-screen: skip the animation (it still wakes up in its idle pose)

@@ -7,7 +7,8 @@
  *   { id, name, seed?, planet:{radius,detail,heightFn,colorFn,sea?, outlinePx?, hatchSpacing?}, 
  *     sky:{paper, doodles, extra(skyApi)}, spawn:{dir,facing}, createHero(ink)->Group,
  *     build(ctx)->{ colliders?:[], update?(dt,t) } }
- *   ctx = { scene, camera, renderer, planet, ink, quality, rng, player, actors, colliders, placer, culler }
+ *   ctx = { scene, camera, renderer, planet, ink, quality, rng, player, actors, colliders, placer, culler, occlusion, talk }
+ *     talk = game/talk/talk.js conversation system: talk.register({ id, role, object, ... }) marks an NPC talkable, talk.setDialogues(map)
  *     occlusion = engine/occlusion.js (register buildings that should fade when they block the camera's view of the hero)
  *     culler = engine/lod.js distance/horizon culler (the engine calls culler.update() each frame, after build.update)
  *     helpers worlds import directly: engine/place.js (placeOnSphere, registerAsset, frameAt, localToDir)
@@ -28,6 +29,7 @@ import { createCuller } from './lod.js';
 import { createOcclusion } from './occlusion.js';
 import { createPost } from './post.js';
 import { QUALITY } from './quality.js';
+import { createTalk } from '../game/talk/talk.js';
 
 const MAX_DT = 0.05;
 const FOV = 50;
@@ -57,10 +59,11 @@ export function createEngine(world) {
 
   const player = createPlayer({ hero: world.createHero(ink), planet, colliders, spawn: world.spawn });
   const occlusion = createOcclusion({ camera, player });
-  const built = world.build({ scene, camera, renderer, planet, ink, quality: QUALITY, rng, player, actors, colliders, placer, culler, occlusion }) ?? {};
+  const cameraRig = createCameraRig(camera, player, planet);
+  const talk = createTalk({ camera, player, cameraRig, input, worldId: world.id });
+  const built = world.build({ scene, camera, renderer, planet, ink, quality: QUALITY, rng, player, actors, colliders, placer, culler, occlusion, talk }) ?? {};
   (built.colliders ?? []).forEach((c) => colliders.add(c));
   scene.add(player.object);
-  const cameraRig = createCameraRig(camera, player, planet);
 
   const post = createPost({ renderer, scene, camera, quality: QUALITY });
   function resize() {
@@ -83,6 +86,7 @@ export function createEngine(world) {
     actors.update(dt);
     colliders.update(dt);
     built.update?.(dt, time);
+    talk.update(dt);
     cameraRig.update(dt, state);
     camera.updateMatrixWorld();
     culler.update();
@@ -99,7 +103,7 @@ export function createEngine(world) {
     advance(Math.min(timer.getDelta(), MAX_DT));
   }
 
-  const engine = { scene, camera, renderer, planet, player, sky, colliders, actors, cameraRig, culler, occlusion, step: advance, start() { renderer.setAnimationLoop(frame); } };
-  if (import.meta.env.DEV) window.__game = { occlusion, step: advance, renderer, composer: post.composer, post, player, camera, cameraRig, scene, colliders: colliders.list, planet, culler, actors, world, built, QUALITY };
+  const engine = { scene, camera, renderer, planet, player, sky, colliders, actors, cameraRig, culler, occlusion, talk, input, step: advance, start() { renderer.setAnimationLoop(frame); } };
+  if (import.meta.env.DEV) window.__game = { talk, input, occlusion, step: advance, renderer, composer: post.composer, post, player, camera, cameraRig, scene, colliders: colliders.list, planet, culler, actors, world, built, QUALITY };
   return engine;
 }

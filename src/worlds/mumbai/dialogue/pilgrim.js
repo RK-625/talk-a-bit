@@ -1,0 +1,52 @@
+// Keyed by role `pilgrim`. Several pilgrims exist (temple devotees and Haji Ali); this dialogue is written for the Haji Ali
+// pilgrims on and near the causeway, with a gender-neutral NPC voice.
+export default {
+  id: 'pilgrim',
+  name: 'Haji Ali Pilgrim', role: 'pilgrim',
+  lang: 'hi',
+  site: 'Haji Ali causeway', difficulty: 4,
+  voice: { rate: 0.9, pitch: 1.0 },
+  persona: 'Gentle, elderly visitor to Haji Ali who knows the tides. Speaks politely; Chotu uses aap.',
+  goal: 'Greet the pilgrim and ask when the causeway closes with the tide.',
+  steps: [
+    {
+      id: 'salaam',
+      npc: { text: 'सलाम बेटा। दरगाह की ज़ियारत को आए हो?', roman: 'Salaam beta. Dargah ki ziyarat ko aaye ho?', en: 'Salaam, child. Have you come to visit the dargah?' },
+      instruction: 'Greet them with salaam and say you came to see the dargah.',
+      suggest: { roman: 'Salaam. Ji haan, dargah dekhne aaya hoon.', text: 'सलाम। जी हाँ, दरगाह देखने आया हूँ।' },
+      accept: ['salaam ji haan dargah dekhne aaya hoon', 'assalamu alaikum', 'salaam ji haan', 'ji haan dargah dekhne aaya hoon', 'सलाम जी हाँ दरगाह देखने आया हूँ', 'असलामु अलैकुम', 'ji haan', 'haan dargah aaya hoon', 'salaam, main dargah dekhne aaya'],
+      intent: 'greet_and_confirm_visit',
+      hints: ['Greet them politely and say yes.', '"salaam" = greeting, "dargah dekhne" = to see the dargah.', 'Say: "Salaam. Ji haan, dargah dekhne aaya hoon."'],
+      onValid: { text: 'वालेकुम सलाम। बहुत अच्छा।', roman: 'Walaikum salaam. Bahut achha.', en: 'Peace be upon you too. Very good.' },
+      onRetry: { text: 'क्या कहा बेटा? ज़रा फिर से कहना।', roman: 'Kya kaha beta? Zara phir se kehna.', en: 'What did you say, child? Please say it again.' },
+    },
+    {
+      id: 'tide',
+      npc: { text: 'कुछ पूछना है, बेटा?', roman: 'Kuch poochna hai, beta?', en: 'Do you want to ask something, child?' },
+      instruction: 'Ask when the path closes when the tide comes in.',
+      suggest: { roman: 'Paani chadhne par rasta kab band hota hai?', text: 'पानी चढ़ने पर रास्ता कब बंद होता है?' },
+      accept: ['paani chadhne par rasta kab band hota hai', 'rasta kab band hota hai', 'kitne baje rasta band hoga', 'samandar ka paani kab chadhta hai', 'पानी चढ़ने पर रास्ता कब बंद होता है', 'रास्ता कब बंद होता है', 'when does the path close', 'tide kab aata hai', 'rasta kab tak khula hai'],
+      intent: 'ask_causeway_closing_time',
+      hints: ['Ask when the path closes.', '"rasta" = path, "band" = closed, "kab" = when.', 'Say: "Paani chadhne par rasta kab band hota hai?"'],
+      onValid: { text: 'आज शाम छह बजे के क़रीब। ज्वार में रास्ता डूब जाता है।', roman: 'Aaj shaam chhe baje ke qareeb. Jwaar mein rasta doob jaata hai.', en: 'Around six this evening. At high tide the path goes under.' },
+      onRetry: { text: 'रास्ते के बारे में पूछ रहे हो?', roman: 'Raste ke baare mein poochh rahe ho?', en: 'Are you asking about the path?' },
+    },
+    {
+      id: 'thanks',
+      npc: { text: 'इसलिए जल्दी लौट आना, बेटा।', roman: 'Isliye jaldi laut aana, beta.', en: 'So come back early, child.' },
+      instruction: 'Thank them and say you will return early.',
+      suggest: { roman: 'Shukriya. Main jaldi laut aaunga.', text: 'शुक्रिया। मैं जल्दी लौट आऊँगा।' },
+      accept: ['shukriya main jaldi laut aaunga', 'shukriya main jaldi aaunga', 'jaldi laut aaunga', 'theek hai shukriya', 'शुक्रिया मैं जल्दी लौट आऊँगा', 'जल्दी लौट आऊँगा', 'thank you i will come back early', 'ji shukriya', 'dhanyavaad main jaldi aata hoon'],
+      intent: 'thank_and_promise_return',
+      hints: ['Thank them.', '"jaldi" = early, "laut aaunga" = I will return.', 'Say: "Shukriya. Main jaldi laut aaunga."'],
+      onValid: { text: 'अल्लाह हाफ़िज़, बेटा।', roman: 'Allah Hafiz, beta.', en: 'God protect you, child.' },
+      onRetry: { text: 'ठीक से लौटना, ये बताओ बस।', roman: 'Theek se lautna, ye batao bas.', en: 'Just say you will return safely.' },
+    },
+  ],
+  outro: { text: 'जाओ, दरगाह में सुकून मिलेगा।', roman: 'Jao, dargah mein sukoon milega.', en: 'Go, you will find peace at the dargah.' },
+  learned: [
+    { roman: 'salaam', en: 'greetings (peace)' },
+    { roman: 'rasta kab band hota hai?', en: 'when does the path close?' },
+    { roman: 'main jaldi laut aaunga', en: 'I will return early' },
+  ],
+};

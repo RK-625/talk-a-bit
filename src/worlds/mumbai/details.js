@@ -73,9 +73,9 @@ export function details(W, S, N, sites = {}) {
     const gw = S.items.get('gateway');
     const booth = prop('elephanta', 'elephantaBooth', pose(gw, 'ferryBooth'), { inside: 'gateway' });
     citizen(41, { kind: 'man', loop: 'idle' }, pose(booth, 'clerk'));
-    person('tourist', { seed: 42 }, pose(booth, 'queue', [-0.6, 0, 0]));
+    person('tourist', { seed: 42, convo: true }, pose(booth, 'queue', [-0.6, 0, 0]));
     const tripod = prop('tripod', 'tripod', pose(gw, 'photographer'), { inside: 'gateway' });
-    person('photographer', { seed: 44, props: false }, pose(tripod, 'photographer'));
+    person('photographer', { seed: 44, props: false, convo: true }, pose(tripod, 'photographer'));
     person('tourist', { seed: 45, variant: 0, loop: 'pose' }, pose(tripod, 'client'));
     const dana = prop('dana', 'danaMat', pose(gw, 'pigeonFeeder'), { inside: 'gateway' });
     citizen(46, { kind: 'woman', loop: 'idle' }, pose(dana, 'feeder'));
@@ -96,7 +96,7 @@ export function details(W, S, N, sites = {}) {
   // CST
   safe('cst', () => {
     const cst = S.items.get('cst');
-    person('coolie', { seed: 50 }, pose(cst, 'coolieA'));
+    person('coolie', { seed: 50, convo: true }, pose(cst, 'coolieA'));
     person('coolie', { seed: 51 }, pose(cst, 'coolieB'));
     const tiffin = prop('tiffin', 'tiffinPile', pose(cst, 'tiffinSorting'), { inside: 'cst' });
     person('dabbawala', { seed: 52, loop: false }, pose(tiffin, 'sorterA'));
@@ -167,7 +167,7 @@ export function details(W, S, N, sites = {}) {
     const sp = pose(sh, 'flowerSeller', [6.2, 0, 0]);
     const stallB = prop('chadar', 'chadarB', sp, { inside: 'haji' });
     citizen(101, { kind: 'woman', loop: 'idle' }, pose(stallB, 'seller'));
-    person('pilgrim', { seed: 102, variant: 0 }, pose(sh, 'pilgrimGate', [2.2, 0, 0.4]));
+    person('pilgrim', { seed: 102, variant: 0, convo: true }, pose(sh, 'pilgrimGate', [2.2, 0, 0.4]));
     // juice centre on the shore where the causeway starts
     const t0 = h.t0;
     const shoreBase = stepAlong(c, t0, h.shoreDist + 6.5);
@@ -185,7 +185,7 @@ export function details(W, S, N, sites = {}) {
   // ============================== Antilia =========================================================================
   safe('antilia', () => {
     const an = S.items.get('antilia'); if (!an) return;
-    person('securityGuard', { seed: 110 }, pose(an, 'guardBooth'));
+    person('securityGuard', { seed: 110, convo: true }, pose(an, 'guardBooth'));
     person('watchman', { seed: 111, wave: true }, pose(an, 'gateGuard'));
     person('sweeper', { seed: 112 }, pose(an, 'mali'));
     const line = pose(an, 'carLine');
@@ -233,7 +233,7 @@ export function details(W, S, N, sites = {}) {
   // ============================== temple + chowk + chawls ==========================================================
   safe('temple', () => {
     const sh = S.items.get('shrine'); if (!sh) return;
-    person('priest', { seed: 150 }, pose(sh, 'priest'));
+    person('priest', { seed: 150, convo: true }, pose(sh, 'priest'));
     const bells = prop('bells', 'templeBells', pose(sh, 'bells', [-2.1, 0, -0.8]), { inside: 'shrine', collide: false }); // beside the door: the pujari stays in clear view
     citizen(151, { kind: 'woman', loop: 'idle' }, pose(bells, 'devotee'));
     const off = prop('offering', 'offeringStall', pose(sh, 'devotee', [-3.4, 0, 0.8]), { inside: 'shrine' });
@@ -263,7 +263,7 @@ export function details(W, S, N, sites = {}) {
   safe('station', () => {
     const st = sites.station; if (!st) return;
     const tt = prop('timetable', 'timetable', pose(st, 'ticketWindow', [-3.4, 0, -0.6]), { inside: 'station' });
-    person('commuter', { seed: 170 }, pose(tt, 'reader'));
+    person('commuter', { seed: 170, convo: true }, pose(tt, 'reader'));
     const fs = prop('fastSlow', 'fastSlow', pose(st, 'commuterA', [-2.6, 0, -1.2]), { inside: 'station', collide: false });
     citizen(171, { kind: 'man', loop: 'phone' }, pose(fs, 'waiter'));
     const chai = prop('platformChai', 'platformChai', pose(st, 'chaiStall', [7.0, 0, -0.55]), { inside: 'station' });

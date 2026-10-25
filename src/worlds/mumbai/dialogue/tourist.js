@@ -1,0 +1,52 @@
+// Keyed by role `tourist`. English NPC: roman and en repeat the English text. Placed at the Gateway (tripod client); other
+// tourists (queue, selfie) exist in the world and may share this dialogue.
+export default {
+  id: 'tourist',
+  name: 'Emma (tourist)', role: 'tourist',
+  lang: 'en',
+  site: 'Gateway of India', difficulty: 4,
+  voice: { rate: 0.95, pitch: 1.1 },
+  persona: 'Friendly foreign tourist with a camera and backpack, a bit lost, speaks slowly and clearly.',
+  goal: 'Help her find the Elephanta ferry, tell her how long it takes, and recommend vada pav.',
+  steps: [
+    {
+      id: 'ferry',
+      npc: { text: 'Excuse me! Do you speak English? Where is the ferry to Elephanta Island?', roman: 'Excuse me! Do you speak English? Where is the ferry to Elephanta Island?', en: 'Excuse me! Do you speak English? Where is the ferry to Elephanta Island?' },
+      instruction: 'Tell her the ferry is just near the Gateway, by the water.',
+      suggest: { roman: 'Yes! The ferry is near the Gateway, by the water.', text: 'Yes! The ferry is near the Gateway, by the water.' },
+      accept: ['Yes! The ferry is near the Gateway, by the water.', 'The ferry is right there near the sea', 'It is near the Gateway, go to the boats', 'Yes, the Elephanta ferry is next to the Gateway', 'Go that way, the boats are by the water', 'the ferry is over there by the water', 'It is close, near the Gateway of India', 'ferry is near the gateway', 'Follow me, the boats are near the sea'],
+      intent: 'tell_ferry_location',
+      hints: ['Say where the ferry is.', 'Use "near the Gateway" and "by the water".', 'Say: "Yes! The ferry is near the Gateway, by the water."'],
+      onValid: { text: 'Oh wonderful, thank you so much!', roman: 'Oh wonderful, thank you so much!', en: 'Oh wonderful, thank you so much!' },
+      onRetry: { text: 'Sorry, I did not catch that. Where is the ferry?', roman: 'Sorry, I did not catch that. Where is the ferry?', en: 'Sorry, I did not catch that. Where is the ferry?' },
+    },
+    {
+      id: 'duration',
+      npc: { text: 'Is it far? And how long does the boat take?', roman: 'Is it far? And how long does the boat take?', en: 'Is it far? And how long does the boat take?' },
+      instruction: 'Tell her it is close and the ferry takes about one hour.',
+      suggest: { roman: 'It is close. The ferry takes about one hour.', text: 'It is close. The ferry takes about one hour.' },
+      accept: ['It is close. The ferry takes about one hour.', 'Not far, the boat takes one hour', 'The boat takes around an hour', 'It is very near, the ferry is about one hour', 'About one hour by boat', 'it is close, one hour on the ferry', 'a short walk, then one hour by boat', 'one hour by ferry', 'The ride is one hour'],
+      intent: 'tell_ferry_duration',
+      hints: ['Say it is close, and give the time.', 'Use "close" and "one hour".', 'Say: "It is close. The ferry takes about one hour."'],
+      onValid: { text: 'Great, that is not too long!', roman: 'Great, that is not too long!', en: 'Great, that is not too long!' },
+      onRetry: { text: 'Sorry, how long did you say?', roman: 'Sorry, how long did you say?', en: 'Sorry, how long did you say?' },
+    },
+    {
+      id: 'food',
+      npc: { text: 'I am so hungry! Do you know something tasty and cheap to eat here?', roman: 'I am so hungry! Do you know something tasty and cheap to eat here?', en: 'I am so hungry! Do you know something tasty and cheap to eat here?' },
+      instruction: 'Recommend vada pav.',
+      suggest: { roman: 'Try vada pav! It is tasty and cheap.', text: 'Try vada pav! It is tasty and cheap.' },
+      accept: ['Try vada pav! It is tasty and cheap.', 'You must try vada pav', 'Vada pav is the best, it is cheap', 'Eat vada pav, it is a potato snack in bread', 'I recommend vada pav', 'Have a vada pav, very tasty', 'try the vada pav stall', 'vada pav is spicy potato in bread', 'Go for vada pav, it is delicious'],
+      intent: 'recommend_vada_pav',
+      hints: ['Suggest a famous Mumbai street snack.', 'The snack is "vada pav".', 'Say: "Try vada pav! It is tasty and cheap."'],
+      onValid: { text: 'Vada pav! I will find it right now. You are so kind!', roman: 'Vada pav! I will find it right now. You are so kind!', en: 'Vada pav! I will find it right now. You are so kind!' },
+      onRetry: { text: 'Hmm, what food do you suggest?', roman: 'Hmm, what food do you suggest?', en: 'Hmm, what food do you suggest?' },
+    },
+  ],
+  outro: { text: 'Thank you, Chotu! You are the best guide in Mumbai.', roman: 'Thank you, Chotu! You are the best guide in Mumbai.', en: 'Thank you, Chotu! You are the best guide in Mumbai.' },
+  learned: [
+    { roman: 'The ferry is near the Gateway.', en: 'a way to give directions in English' },
+    { roman: 'It takes about one hour.', en: 'telling how long something takes' },
+    { roman: 'Try vada pav!', en: 'recommending food' },
+  ],
+};
