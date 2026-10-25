@@ -89,6 +89,7 @@ function furniture(W, S) {
       const dir = stepAlong(f.dir, f.left, lat);
       if (!freeSpot(dir, 1.2)) continue;
       if (nearRail(dir, 5)) continue;
+      if (id === 'juhuRoad' && dist(dir, BRIDGE.end) < 20) continue; // the Juhu road hairpins off the ramp: a lamp here stands between both legs, in the Sea Link cars' U-turn
       const face = tangentTo(dir, f.dir); // lamp arm toward the road
       bank.add('lampPost', dir, face);
       if (!(id === 'great' && s > 74 && s < 106) && rnd() < 0.5 * dens) bank.add('hydrant', stepAlong(dir, f.tan, 3.2), face);
@@ -159,10 +160,10 @@ function scatterShore(W, rnd, dens) {
     if (!freeSpot(dir, 1.5) || !clearOfRoads(dir, 4)) continue;
     const juhu = dist(dir, GEO.juhu.c) < GEO.juhu.r;
     if (beach > 0.4 && s > -7.5 && s < -3.5) {
-      if (umb < wantUmb && rnd() < 0.18) { bank.add('beachUmbrella', dir, rnd() * 6.28, 0.9 + rnd() * 0.3); umb++; continue; }
-      if (castles < wantCastle && rnd() < 0.1) { bank.add('sandcastle', dir, rnd() * 6.28, 0.6 + rnd() * 0.3); castles++; continue; }
+      if (umb < wantUmb && rnd() < 0.18) { const sc = 0.9 + rnd() * 0.3; if (freeSpot(dir, 1.9 * sc)) { bank.add('beachUmbrella', dir, rnd() * 6.28, sc); umb++; continue; } }
+      if (castles < wantCastle && rnd() < 0.1) { const sc = 0.6 + rnd() * 0.3; if (freeSpot(dir, 1.9 * sc)) { bank.add('sandcastle', dir, rnd() * 6.28, sc); castles++; continue; } }
     }
-    if (palms < wantPalms && (juhu ? rnd() < 0.5 : rnd() < 0.12) && s < -4) { bank.add(rnd() < 0.5 ? 'palm' : 'palm2', dir, rnd() * 6.28, 0.85 + rnd() * 0.5); palms++; }
+    if (palms < wantPalms && (juhu ? rnd() < 0.5 : rnd() < 0.12) && s < -4) { const sc = 0.85 + rnd() * 0.5; if (!freeSpot(dir, 1.9 * sc)) continue; bank.add(rnd() < 0.5 ? 'palm' : 'palm2', dir, rnd() * 6.28, sc); palms++; }
   }
   void pole; void MARINE; void bayAngle; void BRIDGE; void R; void polar;
 }

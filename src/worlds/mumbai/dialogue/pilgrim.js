@@ -22,7 +22,7 @@ export default {
     },
     {
       id: 'tide',
-      npc: { text: 'कुछ पूछना है, बेटा?', roman: 'Kuch poochna hai, beta?', en: 'Do you want to ask something, child?' },
+      npc: { text: 'जाने से पहले कुछ पूछना है, बेटा?', roman: 'Jaane se pehle kuch poochna hai, beta?', en: 'Anything to ask before you leave, child?' },
       instruction: 'Ask when the path closes when the tide comes in.',
       suggest: { roman: 'Paani chadhne par rasta kab band hota hai?', text: 'पानी चढ़ने पर रास्ता कब बंद होता है?' },
       accept: ['paani chadhne par rasta kab band hota hai', 'rasta kab band hota hai', 'kitne baje rasta band hoga', 'samandar ka paani kab chadhta hai', 'पानी चढ़ने पर रास्ता कब बंद होता है', 'रास्ता कब बंद होता है', 'when does the path close', 'tide kab aata hai', 'rasta kab tak khula hai'],

@@ -30,7 +30,7 @@ export function talkHook(W) {
   return {
     register(g, n) {
       const role = n.role ?? g.userData.role ?? 'citizen';
-      if (NOT_TALKABLE.has(role) || role === 'couple') return;
+      if (NOT_TALKABLE.has(role)) return; // (a seated couple is one talkable entry: you speak to the pair)
       const handle = talk.register({
         id: n.id ?? role, explicitId: n.id ?? null, convo: !!n.convo, role, object: g, name: LABEL[role] ?? null,
         lang: FOREIGN.has(role) ? 'en' : 'hi',

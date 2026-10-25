@@ -43,6 +43,8 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
   let greetings = GREETINGS;
   let guideDone = false;
   try { guideDone = localStorage.getItem('talkabit.tutorial.v1') === '1'; } catch { /* storage blocked */ }
+  let doneIds = new Set(); // dialogues finished before (this session or earlier visits): a repeat opens with `again` when present
+  try { doneIds = new Set(JSON.parse(localStorage.getItem('talkabit.done.v1') || '[]')); } catch { /* storage blocked */ }
   let cand = null; // current talkable under the prompt
   let conv = null; // { t, dlg, i, attempt, assisted, token }
   let amb = null; // { t, until, line }
@@ -168,9 +170,15 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
   }
 
   // ---------------- first-load guide: a note + arrow to the tutorial NPC ----------------
-  let guideT = null;
+  // The banner shows on first load, then fades after ~15 s or once the player has walked ~15 units from where it first showed
+  // (whichever comes first), and never comes back by itself. The bubble over the tutorial NPC (star) is separate and stays.
+  const GUIDE_MS = 15000, GUIDE_DIST = 15;
+  let guideT = null, guideGone = false, guideSince = 0;
+  const guideFrom = new THREE.Vector3();
   function updateGuide() {
-    if (guideDone) { ui.hideGuide(); return; }
+    if (guideDone || guideGone) { ui.hideGuide(); return; }
+    if (!guideSince) { guideSince = performance.now(); guideFrom.copy(player.object.position); }
+    else if (performance.now() - guideSince > GUIDE_MS || player.object.position.distanceTo(guideFrom) > GUIDE_DIST) { guideGone = true; ui.fadeGuide(); return; }
     if (!guideT || !guideT.object.parent) {
       guideT = null;
       for (const t of list) { const d = dialogueFor(t); if (d?.tutorial) { guideT = t; break; } }
@@ -225,6 +233,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     conv = { t, dlg, i: 0, attempt: 0, assisted: 0, token: Math.random(), q0, abort: null };
     input.clearKeys(); input.setLocked(true);
     ui.openCard({ name: dlg.name ?? t.name ?? 'Mumbaikar' });
+    window.dispatchEvent(new CustomEvent('talkabit:conversation', { detail: { on: true } })); // music ducks
     // two-shot: camera behind Chotu, looking at the pair
     wp(t.object, _a); _b.copy(_a).sub(player.object.position); tangentOf(_b, player.up).normalize();
     _c.copy(player.object.position).add(_a).multiplyScalar(0.5);
@@ -247,7 +256,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     c.attempt = 0; state = 'npc';
     ui.resetRow();
     ui.setStep({ instruction: step.instruction, suggest: step.suggest });
-    say(step.npc, { wait: false });
+    say(c.i === 0 && c.dlg.again && doneIds.has(c.dlg.id) ? c.dlg.again : step.npc, { wait: false }); // "phir aaya?" opener on a repeat visit
     ui.setBusy(false); state = 'await';
   }
 
@@ -294,6 +303,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     const c = conv, tok = c.token; state = 'react';
     ui.setBusy(true);
     const learned = (c.dlg.learned ?? []).length ? c.dlg.learned : c.dlg.steps.filter((s) => s.suggest).map((s) => ({ roman: s.suggest.roman, en: s.instruction, text: s.suggest.text }));
+    if (c.dlg.id && !doneIds.has(c.dlg.id)) { doneIds.add(c.dlg.id); try { localStorage.setItem('talkabit.done.v1', JSON.stringify([...doneIds])); } catch { /* storage blocked */ } }
     phrasebook.add(c.dlg.name ?? c.t.name ?? 'Mumbaikar', worldId, learned);
     const p = c.dlg.outro ? say(c.dlg.outro, { wait: true }) : Promise.resolve();
     ui.showReward({ learned });
@@ -308,6 +318,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     c.abort?.abort(); ui.setThinking(false);
     cancelSpeech(); ui.setSpeaking(false);
     ui.closeCard(); ui.hideBubble();
+    window.dispatchEvent(new CustomEvent('talkabit:conversation', { detail: { on: false } }));
     cameraRig.setShot(null);
     input.setLocked(false);
     lookAtHero(c.t, false); c.t.hold?.(false);

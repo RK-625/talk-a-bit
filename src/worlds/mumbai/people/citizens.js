@@ -1,7 +1,7 @@
 /**
  * people/citizens.js: generic Mumbaikars and seated couples, all from the seeded variation system.
  *
- * createCitizen(ink, seed, { kind?: 'man'|'woman'|'kid'|'elder'|'teen', loop?, seatHeight? }) -> Group (same hooks as createNPC)
+ * createCitizen(ink, seed, { kind?: 'man'|'woman'|'kid'|'elder'|'teen', loop?, seatHeight?, tweak?(spec, r) }) -> Group (same hooks as createNPC)
  * CITIZEN_LOOPS: ['idle','phone','chat','sit','walk','wave','news']   pass any to userData.playLoop(name)
  *   idle = breathing + glances; phone = texting; chat = gesturing + talking; sit = sits on a seat `seatHeight` high (default 0.5,
  *   a bench; ~0.9 a parapet/ledge; ~0.3 a step) with thighs forward; walk = walks in place (the world moves them);
@@ -25,6 +25,7 @@ export function createCitizen(ink, seed = 1, opts = {}) {
   const r = seedRng(seed, 17);
   const kind = opts.kind ?? pick(r, KINDS);
   const spec = citizenSpec(r, kind);
+  if (opts.tweak) opts.tweak(spec, r); // explicit look overrides for a named person (see mumbai/population4.js)
   const loop = opts.loop ?? pick(r, DEFAULT_LOOPS[kind]);
   if (loop === 'phone' && !spec.accessories.some((a) => (a.name ?? a) === 'phone')) spec.accessories.push('phone');
   if (loop === 'news') spec.accessories = [...spec.accessories.filter((a) => (a.name ?? a) !== 'umbrella'), 'newspaper'];

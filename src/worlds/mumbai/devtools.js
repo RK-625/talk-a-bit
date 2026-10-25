@@ -14,7 +14,7 @@ import { JUHU } from './layout.js';
 import { frameAt } from '../../engine/place.js';
 import { segmentPoint } from '../../engine/colliders.js';
 
-export function installDevTools(W, { S, R: RL, B, T, N }) {
+export function installDevTools(W, { S, R: RL, B, T, N, D }) {
   const G = () => window.__game; // engine sets __game after build returns
   const spots = {};
   const POLE = new THREE.Vector3(0, 1, 0);
@@ -22,6 +22,7 @@ export function installDevTools(W, { S, R: RL, B, T, N }) {
     const pl = grp.userData.placement;
     if (pl) spots[id] = { dir: pl.dir.clone(), fwd: pl.fwd.clone() };
   }
+  for (const [id, grp] of D?.props ?? []) { const pl = grp?.userData?.placement; if (pl && !spots[id]) spots[id] = { dir: pl.dir.clone(), fwd: pl.fwd.clone() }; }
   spots.spawn = { dir: POLE.clone(), fwd: new THREE.Vector3(0, 0, 1) };
   const station = RL.station.userData.placement;
   spots.station = { dir: station.dir.clone(), fwd: station.fwd.clone() };

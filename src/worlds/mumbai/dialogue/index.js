@@ -25,7 +25,8 @@
  * tourist  (EN)      Gateway of India                        4    help find the Elephanta ferry, duration, recommend vada pav
  * securityGuard      Antilia gate booth                      5    politely ask whose building, ask to look in, accept no
  *
- * Roles in the world without a dialogue (ambient): newspaperVendor, collegeStudent, jogger, beachKid, bhuttaSeller,
+ * Every talkable cast member now has their own dialogue (45 more, keyed by explicit id, see ./cast/). Roles below only matter for
+ * non-cast extras; the old note follows. Roles in the world without a dialogue (ambient): newspaperVendor, collegeStudent, jogger, beachKid, bhuttaSeller,
  * coconutSeller, officeGoer, ladiesCommuter, watchman, sweeper, doorman, studentWithBooks, bookSeller, chanaSeller, citizen, couple.
  * Those can use GREETINGS (random line when the player presses E).
  *
@@ -51,6 +52,18 @@ import coolie from './coolie.js';
 import commuter from './commuter.js';
 import tourist from './tourist.js';
 import securityGuard from './securityGuard.js';
+import * as chowk from './cast/chowk.js';
+import * as south from './cast/south.js';
+import * as places from './cast/places.js';
+import * as street from './cast/street.js';
+import * as pass4Chowk from './cast/pass4-chowk.js';
+import * as pass4Fort from './cast/pass4-fort.js';
+import * as pass4Coast from './cast/pass4-coast.js';
+import * as pass4Fillers from './cast/pass4-fillers.js';
+
+// Every other talkable person (docs/CAST.md) has a dialogue keyed by their explicit placement id. They live in ./cast/*.js
+// (each file exports several dialogues built with ./cast/kit.js); collecting them here keeps one source of truth.
+const CAST = Object.fromEntries([chowk, south, places, street, pass4Chowk, pass4Fort, pass4Coast, pass4Fillers].flatMap((m) => Object.values(m)).map((d) => [d.id, d]));
 
 export const GREETINGS = [
   { text: 'अरे छोटू! कैसा है?', roman: 'Arre Chotu! Kaisa hai?', en: 'Hey Chotu! How are you?' },
@@ -72,4 +85,5 @@ export default {
   chaiwalaUncle, vadaPavWala, taxiDriver, busConductor, trafficCop, auntyWithSabzi, cricketKid, koliFisherwoman,
   dabbawala, bollywoodHopeful, bhelWala, golaWala, balloonSeller, photographer, priest, pilgrim, coolie, commuter,
   tourist, securityGuard,
+  ...CAST,
 };

@@ -8,14 +8,14 @@
  */
 import * as THREE from 'three';
 import { PATHS, ROAD_DEFS, R, stepAlong, tangentTo, pathNearest, dist, STATION_B, polar, RAIL_RADIUS } from './geo.js';
-import { createTrackSegment, trackParts, createTrainCar, createLevelCrossing, Mix, C } from './props/index.js';
+import { createTrainCar, createLevelCrossing, C } from './props/index.js';
+import { vcMat } from './props/kit.js';
 import * as THREE_ from 'three';
 import { createStation } from './landmarks/index.js';
 import { STATION } from './layout.js';
 import { setSegment } from '../../engine/colliders.js';
 import { flagShadows } from './world.js';
 
-const SINK = 0.36; // track sunk into the ground
 const RAIL_TOP = 0.44; // rail head above the ground (wheels sit here)
 const TRAIN = { vmax: 12.5, acc: 3.0, dec: 3.2, dwell: 3.5, cars: 5, spacing: 8.3, ladiesCar: 3 };
 
@@ -25,15 +25,7 @@ export function rail(W) {
   W.crossings = out.crossings;
 
   // ---- track -------------------------------------------------------------------------------------------------------
-  const tp = trackBed(4); // own track parts: sleepers must stand clear of the ground even though the bed is sunk
-  W.bank.specs.track = { parts: tp, collide: null, bodyRadius: 2, scale: [1, 1], hatch: 0.1, thickness: 1.5 };
-  const f = {};
-  const nSeg = Math.round(path.length / 4);
-  for (let i = 0; i < nSeg; i++) {
-    const s = (i + 0.5) * (path.length / nSeg);
-    path.at(s, f);
-    W.bank.add('track', f.dir, f.tan, path.length / nSeg / 4, { collide: false, lift: -SINK + 0.0 });
-  }
+  buildTrack(W, path); // ONE continuous swept track: ballast bed + two rails + evenly spaced sleepers, all following the ground
 
   // ---- station -----------------------------------------------------------------------------------------------------
   const sc = STATION.s;
@@ -138,24 +130,94 @@ function makeCrossing(W, road, best, rail) {
   }
   return x;
 }
-void tangentTo; void createTrackSegment;
+void tangentTo;
 
-/** ballast bed + chunky wooden sleepers (clearly proud of the bed) + two steel rails; spans z in [-len/2, len/2] */
-function trackBed(len) {
-  const p = new Mix();
+/**
+ * The track as one continuous sweep along the closed rail path (no segments, so no joints): per ~38-unit chunk of mesh
+ *   ballast bed   a low trapezoid whose top follows the real ground height at every lateral point (flush with the ground, no wedge)
+ *   rails         steel web + head boxes swept along the curve (one unbroken ribbon)
+ *   sleepers      one box every SLEEPER_GAP units of ARC LENGTH (even spacing everywhere), each turned to the local tangent
+ * Chunks share their end samples exactly, so the loop is watertight; each chunk is culled by distance.
+ */
+const SLEEPER_GAP = 0.7;
+function buildTrack(W, path) {
   const T = THREE_;
-  const shape = new T.Shape([new T.Vector2(-1.9, 0), new T.Vector2(1.9, 0), new T.Vector2(1.45, 0.34), new T.Vector2(-1.45, 0.34)]);
-  const bed = new T.ExtrudeGeometry(shape, { depth: len, bevelEnabled: false });
-  bed.translate(0, 0, -len / 2);
-  p.add(bed, 0xd7cbb8, { outline: false });
-  const n = Math.round(len / 0.62), sp = len / n;
-  for (let i = 0; i < n; i++) p.box(3.0, 0.2, 0.34, C.woodDark, { pos: [0, 0.43, -len / 2 + sp * (i + 0.5)], outline: false });
-  for (const sx of [-1, 1]) {
-    p.box(0.16, 0.26, len, C.steelDark, { pos: [sx * 0.95, 0.66, 0], outline: false });
-    p.box(0.26, 0.07, len, C.steel, { pos: [sx * 0.95, 0.8, 0], outline: false });
+  const L = path.length;
+  const DS = 0.75; // sweep step along the curve
+  const nChunks = Math.max(1, Math.round(L / 38));
+  const stepsPer = Math.max(2, Math.round(L / nChunks / DS));
+  const ds = L / (nChunks * stepsPer);
+  const mat = vcMat(W.ink, 0.1, 0.9);
+  const f = {};
+  const col = (hex) => new T.Color(hex);
+  const tmpP = new T.Vector3(), tmpD = new T.Vector3();
+  const frames = []; // frames[k] = { dir, tan, left, r (centre ground radius) } at s = k*ds
+  for (let k = 0; k <= nChunks * stepsPer; k++) {
+    path.at(k * ds, f);
+    frames.push({ dir: f.dir.clone(), tan: f.tan.clone(), left: f.left.clone(), r: W.planet.getSurfaceRadius(f.dir) });
   }
-  const bedHull = bed.clone(); bedHull.deleteAttribute('normal'); bedHull.deleteAttribute('uv');
-  const first = p.all[0].clone(); first.deleteAttribute('color'); first.deleteAttribute('normal');
-  p.hull.push(first);
-  return p;
+  /** world position of lateral offset x (left +) at frame fr; y relative to the ground there (follow) or to the centre ground */
+  const at = (fr, x, y, follow, out) => {
+    tmpD.copy(fr.dir).multiplyScalar(R).addScaledVector(fr.left, x).normalize();
+    const rr = follow ? W.planet.getSurfaceRadius(tmpD) : fr.r;
+    return out.copy(tmpD).multiplyScalar(rr + y);
+  };
+  /** sweep a convex profile [[x, y]] (x lateral, y above ground) between frames k0..k1; geometry non-indexed with flat colours */
+  function sweep(prof, k0, k1, follow, color, pos, cols) {
+    const n = prof.length;
+    const ring = (fr) => prof.map(([x, y]) => at(fr, x, y, follow, new T.Vector3()));
+    let prev = ring(frames[k0]);
+    const c = col(color);
+    const cen = new T.Vector3();
+    for (let k = k0 + 1; k <= k1; k++) {
+      const cur = ring(frames[k]);
+      cen.set(0, 0, 0); for (const q of prev) cen.add(q); cen.divideScalar(n);
+      for (let j = 0; j < n; j++) {
+        const j2 = (j + 1) % n;
+        const A = prev[j], B = prev[j2], C2 = cur[j2], D = cur[j];
+        const nrm = new T.Vector3().subVectors(B, A).cross(tmpP.subVectors(D, A));
+        const out = tmpD.copy(A).add(B).multiplyScalar(0.5).sub(cen);
+        const quad = nrm.dot(out) >= 0 ? [A, B, C2, A, C2, D] : [A, C2, B, A, D, C2];
+        for (const q of quad) { pos.push(q.x, q.y, q.z); cols.push(c.r, c.g, c.b); }
+      }
+      prev = cur;
+    }
+  }
+  const sleeperGeo = new T.BoxGeometry(3.0, 0.2, 0.34);
+  const m4 = new T.Matrix4();
+  const nSleep = Math.round(L / SLEEPER_GAP), gap = L / nSleep;
+  const sf = {};
+  for (let c = 0; c < nChunks; c++) {
+    const k0 = c * stepsPer, k1 = (c + 1) * stepsPer;
+    const pos = [], cols = [];
+    sweep([[-2.0, -0.4], [-1.55, 0.04], [1.55, 0.04], [2.0, -0.4]], k0, k1, true, 0xd7cbb8, pos, cols); // ballast bed
+    for (const sx of [-0.95, 0.95]) {
+      sweep([[sx - 0.08, 0.17], [sx + 0.08, 0.17], [sx + 0.08, 0.38], [sx - 0.08, 0.38]], k0, k1, false, C.steelDark, pos, cols); // web
+      sweep([[sx - 0.13, 0.36], [sx + 0.13, 0.36], [sx + 0.13, 0.44], [sx - 0.13, 0.44]], k0, k1, false, C.steel, pos, cols); // head
+    }
+    // sleepers whose arc-length centre falls in this chunk
+    const s0 = k0 * ds, s1 = k1 * ds;
+    const sPos = [], sCol = [], sNrm = [];
+    const wood = col(C.woodDark);
+    for (let i = Math.ceil(s0 / gap - 1e-6); i * gap < s1 - 1e-6; i++) {
+      path.at(i * gap, sf);
+      const r = W.planet.getSurfaceRadius(sf.dir);
+      m4.makeBasis(sf.left, sf.dir, sf.tan).setPosition(tmpP.copy(sf.dir).multiplyScalar(r + 0.1));
+      const g = sleeperGeo.clone().toNonIndexed().applyMatrix4(m4);
+      const p = g.attributes.position;
+      for (let q = 0; q < p.count; q++) { sPos.push(p.getX(q), p.getY(q), p.getZ(q)); sCol.push(wood.r, wood.g, wood.b); }
+    }
+    const P = pos.concat(sPos), Cc = cols.concat(sCol);
+    const geo = new T.BufferGeometry();
+    geo.setAttribute('position', new T.Float32BufferAttribute(P, 3));
+    geo.setAttribute('color', new T.Float32BufferAttribute(Cc, 3));
+    geo.computeVertexNormals();
+    geo.computeBoundingSphere();
+    const mesh = new T.Mesh(geo, mat);
+    mesh.name = 'track' + c;
+    mesh.receiveShadow = true;
+    W.root.add(mesh);
+    const mid = frames[Math.round((k0 + k1) / 2)].dir.clone().multiplyScalar(R);
+    W.cull(mesh, { maxDist: 100, radius: 24, height: 2, position: mid });
+  }
 }

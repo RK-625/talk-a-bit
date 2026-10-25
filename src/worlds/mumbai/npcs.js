@@ -50,19 +50,18 @@ export function npcs(W, S) {
     g.name = g.name || o.role;
     flagShadows(g);
     W.add(g, { dir, fwd, radius: o.radius ?? null, collide: false, walkable: false, noAnim: true, cull: false, occlude: false, height: 3 });
-    if (o.collide !== false) W.colliders.add({ dir: dir.clone(), radius: g.userData.radius ?? 0.5, height: 2.4 });
-    return register(g, { g, id: o.id, convo: o.convo, dir: dir.clone(), role: o.role ?? g.userData.role, wave: !!o.wave, waved: false, waveCool: 0, look: false, lookAt: o.lookAt !== false, sitting: !!o.sitting });
+    if (o.collide !== false) W.colliders.add({ dir: dir.clone(), radius: g.userData.radius ?? 0.5, height: 2.4, person: true });
+    return register(g, { g, id: o.id, convo: o.convo, owner: o.owner, ownerSite: o.ownerSite, dir: dir.clone(), role: o.role ?? g.userData.role, wave: !!o.wave, waved: false, waveCool: 0, look: false, lookAt: o.lookAt !== false, sitting: !!o.sitting });
   }
-  // touch devices: skip every second extra (the original cast, seeds < 40, always stays)
-  const skip = (o, seed) => W.dens < 0.7 && (seed ?? o.seed ?? 0) >= 40 && Math.floor(seed ?? o.seed ?? 0) % 3 === 0;
+    const skip = () => false; // the same ~60-person cast on every device (the cast is small; far people are merged by the crowd LOD)
   function person(role, o, dir, fwd, radius = null) {
     if (skip(o)) return null;
-    const g = createNPC(role, ink, o.seed ?? 1, { variant: o.variant, loop: o.loop, props: o.props });
+    const g = createNPC(role, ink, o.seed ?? 1, { variant: o.variant, loop: o.loop, props: o.props, tweak: o.tweak });
     return addPerson(g, dir, fwd, { ...o, role, radius });
   }
   function citizen(seed, o, dir, fwd, radius = null) {
     if (skip(o, seed)) return null;
-    const g = createCitizen(ink, seed, { kind: o.kind, loop: o.loop, seatHeight: o.seatHeight });
+    const g = createCitizen(ink, seed, { kind: o.kind, loop: o.loop, seatHeight: o.seatHeight, tweak: o.tweak });
     return addPerson(g, dir, fwd, { ...o, role: 'citizen', radius, sitting: o.loop === 'sit' });
   }
   function couple(seed, o, dir, fwd, radius = null) {
@@ -74,7 +73,7 @@ export function npcs(W, S) {
   // ---- stall people (anchors from the props) -----------------------------------------------------------------------
   const tapri = itemFrame('tapri');
   if (tapri) {
-    person('chaiwalaUncle', { seed: 3, wave: true, convo: true }, tapri.anchor('uncle'), tapri.fr.fwd);
+    person('chaiwalaUncle', { seed: 3, wave: true, convo: true, id: 'chaiwalaUncle', owner: tapri.g }, tapri.anchor('uncle'), tapri.fr.fwd);
     // stray dog napping by the bench
     const dd = tapri.at(-3.7, 2.2);
     const dog = createDog(ink, 2);
@@ -83,46 +82,44 @@ export function npcs(W, S) {
     list.push({ g: dog, item: W.culler.items[W.culler.items.length - 1], dir: dd, role: 'dog', lookAt: false });
   }
   const vada = itemFrame('vada');
-  if (vada) person('vadaPavWala', { seed: 5, wave: true, convo: true }, vada.anchor('vendor'), vada.fr.fwd);
+  if (vada) person('vadaPavWala', { seed: 5, wave: true, convo: true, id: 'vadaPavWala', owner: vada.g }, vada.anchor('vendor'), vada.fr.fwd);
   const news = itemFrame('news');
-  if (news) person('newspaperVendor', { seed: 4 }, news.anchor('vendor'), news.fr.fwd);
+  if (news) person('newspaperVendor', { seed: 4, id: 'chowk-newspaper-vendor', owner: news.g }, news.anchor('vendor'), news.fr.fwd);
   const fruit = itemFrame('fruit');
   void fruit;
 
   // ---- the chowk: Bollywood hopeful at the film posters; gully cricket ------------------------------------------------
   const sp = (right, fwd) => resolveAt({ sp: [right, fwd] });
-  person('bollywoodHopeful', { seed: 2, wave: true, convo: true }, sp(2.6, -10.6).dir, sp(2.6, -10.6).fwd);
+  person('bollywoodHopeful', { seed: 2, wave: true, convo: true, id: 'bollywoodHopeful' }, sp(2.6, -10.6).dir, sp(2.6, -10.6).fwd);
   const pitchA = sp(-14, -2.0), pitchB = sp(-14, 3.6);
-  person('cricketKid', { seed: 11, variant: 'batter', wave: true, convo: true }, pitchA.dir, pitchA.fwd);
-  person('cricketKid', { seed: 12, variant: 'bowler' }, pitchB.dir, pitchB.fwd.clone().negate());
-  const field = sp(-18.5, 0.5);
-  if (W.dens >= 0.7) person('cricketKid', { seed: 13, variant: 'batter' }, field.dir, tangentTo(field.dir, pitchA.dir));
+  person('cricketKid', { seed: 11, variant: 'batter', wave: true, convo: true, id: 'cricketKid' }, pitchA.dir, pitchA.fwd);
+  person('cricketKid', { seed: 12, variant: 'bowler', id: 'chowk-cricket-bowler' }, pitchB.dir, pitchB.fwd.clone().negate());
 
   // ---- the Fort: bus stop conductor, parked taxi + driver, dabbawala, cop -------------------------------------------------
   const bus = itemFrame('busStopFort');
-  if (bus) person('busConductor', { seed: 6, wave: true, convo: true }, bus.at(-3.4, 0.2), bus.fr.fwd);
+  if (bus) person('busConductor', { seed: 6, wave: true, convo: true, id: 'busConductor' }, bus.at(-3.4, 0.2), bus.fr.fwd);
   const taxi = itemFrame('parkedTaxi');
   if (taxi) {
     const side = taxi.fr.right.clone();
     const d = taxi.at(1.95, 0.4);
-    person('taxiDriver', { seed: 8, wave: true, convo: true }, d, side);
+    person('taxiDriver', { seed: 8, wave: true, convo: true, id: 'taxiDriver' }, d, side);
   }
   const dabba = itemFrame('dabbaBike');
-  if (dabba) person('dabbawala', { seed: 9, convo: true }, dabba.at(1.6, 0.4), dabba.fr.fwd.clone().applyAxisAngle(dabba.fr.up, 0.9));
+  if (dabba) person('dabbawala', { seed: 9, convo: true, id: 'dabbawala' }, dabba.at(1.6, 0.4), dabba.fr.fwd.clone().applyAxisAngle(dabba.fr.up, 0.9));
   const cop = resolveAt({ road: 'great', s: 12.5, lat: 6.3 });
-  person('trafficCop', { seed: 10, wave: true, convo: true }, cop.dir, tangentTo(cop.dir, PATHS.great.at(12.5).dir ?? cop.dir));
+  person('trafficCop', { seed: 10, wave: true, convo: true, id: 'trafficCop' }, cop.dir, tangentTo(cop.dir, PATHS.great.at(12.5).dir ?? cop.dir));
 
   // ---- the Gateway: balloon seller, pigeons ------------------------------------------------------------------------------
   const bal = itemFrame('balloons');
   if (bal) {
-    person('balloonSeller', { seed: 14, wave: true, convo: true }, bal.at(-1.2, 0.2), bal.fr.fwd);
+    person('balloonSeller', { seed: 14, wave: true, convo: true, id: 'balloonSeller' }, bal.at(-1.2, 0.2), bal.fr.fwd);
   }
   const gw = itemFrame('gateway');
   if (gw) {
     // Koli fisherwoman on the quay beside the boats
     const sh = shoreToward(GEO.harbour.c, gw.fr.up.clone());
     const quay = stepAlong(sh.dir, sh.heading, 2.6); // a little inland of the waterline, facing the boats
-    person('koliFisherwoman', { seed: 15, wave: true, convo: true }, quay, sh.heading.clone().negate());
+    person('koliFisherwoman', { seed: 15, wave: true, convo: true, id: 'koliFisherwoman' }, quay, sh.heading.clone().negate());
     // pigeon flock on the plaza in front of the arch
     const nP = Math.round(10 * Math.max(0.5, W.dens));
     for (let i = 0; i < nP; i++) {
@@ -136,17 +133,13 @@ export function npcs(W, S) {
   for (const [spot, kind] of [[JUHU.bhel, 'bhel'], [JUHU.gola, 'gola']]) {
     const away = tangentTo(spot, POLE).negate(); // toward the sea
     // the stall itself is placed by scenery.js; here only the vendor
-    const vendorDir = stepAlong(spot, away, -1.1);
-    person(kind === 'bhel' ? 'bhelWala' : 'golaWala', { seed: kind === 'bhel' ? 16 : 17, wave: true, convo: true }, vendorDir, away);
+    const vendorDir = stepAlong(spot, away, -1.6); // behind the cart (its rear rack ends at -0.7), never inside it
+    person(kind === 'bhel' ? 'bhelWala' : 'golaWala', { seed: kind === 'bhel' ? 16 : 17, wave: true, convo: true, id: kind === 'bhel' ? 'bhelWala' : 'golaWala' }, vendorDir, away);
   }
 
   // ---- walkers: aunty with sabzi, students on the promenade and footpaths -------------------------------------------------
-  walker('auntyWithSabzi', { seed: 18, convo: true }, pathLine('great', 21, 58, 5.5), 1.25);
-  walker('collegeStudent', { seed: 19, variant: 0 }, pathLine('east', 14, 52, -4.0), 1.5);
-  if (W.dens >= 0.7) walker('collegeStudent', { seed: 20, variant: 1 }, pathLine('east', 16, 54, -5.1), 1.5, 0.12);
-  walker('auntyWithSabzi', { seed: 21 }, pathArc(-38, 24, 3.0), 1.1);
-  walker('collegeStudent', { seed: 22, variant: 1 }, pathArc(-6, 44, 2.2), 1.3);
-  if (W.dens >= 0.7) { walker('collegeStudent', { seed: 23, variant: 0 }, pathArc(-3, 47, 3.6), 1.3, 0.1); walker('dabbawala', { seed: 24 }, pathLine('ring', 30, 90, 4.7), 1.8); }
+  walker('auntyWithSabzi', { seed: 18, convo: true, id: 'auntyWithSabzi' }, pathLine('great', 21, 58, 5.5), 1.25);
+  walker('collegeStudent', { seed: 22, variant: 1, id: 'marine-walk-student' }, pathArc(-6, 44, 2.2), 1.3);
 
   function pathLine(id, s0, s1, lat) {
     const p = PATHS[id];
@@ -162,7 +155,7 @@ export function npcs(W, S) {
     return out;
   }
   function walker(role, o, dirs, speed, phase = 0) {
-    const g = role === 'citizen' ? createCitizen(ink, o.seed ?? 1, { kind: o.kind, loop: 'walk' }) : createNPC(role, ink, o.seed ?? 1, { variant: o.variant, loop: false });
+    const g = role === 'citizen' ? createCitizen(ink, o.seed ?? 1, { kind: o.kind, loop: 'walk', tweak: o.tweak }) : createNPC(role, ink, o.seed ?? 1, { variant: o.variant, loop: false, tweak: o.tweak });
     flagShadows(g);
     W.root.add(g);
     const actor = W.actors.add(g, { type: 'spline', dirs, speed, closed: !!o.closed, phase }, { radiusFn: (d) => planet.getWalkRadius(d) + (o.lift ?? 0), collider: o.solid === false ? null : { radius: g.userData.radius ?? 0.45, height: 2.4 } });

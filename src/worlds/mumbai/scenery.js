@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import * as L from './landmarks/index.js';
 import * as P from './props/index.js';
-import { ITEMS, resolveAll, checkOverlaps, JUHU } from './layout.js';
+import { ITEMS, resolveAll, checkOverlaps, JUHU, place as layoutPlace } from './layout.js';
 import { PATHS, MARINE, GEO, stepAlong, tangentTo, bayAngle, R } from './geo.js';
 
 // kind -> [factory(ink, opts), maxDist (units from the camera), tall?]
@@ -21,7 +21,7 @@ const KINDS = {
   antilia: [(i) => L.createAntilia(i), 160], bse: [(i) => L.createBSE(i), INF], rajabai: [(i) => L.createRajabai(i), INF], flora: [(i) => L.createFloraFountain(i), 140],
   busStop: [(i) => P.createBusStop(i), 60], balloons: [(i) => P.createBalloonBunch(i), 55], taxi: [(i) => P.createTaxi(i, { seed: 3 }), 60],
   dabbaBike: [(i) => P.createDabbawalaBike(i), 55], laundry: [(i, o) => P.createLaundryLine(i, { length: o.length ?? 8 }), 60],
-  pole: [(i) => P.createWirePole(i), 60], deco0: [(i) => L.createArtDeco(i, 0), 150], deco1: [(i) => L.createArtDeco(i, 1), 150], deco2: [(i) => L.createArtDeco(i, 2), 150],
+  pole: [(i) => P.createWirePole(i), 60], toll: [(i) => P.createTollBooth(i), 90], deco0: [(i) => L.createArtDeco(i, 0), 150], deco1: [(i) => L.createArtDeco(i, 1), 150], deco2: [(i) => L.createArtDeco(i, 2), 150],
 };
 
 export function scenery(W) {
@@ -89,7 +89,9 @@ function juhuStalls(W, items) {
   for (const [id, spot, make] of [['bhel', JUHU.bhel, (i) => P.createBhelCart(i)], ['gola', JUHU.gola, (i) => P.createGolaStall(i)]]) {
     const g = make(W.ink);
     g.name = id;
-    W.add(g, { dir: spot, fwd: tangentTo(spot, pole).negate(), maxDist: 70 });
+    const fwd = tangentTo(spot, pole).negate();
+    W.add(g, { dir: spot, fwd, maxDist: 70 });
+    if (!(import.meta.env.DEV && new URLSearchParams(location.search).has('before'))) layoutPlace({ id, kind: id, at: { fixed: { dir: spot, fwd } } }); // registered so the scatter keeps palms/umbrellas off the stalls
     items.set(id, g);
   }
 }

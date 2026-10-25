@@ -137,7 +137,7 @@ export function colorFn(cen, h, f) {
     const dd = dist(cen, z.c);
     if (dd > z.r + 3) continue;
     const k = 1 - smooth(dd, z.r * 0.78, z.r);
-    if (z.kind === 'green') green = Math.max(green, k);
+    if (z.kind === 'green') continue; // painted by the smooth paint layer 8 (see layerValues), not per face
     else if (z.kind === 'terra') { // soft-edged: the colour fades into the city ground over the last quarter of the radius
       const kk = 1 - smooth(dd, z.r * 0.5, z.r);
       if (kk > 0.02) { _t.copy(C.terra).lerp(C.terra2, (m + 0.5) * 0.6); _c.lerp(_t, kk); hatch = lerp(hatch, 0.25, kk); angle = lerp(angle, 0.9 + j * 0.2, kk); }
@@ -165,6 +165,7 @@ const LAYER_DEFS = [
   { color: 0xe8dfcd, hatch: 0.18, line: 0.3 }, // 5 promenade stone
   { color: 0xcfc3b0, hatch: 0.3 }, // 6 rail ballast
   { fill: false, line: 0.85 }, // 7 the waterline, drawn as a wobbly ink line
+  { color: 0xb6d99a, hatch: 0.55 }, // 8 green maidan patches (smooth edge like the other ground boundaries; never over roads/sand/rail)
 ];
 function layerValues(d, h, out) {
   const sf = seaField(d);
@@ -181,6 +182,12 @@ function layerValues(d, h, out) {
   const rl = pathNearest(d, ['rail']);
   out[6] = rl.p ? rl.d - rl.p.w / 2 : 99;
   out[7] = h * 2.5;
+  // green maidan patches: signed distance to the nearest patch edge, kept out of everything painted before it
+  if (!features) features = buildFeatures();
+  let g = 99;
+  for (const z of features.zones) if (z.kind === 'green') { const dd = dist(d, z.c) - z.r * 0.88; if (dd < g) g = dd; }
+  for (let k = 0; k < 7; k++) g = Math.max(g, -out[k]);
+  out[8] = g;
 }
 
 export const PLANET = {

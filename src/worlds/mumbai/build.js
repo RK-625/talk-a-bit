@@ -32,7 +32,7 @@ export function buildWorld(ctx) {
   if (import.meta.env.DEV) {
     console.log(`[mumbai] built in ${(performance.now() - t0).toFixed(0)} ms: ${ctx.culler.items.length} culled items, ${ctx.colliders.list.length} colliders, ${W.bank.count()} instances`);
     installDevTools(W, { S, R, B, T, N, D });
-    window.__mumbaiValidation = validateWorld(W, { T });
+    window.__mumbaiValidation = validateWorld(W, { T, S, N, D });
   }
   return {
     update(dt, t) { for (let i = 0; i < W.updaters.length; i++) W.updaters[i](dt, t); },

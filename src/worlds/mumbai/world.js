@@ -16,8 +16,10 @@ import { placeOnSphere, registerAsset, frameAt } from '../../engine/place.js';
 import { buildInstanced } from '../../engine/scatter.js';
 import { vcMat } from './props/kit.js';
 import { instanceSpecs, PART_HATCH } from './props/street.js';
+import { DYN } from './spots.js';
 
 const Y = new THREE.Vector3(0, 1, 0);
+const SCENIC = { palm: 1.9, palm2: 1.9, banyan: 3.4, beachUmbrella: 1.9, sandcastle: 1.9 }; // canopy radius (units) of the scatter props that must not overlap
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion();
 
 export function flagShadows(obj, cast = true) {
@@ -84,7 +86,27 @@ export function makeWorld(ctx) {
       if (!byChunk.has(ci)) byChunk.set(ci, []);
       byChunk.get(ci).push(mat);
       if (collide && sp.collide) colliders.add({ dir: f.up.clone(), radius: sp.collide.radius * scale, height: sp.collide.height * scale });
+      // remember scenic props (crowns, canopies) so later scatter and the validator keep clear of them
+      if (SCENIC[name]) {
+        const col = collide && sp.collide ? colliders.list[colliders.list.length - 1] : null;
+        DYN.push({ dir: f.up.clone(), r: SCENIC[name] * scale, name, scenic: true, mat, ci, col });
+      }
       return mat;
+    },
+    /** drop scatter props (palms, umbrellas, banyans, sandcastles) whose canopy would intersect something placed later: every DYN scenic
+     *  entry for which test(dyn) is true leaves the bank and the collider list (call before bank.build()) */
+    removeWhere(test) {
+      let n = 0;
+      for (let i = DYN.length - 1; i >= 0; i--) {
+        const d = DYN[i];
+        if (!d.scenic || !test(d)) continue;
+        const list = entries.get(d.name)?.get(d.ci);
+        const k = list ? list.indexOf(d.mat) : -1;
+        if (k >= 0) list.splice(k, 1);
+        if (d.col) colliders.remove(d.col);
+        DYN.splice(i, 1); n++;
+      }
+      return n;
     },
     count() { let n = 0; for (const m of entries.values()) for (const a of m.values()) n += a.length; return n; },
     build() {

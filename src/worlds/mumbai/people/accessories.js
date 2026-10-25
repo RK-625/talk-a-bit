@@ -616,6 +616,63 @@ export function makeCart(o = {}) { // bhutta / coconut cart (ground prop in fron
   return g;
 }
 
+
+// ---- skipping rope -------------------------------------------------------------------------------------
+/** A rope held in BOTH hands. It swings in the kid's side plane, once per skip hop (the 'skip' loop hops at sin(9*lt)), and sweeps under
+ *  the feet at the top of each jump. Rebuilt every frame from the real hand bones as a thin dark ink tube (overlay layer: no hatching). */
+export function makeJumpRope() {
+  const g = group('ground', { dynamic: true });
+  const N = 26, RAD = 4;
+  const pos = new Float32Array((N + 1) * RAD * 3), idx = [];
+  for (let i = 0; i < N; i++) for (let j = 0; j < RAD; j++) { const a = i * RAD + j, b = i * RAD + ((j + 1) % RAD), c = a + RAD, d = b + RAD; idx.push(a, b, c, b, d, c); }
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geom.setIndex(idx);
+  const mesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ color: 0x3f3150, side: THREE.DoubleSide }));
+  mesh.frustumCulled = false; mesh.name = 'jump-rope';
+  g.add(mesh);
+  const hL = new THREE.Vector3(), hR = new THREE.Vector3(), head = new THREE.Vector3(), mid = new THREE.Vector3(), ax = new THREE.Vector3();
+  const P = new THREE.Vector3(), T = new THREE.Vector3(), Nn = new THREE.Vector3(), Bn = new THREE.Vector3(), d = new THREE.Vector3();
+  const pts = Array.from({ length: N + 1 }, () => new THREE.Vector3());
+  let psi = 0;
+  g.userData.update = (dt, c) => {
+    const person = g.parent?.parent;
+    const sl = person?.userData.slots;
+    if (!sl) return;
+    person.updateMatrixWorld(true);
+    sl.handL.getWorldPosition(hL); sl.handR.getWorldPosition(hR); sl.head.getWorldPosition(head);
+    g.worldToLocal(hL); g.worldToLocal(hR); g.worldToLocal(head);
+    // phase of the hop: the skip loop jumps at sin(9*lt) = 1 (psi = 0 = rope under the feet); the rope turns forward once per hop
+    const w = c.lt ?? c.t ?? 0;
+    psi = 9 * w - Math.PI / 2;
+    mid.copy(hL).add(hR).multiplyScalar(0.5);
+    ax.copy(hR).sub(hL);
+    const down = Math.max(0.05, mid.y - 0.03); // the rope's lowest point skims the ground
+    const up = Math.max(down, head.y - mid.y + 0.14); // over the head
+    const rho = down + (up - down) * 0.5 * (1 - Math.cos(psi));
+    d.set(0, -Math.cos(psi), Math.sin(psi)); // apex direction in the side plane (+z forward)
+    d.addScaledVector(ax, -d.dot(ax) / Math.max(1e-6, ax.lengthSq())).normalize();
+    for (let i = 0; i <= N; i++) {
+      const u = i / N;
+      pts[i].copy(hL).addScaledVector(ax, u).addScaledVector(d, rho * Math.pow(Math.sin(Math.PI * u), 0.85));
+    }
+    const r = 0.024;
+    for (let i = 0; i <= N; i++) {
+      T.copy(pts[Math.min(N, i + 1)]).sub(pts[Math.max(0, i - 1)]).normalize();
+      Nn.crossVectors(T, Math.abs(T.y) < 0.9 ? Bn.set(0, 1, 0) : Bn.set(1, 0, 0)).normalize();
+      Bn.crossVectors(T, Nn);
+      for (let j = 0; j < RAD; j++) {
+        const a = (j / RAD) * Math.PI * 2 + 0.78;
+        P.copy(pts[i]).addScaledVector(Nn, Math.cos(a) * r).addScaledVector(Bn, Math.sin(a) * r);
+        const k = (i * RAD + j) * 3;
+        pos[k] = P.x; pos[k + 1] = P.y; pos[k + 2] = P.z;
+      }
+    }
+    geom.attributes.position.needsUpdate = true;
+  };
+  return g;
+}
+
 // ---- registry -------------------------------------------------------------------------------------
 export const ACCESSORIES = {
   kettle: makeKettle, chaiGlass: makeChaiGlass, wireCarrier: makeWireCarrier, gamcha: makeGamcha, tiffinCrate: makeTiffinCrate,
@@ -626,7 +683,7 @@ export const ACCESSORIES = {
   tie: makeTie, thali: makeThali, bell: makeBell, flowerBasket: makeFlowerBasket, tripod: makeTripod, camera: makeCamera,
   backpack: makeBackpack, briefcase: makeBriefcase, tiffinBag: makeTiffinBag, luggage: makeLuggage, armband: makeArmband, watch: makeWatch,
   register: makeRegister, broom: makeBroom, books: makeBooks, bookTray: makeBookTray, chanaBasket: makeChanaBasket, palmFan: makePalmFan,
-  coconut: makeCoconut, torch: makeTorch, cart: makeCart,
+  coconut: makeCoconut, torch: makeTorch, cart: makeCart, jumpRope: makeJumpRope,
 };
 
 export function makeAccessory(name, opts = {}) {

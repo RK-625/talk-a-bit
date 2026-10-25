@@ -169,8 +169,9 @@ export const ROAD_DEFS = {
   great: { kind: 'road', w: 6.6, closed: false, pts: [[32, 0], [50, 0], [66, 0], [84, 0], [106, 0], [124, 0], [142, 0], [158, 0], [169, 0]] },
   // Marine Drive: an arc round the bay, built below (needs the bay centre)
   east: { kind: 'road', w: 5.6, closed: false, pts: [[32, -58], [50, -58], [66, -55], [82, -52], [98, -49], [112, -47]] },
-  west: { kind: 'road', w: 5.6, closed: false, dirs: [...P([[32, 92], [56, 98], [80, 104], [102, 109]]), BRIDGE.start] },
-  juhuRoad: { kind: 'road', w: 5.0, closed: false, dirs: [BRIDGE.end, ...P([[118, 168], [124, 180], [130, 190]])] },
+  // both Sea Link approach roads run straight ONTO the ramp (waypoints along the bridge axis), so the deck always has a road leading onto it
+  west: { kind: 'road', w: 5.6, closed: false, dirs: [...P([[32, 92], [56, 98], [80, 104], [102, 109]]), ...[-20, -13, -7, -2, 3].map((k) => stepAlong(BRIDGE.start, BRIDGE.t, k))] },
+  juhuRoad: { kind: 'road', w: 5.0, closed: false, dirs: [...[-3, 2, 7, 12].map((k) => stepAlong(BRIDGE.end, BRIDGE.t, k)), ...P([[118, 168], [124, 180], [130, 190]])] },
   // lanes in the chawl district
   laneL: { kind: 'lane', w: 3.4, closed: false, pts: [[4, -90], [12, -90], [22, -90], [38, -90]] },
   laneR: { kind: 'lane', w: 3.4, closed: false, pts: [[4, 90], [12, 90], [22, 90], [38, 90]] },

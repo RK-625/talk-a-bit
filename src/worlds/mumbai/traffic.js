@@ -4,11 +4,12 @@
  *   loop 2  the Great Road racetrack (Fort -> toward the Gateway and back), crosses the railway
  *   loop 3  Marine Drive racetrack along Back Bay
  * Each vehicle is an engine actor on a lane path with a moving segment collider (the player bumps off it).
+ *   loop 4  over the Sea Link: west road -> toll plaza -> deck -> Juhu road, and back
  * Vehicles slow/stop for: the player in front of them, the vehicle ahead (queueing), closed level crossings.
  * traffic(W) -> { vehicles }
  */
 import * as THREE from 'three';
-import { PATHS, R, stepAlong } from './geo.js';
+import { PATHS, R, stepAlong, buildPath, BRIDGE } from './geo.js';
 import { createTaxi, createBus, createAutoRickshaw } from './props/index.js';
 import { flagShadows } from './world.js';
 
@@ -32,11 +33,16 @@ export function traffic(W) {
   // loop 3: Marine Drive racetrack
   lanes.push({ id: 'marine', dirs: racetrack(PATHS.marine, { s0: 8, s1: PATHS.marine.length - 8, off: 1.9, capNear: 4.2, capFar: 4.2 }), sign: 1, mix: ['taxi', 'bus', 'auto'] });
 
+  // loop 4: across the Sea Link: the west road through the toll plaza, over the deck, down the Juhu road and back the other lane
+  const seaLink = seaLinkPath();
+  lanes.push({ id: 'seaLink', dirs: racetrack(seaLink, { s0: 2, s1: seaLink.length - 2, off: 1.0, capNear: 1.6, capFar: 1.6 }), sign: 1, mix: ['taxi', 'auto', 'taxi'], deck: true });
+
   const vehicles = [];
   const player = W.player;
   const dens = W.dens;
   lanes.forEach((lane, li) => {
-    const mix = lane.mix.slice(0, Math.max(2, Math.round(lane.mix.length * (0.45 + 0.55 * dens))));
+    const full = [...lane.mix, ...lane.mix.slice(1), lane.mix[0]]; // twice the lane's mix, rotated so the same kind never runs twice in a row
+    const mix = full.slice(0, Math.max(2, Math.round(full.length * (0.45 + 0.55 * dens))));
     const n = mix.length;
     const members = [];
     mix.forEach((kind, i) => {
@@ -46,7 +52,7 @@ export function traffic(W) {
       const speed = CRUISE;
       const phase = (i + (li % 2) * 0.37) / n;
       const actor = W.actors.add(g, { type: 'spline', dirs: lane.dirs, speed: lane.sign * speed, closed: true, phase },
-        { radiusFn: (d) => W.planet.getSurfaceRadius(d), collider: spec.collider });
+        { radiusFn: lane.deck ? (d) => W.planet.getWalkRadius(d) : (d) => W.planet.getSurfaceRadius(d), collider: spec.collider }); // deck lanes ride the bridge surface
       W.root.add(g);
       const item = W.cull(g, { maxDist: 62, radius: 6, height: 6, dynamic: true, outlineDist: 30 });
       const v = { g, actor, spec, lane, item, speed, target: speed, sign: lane.sign };
@@ -81,7 +87,8 @@ export function traffic(W) {
           const dl = Math.acos(THREE.MathUtils.clamp(L.actor.dir.dot(dir), -1, 1)) * R;
           const ahead = dl > 1e-3 ? _a.normalize().dot(fwd) : 0;
           const need = (v.spec.len + L.spec.len) / 2 + 3.5;
-          if (ahead > 0.6 && dl < need + 8) target = Math.min(target, dl < need ? 0 : CRUISE * (dl - need) / 8);
+          // only a leader driving the same way counts: on a short racetrack it can be oncoming in the other lane
+          if (ahead > 0.6 && L.actor.forward.dot(fwd) > 0.3 && dl < need + 8) target = Math.min(target, dl < need ? 0 : CRUISE * (dl - need) / 8);
         }
         // closed crossings
         for (const x of crossings) {
@@ -141,3 +148,14 @@ function racetrack(path, { s0, s1, off, capNear, capFar }) {
   return pts;
 }
 const lerp = THREE.MathUtils.lerp;
+
+/** one open path: the last stretch of the west road (through the toll plaza), the bridge deck, the straight foot of the Juhu ramp (the Juhu road hairpins right after it) */
+function seaLinkPath() {
+  const west = PATHS.west, juhu = PATHS.juhuRoad;
+  const dirs = [];
+  const f = {};
+  for (let s = west.length - 42; s < west.length - 6; s += 4) dirs.push(west.at(s, f).dir.clone());
+  for (let k = 1; k <= BRIDGE.half * 2 - 1; k += 4) dirs.push(stepAlong(BRIDGE.start, BRIDGE.t, k));
+  for (let s = 8; s <= 12; s += 4) dirs.push(juhu.at(s, f).dir.clone());
+  return buildPath(dirs, false);
+}

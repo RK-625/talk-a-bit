@@ -80,6 +80,7 @@ varying vec2 vHatchP; // x: how strongly this patch is hatched in light, y: stro
 #ifdef INK_LAYERS
 varying vec4 vLA; // per-vertex signed distances (units) to the edge of paint layers 0..3 (negative = inside)
 varying vec4 vLB; // layers 4..7
+varying vec4 vLC; // layers 8..11
 #endif
 `;
 
@@ -184,7 +185,7 @@ export function createInkMaterial({
   hatchStrength = 1,
   lightHatch = 0, // sparse hatch in lit areas (0 = none)
   hatchAttribute = false, // modulate lightHatch with geometry attribute `aHatch`
-  layers = null, // paint layers resolved PER FRAGMENT from per-vertex distances (geometry attributes aLayerA, aLayerB: vec4 each):
+  layers = null, // paint layers resolved PER FRAGMENT from per-vertex distances (geometry attributes aLayerA, aLayerB, aLayerC: vec4 each, max 12):
   //   [{ color, hatch (light-hatch amount), line (0..1 ink edge line), fill = true }] (max 8, painted in order). Smooth, wobbly,
   //   hand-drawn boundaries instead of per-face stair steps (see engine/planet.js `layers`).
 } = {}) {
@@ -220,6 +221,7 @@ attribute vec2 aHatch;
 #ifdef INK_LAYERS
 attribute vec4 aLayerA;
 attribute vec4 aLayerB;
+attribute vec4 aLayerC;
 #endif`
       )
       .replace(
@@ -230,7 +232,7 @@ vOPos = position; vONorm = normal;
 vHatchP = aHatch;
 #endif
 #ifdef INK_LAYERS
-vLA = aLayerA; vLB = aLayerB;
+vLA = aLayerA; vLB = aLayerB; vLC = aLayerC;
 #endif`
       );
     shader.fragmentShader = shader.fragmentShader
@@ -251,8 +253,9 @@ inkHatchX = vHatchP.x; inkHatchY = vHatchP.y;
 #endif
 #ifdef INK_LAYERS
 {
-  float lv[8];
+  float lv[12];
   lv[0] = vLA.x; lv[1] = vLA.y; lv[2] = vLA.z; lv[3] = vLA.w; lv[4] = vLB.x; lv[5] = vLB.y; lv[6] = vLB.z; lv[7] = vLB.w;
+  lv[8] = vLC.x; lv[9] = vLC.y; lv[10] = vLC.z; lv[11] = vLC.w;
   // hand-drawn wobble: low + mid frequency noise shifts every edge a little, the same way for all layers
   float wob = (inkNoise2(vOPos.xz * 1.9 + vOPos.y * 1.3) - 0.5) * 0.34 + (inkNoise2(vOPos.xy * 6.3 + vOPos.z * 2.1) - 0.5) * 0.12;
   float mott = 0.95 + 0.1 * inkNoise2(vOPos.xz * 3.1 + vOPos.y);
@@ -491,7 +494,9 @@ const PAPER_SHADER = {
       float blotch = inkNoise2(px * 0.012);
 
       // pen/pencil skips on the tooth of the paper: dark marks break up where grain is high
-      col = mix(col, uPaper, (1.0 - lum) * smoothstep(0.55, 1.0, grain) * 0.2);
+      // (softened on the darkest marks: hair and other solid ink read as a fill with only a faint paper tooth, not TV static)
+      float skip = mix(0.04, 0.2, smoothstep(0.08, 0.4, lum));
+      col = mix(col, uPaper, (1.0 - lum) * smoothstep(0.55, 1.0, grain) * skip);
       col *= 1.0 + (grain - 0.5) * 0.05 + (fibres - 0.5) * 0.04 + (blotch - 0.5) * 0.03;
 
       vec2 d = (vUv - 0.5) * vec2(uResolution.x / uResolution.y, 1.0);

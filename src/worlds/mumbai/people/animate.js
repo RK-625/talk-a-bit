@@ -493,7 +493,7 @@ export function attachAnimator(person, rig, cfg = {}) {
     mouth = false;
 
     // ---- accessories: orientation (hang / up), per-frame hooks
-    const c = { t, walk: walkS, phase: ph };
+    const c = { t, walk: walkS, phase: ph, lt };
     for (const a of rig.acc) {
       const u = a.obj.userData;
       if (u.orient) {

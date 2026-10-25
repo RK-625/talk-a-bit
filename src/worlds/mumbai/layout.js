@@ -35,9 +35,9 @@ const NORTH = new THREE.Vector3(0, 0, 1);
 export const SIZE = {
   tapri: [5.6, 4.5], vada: [4.9, 4.0], paanS: [3.2, 2.3], news: [3.8, 2.9], fruit: [3.7, 3.3], marigold: [3.5, 3.0], bhel: [4, 4], gola: [3.8, 3.8],
   irani: [8.3, 9.9], poster: [9.9, 2.9], shrine: [4.8, 5.1], paanShop: [4.1, 4.1], chawl: [10.5, 8.4], banyan: [6, 6], busStop: [6.4, 2.4], balloons: [3.4, 3.7],
-  antilia: [21, 19], gateway: [14, 9], taj: [23.6, 8.9], cst: [29.6, 10.5], bse: [12.5, 10.1], rajabai: [7.6, 7.5], flora: [8.8, 8.8],
+  antilia: [23.6, 21.4], gateway: [18, 13], taj: [23.6, 8.9], cst: [29.6, 10.5], bse: [12.5, 10.1], rajabai: [7.6, 7.5], flora: [8.8, 8.8],
   deco0: [8.7, 8.3], deco1: [8.8, 6.2], deco2: [8.7, 6.1], haji: [13, 13], station: [22.2, 6.5], taxi: [2.9, 5.5], dabbaBike: [2, 4],
-  palm: [3, 3], umbrella: [4, 4], sandcastle: [3.5, 3], boat: [2.2, 5.9], signal: [1.2, 2.4], tetra: [4.5, 4.1], streetlight: [1, 1], lamp: [1, 1],
+  palm: [3, 3], toll: [7.6, 4.6], umbrella: [4, 4], sandcastle: [3.5, 3], boat: [2.2, 5.9], signal: [1.2, 2.4], tetra: [4.5, 4.1], streetlight: [1, 1], lamp: [1, 1],
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -126,7 +126,7 @@ export function place(item) {
   const r = resolve(item);
   if (item.id) registry.set(item.id, r);
   const size = item.size ?? SIZE[item.kind] ?? [2, 2];
-  PLACED.push({ id: item.id ?? item.kind, kind: item.kind, dir: r.dir, fwd: r.fwd, size, radius: Math.hypot(size[0], size[1]) / 2, major: !!item.major, noOverlap: item.noOverlap, inside: item.inside });
+  PLACED.push({ id: item.id ?? item.kind, kind: item.kind, dir: r.dir, fwd: r.fwd, size, radius: Math.hypot(size[0], size[1]) / 2, major: !!item.major, noOverlap: item.noOverlap, inside: item.inside, noPad: item.noPad, onRoad: item.onRoad });
   return { ...item, dir: r.dir, fwd: r.fwd };
 }
 export const placed = (id) => registry.get(id);
@@ -169,7 +169,7 @@ export const ITEMS = [
   { id: 'ch7', kind: 'chawl', opts: { seed: 7 }, at: S(9, -26), face: 0 },
   // cricket gully (left lane): stumps + 3 kids are NPCs; the stumps are a scatter prop
   { id: 'laundry1', kind: 'laundry', at: S(-15.5, 0), face: 90, opts: { length: 8 }, noOverlap: true },
-  { id: 'pole1', kind: 'pole', at: S(-12, 9.5), face: 0, noOverlap: true },
+  { id: 'pole1', kind: 'pole', at: S(-9.5, 7.2), face: 0, noOverlap: true },
   { id: 'pole2', kind: 'pole', at: S(12, 11), face: 0, noOverlap: true },
   { id: 'pole3', kind: 'pole', at: S(-17.5, -8), face: 0, noOverlap: true },
 
@@ -192,13 +192,16 @@ export const ITEMS = [
   { id: 'eastChawl2', kind: 'chawl', opts: { seed: 16 }, at: { road: 'east', s: 60, lat: 12 } },
 
   // ---- the Gateway and the Taj (tip of the tongue, end of the Great Road) ----------------------------------------
-  { id: 'antilia', kind: 'antilia', at: { road: 'west', s: 62, lat: -22 }, face: 'road', major: true },
-  { id: 'gateway', kind: 'gateway', at: { shore: { from: 'harbour', to: { road: 'great', s: 138, lat: 0 }, inland: 6.5 } }, major: true },
+  { id: 'antilia', kind: 'antilia', at: { road: 'west', s: 47, lat: -21 }, face: 'road', major: true },
+  { id: 'gateway', kind: 'gateway', at: { shore: { from: 'harbour', to: { road: 'great', s: 138, lat: 0 }, inland: 9.8 } }, major: true },
   { id: 'taj', kind: 'taj', at: { road: 'great', s: 112, lat: 15.5 }, face: -90, major: true },
   { id: 'balloons', kind: 'balloons', at: { road: 'great', s: 125, lat: -7 }, face: 0 },
 
   // ---- Marine Drive (angle about the bay centre; r = 52 road, 42.4 promenade, 61 buildings) ----------------------
   ...[-46, -33, -20, -7, 6, 19, 32, 45].map((a, i) => ({ id: 'deco' + i, kind: 'deco' + (i % 3), at: { arc: 'marine', a, off: 22 }, face: 0, major: i === 3, opts: { variant: i % 3 } })),
+
+  // ---- Sea Link toll plaza: straddles the west approach road just before the ramp (facing the city-side traffic) ----------
+  { id: 'tollBooth', kind: 'toll', at: { road: 'west', s: PATHS.west.length - 13.5, lat: 0 }, face: 180, onRoad: true, noPad: true },
 
   // ---- Churchgate-style station on the rail (built by rail.js) ---------------------------------------------------
   { id: 'station', kind: 'station', at: { fixed: STATION }, size: [24, 7], major: true, skipScenery: true },
@@ -252,7 +255,7 @@ export function resolveAll(density = 1) {
 /** flat "pads": big flat assets stand on a plane tangent at their centre, so the ground under them is raised to that plane
  *  (plus a skirt) and the hero walks on the same surface the plinth is drawn at. [{dir, fwd, hw, hd}] */
 export function padList() {
-  return PLACED.filter((p) => !p.noOverlap && Math.max(p.size[0], p.size[1]) >= 7 && p.kind !== 'banyan')
+  return PLACED.filter((p) => !p.noOverlap && !p.noPad && Math.max(p.size[0], p.size[1]) >= 7 && p.kind !== 'banyan')
     .map((p) => ({ id: p.id, dir: p.dir, fwd: p.fwd, hw: p.size[0] / 2 + 1.4, hd: p.size[1] / 2 + 1.8 }));
 }
 

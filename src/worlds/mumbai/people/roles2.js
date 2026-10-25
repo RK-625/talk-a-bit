@@ -57,7 +57,7 @@ export const EXTRA_DEFS = {
   beachKid: {
     loop: 'play',
     make: (r, o) => {
-      const s = citizenSpec(r, 'kid'); s.accessories = chance(r, 0.4) ? ['ball'] : []; s.footwear = 'bare';
+      const s = citizenSpec(r, 'kid'); s.accessories = o.loop === 'skip' ? ['jumpRope'] : chance(r, 0.4) ? ['ball'] : []; s.footwear = 'bare';
       s.top = pick(r, [P.pink, P.sky, P.mint, P.teal, P.lilac]); return notChotu(s, r);
     },
   },

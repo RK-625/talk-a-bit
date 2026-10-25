@@ -187,10 +187,17 @@ export function createTalkUI() {
       bubble.style.display = 'block'; draw(bubble);
     },
     showGuide({ text, x, y, angle }) {
+      if (guide._fade) return; // already fading out: never pop back
       guide.style.display = 'block'; guide.style.left = x + 'px'; guide.style.top = y + 'px';
       guide.querySelector('.txt').textContent = text; guide.querySelector('svg.arr').style.transform = `rotate(${angle}deg)`; draw(guide);
     },
-    hideGuide() { guide.style.display = 'none'; },
+    hideGuide() { if (guide._fade) return; guide.style.display = 'none'; },
+    /** fade the hint banner out (~1.2 s) and keep it gone */
+    fadeGuide() {
+      if (guide._fade || guide.style.display === 'none') { guide._fade = true; return; }
+      guide._fade = true; guide.style.transition = 'opacity 1.2s ease'; guide.style.opacity = '0';
+      setTimeout(() => { guide.style.display = 'none'; }, 1300);
+    },
     hideBubble() { bubble.style.display = 'none'; },
     showSpeech(x, y, line) { speech.querySelector('.dv').textContent = line.text ?? ''; speech.querySelector('.ro').textContent = line.roman ?? ''; position(speech, x, y); speech.style.display = 'block'; draw(speech); },
     hideSpeech() { speech.style.display = 'none'; },

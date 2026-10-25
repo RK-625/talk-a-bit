@@ -241,6 +241,7 @@ export function createNPC(role, ink, seed = 1, opts = {}) {
   const spec = def.make(r, o);
   // seeded individuality for every role (heights, builds, shirt looks, grey hair, specs, flowers ...)
   vary(spec, r, { height: 0.04, build: false, specs: null, ...(def.vary ?? DEFAULT_VARY[role] ?? {}) });
+  if (o.tweak) o.tweak(spec, r); // explicit look overrides for a named person (mumbai/population4.js)
   spec.seed = Math.floor(seed * 3 + 1);
   const p = createPerson(spec, ink);
   p.name = role;

@@ -1,6 +1,7 @@
 // Boot: pick a world with ?world=<id> (default: mumbai; ?world=dozy-hollow for the stage-1 world) and start the engine.
 // To add a world, add one line to WORLDS. Worlds import from ./engine only; the engine never imports a world.
 import { createEngine } from './engine/engine.js';
+import { createMusic } from './game/audio/music.js';
 
 const WORLDS = {
   'dozy-hollow': () => import('./worlds/dozy-hollow/index.js'),
@@ -13,3 +14,6 @@ const load = WORLDS[id] ?? WORLDS[DEFAULT_WORLD];
 const world = (await load()).default;
 document.title = world.name;
 createEngine(world).start();
+
+const music = createMusic(); // starts on the first key/click; M toggles; ducks on 'talkabit:conversation'
+if (import.meta.env.DEV) window.__music = music;
