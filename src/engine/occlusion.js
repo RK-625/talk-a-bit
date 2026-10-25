@@ -9,12 +9,15 @@
  *     The fill materials are cloned lazily on first fade (the ink shader is shared via onBeforeCompile) and animated through
  *     opacity; outline hulls fade through their uAlpha uniform (engine/ink.js).
  * occ.remove(occluder);  occ.items; occ.fadeCount (how many are currently faded; dev stats)
+ * A building fades only when (1) the camera->hero segment crosses its box, (2) the hero actually lies inside the building's projected
+ * screen rectangle, and (3) the camera is not out in front of its facade (local +Z): you never lose a landmark you are looking at head-on.
  * Tunables: FADE_FILL (opacity of the faded fill), FADE_LINE (outline alpha), SPEED (1/s).
  */
 import * as THREE from 'three';
 
-const FADE_FILL = 0.1, FADE_LINE = 0.22, SPEED = 7, MAX_TEST_DIST = 110;
-const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _inv = new THREE.Matrix4(), _c = new THREE.Vector3();
+const FADE_FILL = 0.35, FADE_LINE = 0.5, SPEED = 7, MAX_TEST_DIST = 110;
+const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _inv = new THREE.Matrix4(), _c = new THREE.Vector3(), _p = new THREE.Vector3();
+const _hd = new THREE.Vector3(), _ft = new THREE.Vector3();
 
 function localBox(obj) {
   obj.updateWorldMatrix(true, true);
@@ -62,7 +65,9 @@ export function createOcclusion({ camera, player }) {
     },
     remove(o) { const i = items.indexOf(o); if (i >= 0) items.splice(i, 1); },
     update(dt) {
+      camera.updateMatrixWorld(); camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
       head.copy(player.object.position).addScaledVector(player.up, 1.2);
+      _hd.copy(head).project(camera); _ft.copy(player.object.position).project(camera);
       const cam = camera.position;
       let faded = 0;
       for (let i = 0; i < items.length; i++) {
@@ -74,7 +79,7 @@ export function createOcclusion({ camera, player }) {
           if (_c.distanceToSquared(cam) < MAX_TEST_DIST * MAX_TEST_DIST) {
             _inv.copy(ob.matrixWorld).invert();
             _a.copy(cam).applyMatrix4(_inv); _b.copy(head).applyMatrix4(_inv);
-            hit = segHitsBox(_a, _b, it.box);
+            hit = segHitsBox(_a, _b, it.box) && _a.z < it.box.max.z + 0.5 && heroOnScreenRect(it, ob, camera);
           }
         }
         const target = hit ? 1 : 0;
@@ -88,6 +93,21 @@ export function createOcclusion({ camera, player }) {
     },
   };
   return api;
+}
+
+/** is the hero (head or feet) inside the occluder's projected screen rectangle? (a corner behind the camera = assume yes) */
+function heroOnScreenRect(it, ob, camera) {
+  const b = it.box;
+  let x0 = 9, y0 = 9, x1 = -9, y1 = -9;
+  for (let k = 0; k < 8; k++) {
+    _p.set(k & 1 ? b.max.x : b.min.x, k & 2 ? b.max.y : b.min.y, k & 4 ? b.max.z : b.min.z).applyMatrix4(ob.matrixWorld);
+    _p.project(camera);
+    if (_p.z > 1) return true;
+    x0 = Math.min(x0, _p.x); x1 = Math.max(x1, _p.x); y0 = Math.min(y0, _p.y); y1 = Math.max(y1, _p.y);
+  }
+  const m = 0.02;
+  const inside = (v) => v.x > x0 - m && v.x < x1 + m && v.y > y0 - m && v.y < y1 + m;
+  return inside(_hd) || inside(_ft);
 }
 
 /** segment a->b vs box (all in the box's frame): slab method */

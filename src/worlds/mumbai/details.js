@@ -74,7 +74,6 @@ export function details(W, S, N, sites = {}) {
     const booth = prop('elephanta', 'elephantaBooth', pose(gw, 'ferryBooth'), { inside: 'gateway' });
     citizen(41, { kind: 'man', loop: 'idle' }, pose(booth, 'clerk'));
     person('tourist', { seed: 42 }, pose(booth, 'queue', [-0.6, 0, 0]));
-    person('tourist', { seed: 43, variant: 1 }, pose(booth, 'queue', [0.7, 0, 0.9]));
     const tripod = prop('tripod', 'tripod', pose(gw, 'photographer'), { inside: 'gateway' });
     person('photographer', { seed: 44, props: false }, pose(tripod, 'photographer'));
     person('tourist', { seed: 45, variant: 0, loop: 'pose' }, pose(tripod, 'client'));
@@ -83,7 +82,7 @@ export function details(W, S, N, sites = {}) {
     sites.danaPose = pose(dana, 'feeder');
     safe('ferry', () => {
       const ferry = prop('ferry', 'ferry', { ...local(gw, 9.5, 0, 17.5, Math.PI / 2), radius: W.seaR - 0.3 }, { collide: false, ground: false, free: true, maxDist: 90, height: 6 });
-      citizen(47, { kind: 'man', loop: 'idle' }, pose(ferry, 'captain'));
+      citizen(47, { kind: 'man', loop: 'idle' }, pose(ferry, 'deck'));
     });
   });
   // Taj
@@ -104,7 +103,7 @@ export function details(W, S, N, sites = {}) {
     person('dabbawala', { seed: 53, loop: false }, pose(tiffin, 'sorterB'));
     const trolley = prop('trolley', 'luggageTrolley', pose(cst, 'luggageTrolley'), { inside: 'cst' });
     person('coolie', { seed: 54 }, pose(trolley, 'coolie'));
-    for (let i = 0; i < 3; i++) person('commuter', { seed: 55 + i, variant: i % 2 }, pose(cst, 'commuters', [-3.2 + i * 3.4, 0, 0.6 + (i % 2) * 1.2], { yaw: (i - 1) * 0.5 }));
+    for (let i = 0; i < 2; i++) person('commuter', { seed: 55 + i, variant: i % 2 }, pose(cst, 'commuters', [-2.2 + i * 4.4, 0, 0.6 + (i % 2) * 1.2], { yaw: (i - 0.5) * 0.5 }));
     const lane = (z) => pathOf(cst, [[-9, 0.05, z], [-3, 0.05, z + 0.5], [4, 0.05, z], [10, 0.05, z + 0.5]]);
     N.walker('officeGoer', { seed: 58 }, lane(9.5), 1.7);
     N.walker('officeGoer', { seed: 59, variant: 1 }, lane(10.6), 1.5, 0.5);
@@ -156,7 +155,6 @@ export function details(W, S, N, sites = {}) {
     const arc = (a0, a1, off) => { const out = []; for (let i = 0; i <= 8; i++) out.push(MARINE.pt(a0 + (a1 - a0) * (i / 8), off)); return out; };
     N.walker('jogger', { seed: 91 }, arc(-44, 44, 2.2), 3.4);
     N.walker('jogger', { seed: 92, variant: 1 }, arc(40, -40, 3.2), 3.0, 0.3);
-    N.walker('citizen', { seed: 93, kind: 'woman' }, arc(-20, 36, 2.8), 1.1);
   });
 
   // ============================== Haji Ali ========================================================================
@@ -177,7 +175,6 @@ export function details(W, S, N, sites = {}) {
     const jp = stepAlong(shoreBase, side, 7);
     const juice = prop('juice', 'hajiJuice', { dir: jp, fwd: tangentTo(jp, shoreBase), radius: null }, { ground: true });
     person('chanaSeller', { seed: 103 }, pose(juice, 'juiceMan'));
-    citizen(104, { kind: 'man', loop: 'idle' }, pose(juice, 'customer'));
     seat(105, 'woman', 0.45, pose(juice, 'stool', [0, 0, 0], { flat: true }));
     // pilgrims walk the causeway
     const line = (lat) => { const out = []; for (let d = 8; d <= h.shoreDist + 3; d += 4) out.push(stepAlong(stepAlong(c, t0, d), side, lat)); return out; };
@@ -223,12 +220,12 @@ export function details(W, S, N, sites = {}) {
     const sa = mk('sandArt', 'sandArt', 171, 7.5);
     citizen(129, { kind: 'man', loop: 'idle' }, pose(sa, 'artist'));
     citizen(130, { kind: 'woman', loop: 'chat' }, pose(sa, 'onlooker'));
-    for (let i = 0; i < 4; i++) {
-      const d = shorePoint(186 + i * 6.5, 6 + (i % 2) * 2.5);
+    for (let i = 0; i < 3; i++) {
+      const d = shorePoint(186 + i * 8.5, 6 + (i % 2) * 2.5);
       person('beachKid', { seed: 131 + i, loop: 'play' }, { dir: d, fwd: tangentTo(d, POLE).applyAxisAngle(d, i * 1.7), radius: null });
     }
-    for (let i = 0; i < 3; i++) {
-      const d = shorePoint(180 + i * 10, 5.2);
+    for (let i = 0; i < 2; i++) {
+      const d = shorePoint(180 + i * 14, 5.2);
       citizen(140 + i, { kind: i % 2 ? 'woman' : 'man', loop: i === 1 ? 'chat' : 'idle' }, { dir: d, fwd: tangentTo(d, POLE).negate(), radius: null });
     }
   });
@@ -237,12 +234,12 @@ export function details(W, S, N, sites = {}) {
   safe('temple', () => {
     const sh = S.items.get('shrine'); if (!sh) return;
     person('priest', { seed: 150 }, pose(sh, 'priest'));
-    const bells = prop('bells', 'templeBells', pose(sh, 'bells'), { inside: 'shrine', collide: false });
+    const bells = prop('bells', 'templeBells', pose(sh, 'bells', [-2.1, 0, -0.8]), { inside: 'shrine', collide: false }); // beside the door: the pujari stays in clear view
     citizen(151, { kind: 'woman', loop: 'idle' }, pose(bells, 'devotee'));
     const off = prop('offering', 'offeringStall', pose(sh, 'devotee', [-3.4, 0, 0.8]), { inside: 'shrine' });
     person('pilgrim', { seed: 152, variant: 1, loop: 'pray' }, pose(off, 'devotee'));
     prop('chappals', 'chappalRow', pose(sh, 'shoes'), { inside: 'shrine', collide: false });
-    person('pilgrim', { seed: 153, variant: 0, loop: 'pray' }, pose(sh, 'devotee'));
+    person('pilgrim', { seed: 153, variant: 0, loop: 'pray' }, pose(sh, 'devotee', [2.8, 0, 0.4])) // off to the side: never between the approach and the pujari;
   });
   safe('chawls', () => {
     const c1 = S.items.get('ch1'), c2 = S.items.get('ch2'), c3 = S.items.get('ch3'), c7 = S.items.get('ch7');
@@ -273,8 +270,6 @@ export function details(W, S, N, sites = {}) {
     person('chaiwalaUncle', { seed: 172 }, pose(chai, 'chaiwala'));
     for (let i = 0; i < 3; i++) person('ladiesCommuter', { seed: 174 + i }, pose(st, 'edge', [-8.2 + i * 1.5, 0, -0.1 - (i % 2) * 0.45], { yaw: 0 }));
     person('commuter', { seed: 177 }, pose(st, 'commuterB'));
-    seat(178, 'woman', 0.45, pose(st, 'benchSeat1', [0, 0, 0], { flat: true }));
-    seat(179, 'elder', 0.45, pose(st, 'benchSeat2', [0, 0, 0], { flat: true }));
   });
   safe('chowk', () => {
     const sp = (x, z, yaw = 0) => { const r = resolveAt({ sp: [x, z] }); return { dir: r.dir, fwd: r.fwd.clone().applyAxisAngle(r.dir, -yaw), radius: null }; };
@@ -290,9 +285,13 @@ export function details(W, S, N, sites = {}) {
     prop('puddle', 'puddle3', sp(3.4, 7.8), { collide: false, noOverlap: true });
     prop('rangoli', 'rangoliChowk', sp(4.2, -3.2), { collide: false, noOverlap: true });
     prop('ganpati', 'ganpatiPoster', sp(4.2, 11.8, Math.PI), {});
-    for (let i = 0; i < 3; i++) { const q = sp(-5 + i * 1.3, -2.4 + (i % 2) * 1.5); person('beachKid', { seed: 190 + i, loop: 'play' }, q); }
+    // gully games: two kids crouched over marbles, one skipping, one flying a kite (never the beach arms-out pose)
+    const m1 = sp(-5.2, -2.2), m2 = sp(-4.0, -2.0);
+    person('beachKid', { seed: 190, loop: 'marbles' }, { ...m1, fwd: tangentTo(m1.dir, m2.dir) });
+    person('beachKid', { seed: 191, loop: 'marbles' }, { ...m2, fwd: tangentTo(m2.dir, m1.dir) });
+    person('beachKid', { seed: 192, loop: 'skip' }, sp(-6.8, -4.4));
+    person('beachKid', { seed: 193, loop: 'kite' }, sp(-2.6, -6.6, 0.4));
     const q = sp(7, -1.6); citizen(194, { kind: 'woman', loop: 'chat' }, q);
-    const q2 = sp(8.2, -0.8); citizen(195, { kind: 'woman', loop: 'chat' }, { ...q2, fwd: tangentTo(q2.dir, q.dir) });
   });
 
   // ============================== Sea Link toll booth ============================================================
@@ -309,7 +308,8 @@ export function details(W, S, N, sites = {}) {
   /** citizens scattered over all the land (a Poisson-ish spacing), pairs chatting, plus a few footpath strollers */
   function ambient() {
     const rnd = W.rng;
-    const maxN = Math.round(70 * W.dens), gapTarget = W.dens < 0.7 ? 30 : 20;
+    const touch = W.dens < 0.7;
+    const maxN = touch ? 80 : 56, gapTarget = touch ? 17 : 22.4; // by coverage: farthest-point, relative to what a camera sees
     const loops = ['idle', 'phone', 'chat', 'news', 'idle', 'chat'];
     const okSpot = (d, near = 1.6) => planet.getSurfaceRadius(d) > W.seaR + 0.7 && seaField(d) < -6 && freeSpot(d, near + 1) && pathNearest(d, ['road', 'rail', 'lane', 'promenade']).d > 5.4 && !nearCollider(W.colliders, d, near);
     // farthest-point filling: always put the next citizen where the nearest existing person is farthest away, until no gap is wider than gapTarget
@@ -331,7 +331,7 @@ export function details(W, S, N, sites = {}) {
       for (let i = 0; i < cands.length; i++) { const dd = dist(cands[i], d); if (dd < minD[i]) minD[i] = dd; }
       const seed = 300 + placedAt.length * 7;
       const t = tangentTo(d, POLE).applyAxisAngle(d, rnd() * 6.28);
-      const pair = rnd() < 0.4;
+      const pair = rnd() < (touch ? 0.15 : 0.2);
       citizen(seed, { loop: pair ? 'chat' : loops[Math.floor(rnd() * loops.length)] }, { dir: d, fwd: t, radius: null });
       if (pair) {
         const d2 = stepAlong(d, t, 1.5);
@@ -339,14 +339,14 @@ export function details(W, S, N, sites = {}) {
       }
     }
     // strollers on the footpaths (never on a carriageway)
-    const strolls = [['great', 20, 58, 4.4, 0], ['great', 70, 112, -4.4, 0.4], ['ring', 6, 70, -4.6, 0.2], ['ring', 120, 190, 4.6, 0.6], ['east', 8, 60, -4.2, 0.1], ['west', 8, 70, 4.2, 0.5], ['west', 80, 120, -4.2, 0.2]];
+    const strolls = [['great', 20, 58, 4.4, 0], ['ring', 6, 70, -4.6, 0.2], ['east', 8, 60, -4.2, 0.1], ['west', 80, 120, -4.2, 0.2]];
     strolls.forEach(([id, s0, s1, lat, ph], i) => {
       const p = PATHS[id];
       const pts = [];
       const n = Math.max(2, Math.round(Math.abs(s1 - s0) / 7));
       for (let k = 0; k <= n; k++) pts.push(p.lateral(s0 + (s1 - s0) * (k / n), lat));
       if (pts.some((d) => !freeSpot(d, 0.9) || nearCollider(W.colliders, d, 0.9))) return;
-      N.walker('citizen', { seed: 400 + i * 5, kind: ['man', 'woman', 'teen', 'woman', 'elder', 'man', 'kid'][i] }, pts, 1.05 + (i % 3) * 0.2, ph);
+      N.walker('citizen', { seed: 400 + i * 5, kind: ['man', 'woman', 'teen', 'elder'][i] }, pts, 1.05 + (i % 3) * 0.2, ph);
     });
     props.set('_ambientCount', placedAt.length);
   }

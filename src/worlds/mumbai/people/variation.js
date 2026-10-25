@@ -33,8 +33,30 @@ export function look(r, { floral = false, base = null } = {}) {
 const skinFor = (r, idx) => SKIN[pick(r, idx)];
 const buildFor = (r, w = [1, 2, 1]) => { const x = r() * (w[0] + w[1] + w[2]); return x < w[0] ? 'thin' : x < w[0] + w[1] ? 'normal' : 'round'; };
 
+const HERO_TOPS = [P.marigold, P.butter, P.saffron, 0xf9cf4a];
+const BLUES = [P.denim, P.navy, 0x8db4de, 0x7d8fb5, 0x9aa8c8];
+/** Chotu is unique: nobody else gets his yellow-striped half-sleeve shirt, blue shorts, spiky black hair or kettle/carrier */
+export function notChotu(s, r) {
+  const warm = HERO_TOPS.includes(s.top);
+  if (warm && (s.topPattern === 'stripes' || s.topPattern === 'vstripes')) { s.topPattern = chance(r, 0.5) ? 'plain' : 'checks'; }
+  if (s.outfit === 'shirtShorts') {
+    if (BLUES.includes(s.bottom)) s.bottom = pick(r, [P.khaki, P.olive, P.sand, 0xd8c9b0]);
+    if (warm) s.top = pick(r, [P.teal, P.pink, P.lilac, P.mint, P.sky]);
+    if (s.hair && s.hair.style === 'messy') s.hair = { ...s.hair, style: 'short' };
+  }
+  s.accessories = (s.accessories ?? []).filter((a) => !['kettle', 'wireCarrier'].includes(a.name ?? a));
+  return s;
+}
+
 /** Generic Mumbaikar spec */
 export function citizenSpec(r, kind = 'man') {
+  const s = citizenSpecRaw(r, kind);
+  // adults: a touch more torso, a touch less leg, so they do not read as stilts on a plank; grey hair never spiky
+  if (s.torsoScale == null && s.legScale == null && s.armScale == null) { s.torsoScale = 1.08; s.legScale = 0.92; s.armScale = 1.05; }
+  if (s.hair && s.hair.style === 'messy' && (s.hair.color === HAIR.grey || s.hair.color === HAIR.white)) s.hair = { ...s.hair, style: 'short' };
+  return notChotu(s, r);
+}
+function citizenSpecRaw(r, kind = 'man') {
   const s = { footwear: pick(r, ['chappal', 'chappal', 'shoes']), footColor: pick(r, [P.sky, P.red, P.brown, P.white, P.pink]), accessories: [], face: {} };
   const spiceUp = (list) => { s.accessories.push(...list); };
   if (kind === 'man' || kind === 'elder' || kind === 'teen') {

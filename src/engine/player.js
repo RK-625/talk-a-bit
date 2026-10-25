@@ -36,6 +36,7 @@ const _q = new THREE.Quaternion();
 const _a = new THREE.Vector3();
 const _b = new THREE.Vector3();
 const _m = new THREE.Matrix4();
+const _cu = new THREE.Vector3(), _cf = new THREE.Vector3(), _cvv = new THREE.Vector3();
 const _up0 = new THREE.Vector3(), _face0 = new THREE.Vector3(), _vel0 = new THREE.Vector3();
 const _t1 = new THREE.Vector3(), _t2 = new THREE.Vector3(), _s = new THREE.Vector3(), _n = new THREE.Vector3(), _cq = new THREE.Vector3();
 
@@ -152,7 +153,10 @@ export function createPlayer({ hero, planet, colliders, spawn = {}, radius: play
 
     // ---- trees and rocks: push out horizontally (before the ground test, so height matters) ----
     const ground0 = planet.getWalkRadius(up);
+    _cu.copy(up); _cf.copy(face); _cvv.copy(vel);
     collide(r - ground0);
+    // a push out of an obstacle must never shove the hero into the water (he would be stuck there): then keep him where he was
+    if (planet.seaRadius !== null && !planet.isWalkable(up) && planet.isWalkable(_cu)) { up.copy(_cu); face.copy(_cf); vel.copy(_cvv); }
 
     // ---- ground: land, or stay glued to it when walking downhill ----
     const ground = planet.getWalkRadius(up);

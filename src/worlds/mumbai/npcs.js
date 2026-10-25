@@ -35,7 +35,7 @@ export function npcs(W, S) {
   };
 
   // every person goes through the crowd LOD (full / far merged / hidden by distance) and a static or moving collider
-  const crowd = createCrowdLOD([], { near: 24, hide: 62 });
+  const crowd = createCrowdLOD([], W.dens < 0.7 ? { near: 14, hide: 54 } : { near: 24, hide: 62 }); // touch: the far (merged) body sooner
   let lodT = 0;
   function register(g, n) {
     list.push(n);
@@ -51,7 +51,7 @@ export function npcs(W, S) {
     return register(g, { g, dir: dir.clone(), role: o.role ?? g.userData.role, wave: !!o.wave, waved: false, waveCool: 0, look: false, lookAt: o.lookAt !== false, sitting: !!o.sitting });
   }
   // touch devices: skip every second extra (the original cast, seeds < 40, always stays)
-  const skip = (o, seed) => W.dens < 0.7 && (seed ?? o.seed ?? 0) >= 40 && Math.floor(seed ?? o.seed ?? 0) % 2 === 0;
+  const skip = (o, seed) => W.dens < 0.7 && (seed ?? o.seed ?? 0) >= 40 && Math.floor(seed ?? o.seed ?? 0) % 3 === 0;
   function person(role, o, dir, fwd, radius = null) {
     if (skip(o)) return null;
     const g = createNPC(role, ink, o.seed ?? 1, { variant: o.variant, loop: o.loop, props: o.props });

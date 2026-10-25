@@ -3,7 +3,7 @@
  * Each def: { loop, make(r, opts) -> spec, vary? }. Props that the role stands at (carts, tripod) are added unless opts.props === false.
  */
 import { PASTEL as P, HAIR } from './kit.js';
-import { pick, chance, citizenSpec, look, SHIRTS, SAREES, TROUSERS } from './variation.js';
+import { pick, chance, notChotu, citizenSpec, look, SHIRTS, SAREES, TROUSERS } from './variation.js';
 import { SKIN } from './kit.js';
 
 const W = 0xfffaf0;
@@ -58,7 +58,7 @@ export const EXTRA_DEFS = {
     loop: 'play',
     make: (r, o) => {
       const s = citizenSpec(r, 'kid'); s.accessories = chance(r, 0.4) ? ['ball'] : []; s.footwear = 'bare';
-      s.top = pick(r, [P.marigold, P.pink, P.sky, P.mint, P.saffron]); return s;
+      s.top = pick(r, [P.pink, P.sky, P.mint, P.teal, P.lilac]); return notChotu(s, r);
     },
   },
   bhuttaSeller: {

@@ -143,8 +143,8 @@ const ROLE_DEFS = {
     loop: (o) => (o.variant === 'bowler' ? 'bowl' : 'bat'),
     make: (r, o) => ({
       height: 1.5, build: 0.92, headScale: 1.34, legScale: 0.76, armScale: 0.86, torsoScale: 0.88, trim: 0xfffaf0, skin: warm(r, [2, 3, 4]),
-      outfit: 'shirtShorts', top: o.variant === 'bowler' ? PASTEL.marigold : 0x86a9e3, topPattern: 'stripes', top2: 0xfff6dc, bottom: o.variant === 'bowler' ? 0x6f7fb0 : 0xf3efe2,
-      hair: { style: 'messy', color: HAIR.black },
+      outfit: 'shirtShorts', top: o.variant === 'bowler' ? 0xe98a8a : 0x86a9e3, topPattern: o.variant === 'bowler' ? 'checks' : 'stripes', top2: 0xfff6dc, bottom: o.variant === 'bowler' ? 0xc9b97a : 0xf3efe2, // (nobody but Chotu wears yellow stripes + blue shorts)
+      hair: { style: 'short', color: HAIR.black },
       face: { eyes: 'dot', eyeScale: 1.2, blush: true, smile: 'big', smudge: r() > 0.5 },
       accessories: o.variant === 'bowler' ? ['ball'] : ['cricketBat', ...(o.props ? [{ name: 'stumps', pos: [0, 0, -1.15] }] : [])],
       footwear: r() > 0.5 ? 'bare' : 'shoes', footColor: PASTEL.white,

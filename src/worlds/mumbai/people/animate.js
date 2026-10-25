@@ -10,6 +10,7 @@
  *   playOnce(name, seconds)   one-shot overlay loop (e.g. playOnce('wave', 2))
  *   loop                      current loop name
  *
+ * kid games: marbles skip kite tag play
  * LOOPS: wave frying pouring leaning carry headLoad ticket whistle texting chat sabzi bat bowl pose stir crank sell shout
  * Add your own: LOOPS.myLoop = (c) => { c.arm(c.P.armR, {x:1, e:.5}, c.w); ... }  (c: P pose, w weight, lt loop time, t, acc, talk)
  *
@@ -241,14 +242,47 @@ export const LOOPS = {
     P.hdX += w * 0.32 * k; P.hdY += w * (-0.15 * k + Math.sin(lt * 0.5) * 0.3 * (1 - k));
     P.legR.a += w * Math.max(0, Math.sin(lt * 6)) * 0.4 * (1 - k); P.spX += w * 0.03;
   },
-  play(c) { // beach kids
+  play(c) { // beach kids: a happy bounce with one hand waving, the other on the hip (not arms-out)
     const { P, w, lt } = c;
     const hop = Math.abs(Math.sin(lt * 4.6));
     P.hipY += w * hop * 0.1; P.legL.k += w * hop * 0.5; P.legR.k += w * hop * 0.5;
-    to(P.armL, { x: 0.3, z: 1.9 + Math.sin(lt * 9) * 0.3, e: 0.3, ez: 0 }, w);
-    to(P.armR, { x: 0.3, z: 1.9 + Math.sin(lt * 9 + 1) * 0.3, e: 0.3, ez: 0 }, w);
+    to(P.armL, { x: 0.5 + Math.sin(lt * 4.6) * 0.3, z: 0.55, e: 1.1, ez: 0 }, w);
+    to(P.armR, { x: 0.3, z: 1.25 + Math.sin(lt * 7) * 0.35, e: 0.8, ez: 0 }, w);
     P.spY += w * Math.sin(lt * 2.3) * 0.4; P.hdZ += w * Math.sin(lt * 4.6) * 0.12;
     c.talk(w > 0.5 && Math.sin(lt * 5.5) > 0.2);
+  },
+  marbles(c) { // gully marbles: crouched low, flicking a shooter with the thumb now and then
+    const { P, w, lt } = c;
+    const T = 2.8, u = (lt % T) / T, flick = sm(0.55, 0.62, u) * (1 - sm(0.66, 0.8, u));
+    P.hipY += w * -0.4; P.legL.k += w * 1.9; P.legR.k += w * 1.9; P.legL.h += w * 0.9; P.legR.h += w * 0.9;
+    P.spX += w * 0.55; P.hdX += w * (0.45 + Math.sin(lt * 1.3) * 0.04);
+    to(P.armR, { x: 0.95 + flick * 0.35, z: 0.2, e: 0.9 - flick * 0.4, ez: 0 }, w);
+    to(P.armL, { x: 0.55, z: 0.45, e: 0.6, ez: 0 }, w);
+    c.talk(w > 0.5 && Math.sin(lt * 4) > 0.6);
+  },
+  skip(c) { // skipping rope: little double hops, both hands circling at the hips
+    const { P, w, lt } = c;
+    const a = lt * 9, hop = Math.max(0, Math.sin(a));
+    P.hipY += w * hop * 0.2; P.legL.k += w * hop * 0.9; P.legR.k += w * hop * 0.9;
+    to(P.armL, { x: 0.2 + Math.sin(a) * 0.25, z: 0.65, e: 0.8, ez: 0 }, w);
+    to(P.armR, { x: 0.2 + Math.sin(a) * 0.25, z: 0.65, e: 0.8, ez: 0 }, w);
+    P.hdZ += w * Math.sin(lt * 4.5) * 0.06;
+  },
+  kite(c) { // flying a kite: head tipped back, one hand high pulling the string, the other reeling
+    const { P, w, lt } = c;
+    to(P.armR, { x: 1.9 + Math.sin(lt * 1.2) * 0.12, z: 0.25, e: 0.15, ez: 0 }, w);
+    to(P.armL, { x: 0.7, z: 0.2, e: 1.3 + Math.sin(lt * 6) * 0.3, ez: 0 }, w);
+    P.hdX += w * -0.45; P.spX += w * -0.12; P.hipRz += w * Math.sin(lt * 0.9) * 0.05;
+    P.legL.h += w * 0.15; P.legR.h += w * -0.15;
+  },
+  tag(c) { // chasing game: quick bounce, arms pumping forward, leaning in
+    const { P, w, lt } = c;
+    const s = Math.sin(lt * 9);
+    P.hipY += w * Math.abs(s) * 0.12; P.spX += w * 0.25; P.hdX += w * 0.1;
+    P.legL.h += w * s * 0.8; P.legR.h += w * -s * 0.8; P.legL.k += w * Math.max(0, -s) * 1.2; P.legR.k += w * Math.max(0, s) * 1.2;
+    to(P.armL, { x: -s * 0.9, z: 0.3, e: 1.2, ez: 0 }, w);
+    to(P.armR, { x: s * 0.9, z: 0.3, e: 1.2, ez: 0 }, w);
+    c.talk(w > 0.5 && Math.sin(lt * 6) > 0.5);
   },
   news(c) { // reading a newspaper
     const { P, w, lt } = c;
