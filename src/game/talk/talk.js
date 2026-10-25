@@ -20,7 +20,7 @@ import * as THREE from 'three';
 import { createTalkUI } from './ui.js';
 import { speak, cancel as cancelSpeech } from './speak.js';
 import { phrasebook } from './phrasebook.js';
-import { classify } from '../classifier.js';
+import { classify, reasonLine } from '../classifier.js';
 import { GREETINGS, GREETINGS_EN } from './sampleDialogue.js';
 
 const RANGE = 3.6, CLOSE = 1.7, CONE = 1.25; // metres, metres, radians
@@ -222,7 +222,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
       return;
     }
     finishGuide(t);
-    conv = { t, dlg, i: 0, attempt: 0, assisted: 0, token: Math.random(), q0 };
+    conv = { t, dlg, i: 0, attempt: 0, assisted: 0, token: Math.random(), q0, abort: null };
     input.clearKeys(); input.setLocked(true);
     ui.openCard({ name: dlg.name ?? t.name ?? 'Mumbaikar' });
     // two-shot: camera behind Chotu, looking at the pair
@@ -254,26 +254,28 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
   async function submit(raw) {
     const c = conv; const reply = (raw ?? '').trim();
     if (!c || state !== 'await' || !reply) return;
-    state = 'checking'; ui.setBusy(true);
+    state = 'checking'; ui.setBusy(true); ui.setThinking(true); ui.setReason(null);
     const step = c.dlg.steps[c.i], tok = c.token;
+    const ac = c.abort = new AbortController();
     let res;
     try {
-      res = await classify({ worldId, npcId: c.dlg.id ?? c.t.id, lang: c.dlg.lang ?? 'hi', persona: c.dlg.persona, goal: c.dlg.goal, step: { id: step.id, intent: step.intent, instruction: step.instruction, npc: step.npc, suggest: step.suggest, accept: step.accept }, attempt: c.attempt + 1, reply });
-    } catch (e) { console.warn('[talk] classifier failed', e); res = { verdict: 'retry' }; }
-    if (!conv || conv.token !== tok) return; // left during the check
+      res = await classify({ worldId, npcId: c.dlg.id ?? c.t.id, npcName: c.dlg.name, npcRole: c.dlg.role, lang: c.dlg.lang ?? 'hi', persona: c.dlg.persona, goal: c.dlg.goal, step: { id: step.id, intent: step.intent, instruction: step.instruction, npc: step.npc, suggest: step.suggest, accept: step.accept }, attempt: c.attempt + 1, reply }, { signal: ac.signal });
+    } catch (e) { if (e?.name !== 'AbortError') console.warn('[talk] classifier failed', e); res = { verdict: 'retry' }; }
+    if (!conv || conv.token !== tok || ac.signal.aborted) return; // left during the check: ignore a late answer
+    c.abort = null; ui.setThinking(false);
     if (res.verdict === 'valid') return advance(step, false);
     c.attempt++;
     const hints = step.hints?.length ? step.hints : defaultHints(step);
     const hint = hints[Math.min(c.attempt, hints.length) - 1];
     if (c.attempt >= MAX_TRIES) { // the NPC helps: show the full phrase and accept the step as assisted
       state = 'react'; ui.flashRetry();
-      ui.setHint(hints[hints.length - 1] ?? `Say: "${step.suggest?.roman}"`, MAX_TRIES);
+      ui.setHint(hints[hints.length - 1] ?? `Say: "${step.suggest?.roman}"`, MAX_TRIES); ui.setReason(reasonLine(res.reason));
       c.assisted++;
       await sleep(2300); if (!conv || conv.token !== tok) return;
       return advance(step, true);
     }
     state = 'react'; ui.flashRetry();
-    ui.setHint(hint, c.attempt);
+    ui.setHint(hint, c.attempt); ui.setReason(reasonLine(res.reason));
     ui.setBusy(false); ui.focusInput(); state = 'await';
     await say(step.onRetry ?? { text: 'क्या? फिर से बोल।', roman: 'Kya? Phir se bol.', en: 'What? Say it again.' }, { react: true, wait: false });
   }
@@ -303,6 +305,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     if (amb) { endAmbient(); cancelSpeech(); return; }
     if (!conv) return;
     const c = conv; conv = null; state = 'idle';
+    c.abort?.abort(); ui.setThinking(false);
     cancelSpeech(); ui.setSpeaking(false);
     ui.closeCard(); ui.hideBubble();
     cameraRig.setShot(null);

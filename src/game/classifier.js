@@ -2,17 +2,19 @@
  * game/classifier.js: judges the player's reply for the current dialogue step.
  *
  *   classify({ worldId, npcId, lang, persona, goal, step: { id, intent, instruction, npc, suggest, accept }, attempt, reply })
- *     -> Promise<{ verdict: 'valid' | 'retry', confidence?: number, reason?: string, source: 'mock' | 'jev' }>
+ *     -> Promise<{ verdict: 'valid' | 'retry', confidence?: number, reason?: string, source: 'mock' | 'jev', model?, answers? }>
+ *   classify(payload, { signal })  an aborted signal (Esc) rejects with an AbortError; the caller ignores it.
  *
  *   Modes (?classifier=mock|jev). Default: jev when the dev server reports an API key, otherwise mock.
- *   'jev' POSTs to /api/classify (Vite dev middleware, vite.config.js: the key stays server side). Timeout 6 s, any error:
- *   console warning and fall back to the mock, so the player is never blocked.
+ *   'jev' POSTs to /api/classify (Vite dev middleware -> server/jev.js: the key stays server side). Timeout 8 s, any error:
+ *   console warning and fall back to the mock, so the player is never blocked. One dev-console line per verdict ([jev] ...).
+ *   reasonLine(reason) -> short kind English line for the UI ('language' | 'extra' | 'rude' | 'partial').
  *   'mock': normalised fuzzy matching against accept + suggest (tolerant of romanised/Devanagari spelling, punctuation,
  *   Whisper-style casing and filler).
  */
 import { tokens, tokenMatch, normalize } from './translit.js';
 
-const TIMEOUT_MS = 6000;
+const TIMEOUT_MS = 8000;
 const THRESHOLD = 0.55; // Dice score on fuzzy-matched tokens
 
 /** local classifier */
@@ -44,25 +46,43 @@ async function probe() {
   return serverHasKey;
 }
 
-async function jevClassify(payload) {
+async function jevClassify(payload, outer) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  const onAbort = () => ctrl.abort();
+  outer?.addEventListener('abort', onAbort, { once: true });
   try {
     const r = await fetch('/api/classify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: ctrl.signal });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const j = await r.json();
     if (j.verdict !== 'valid' && j.verdict !== 'retry') throw new Error('bad verdict');
     return { ...j, source: 'jev' };
-  } finally { clearTimeout(timer); }
+  } finally { clearTimeout(timer); outer?.removeEventListener('abort', onAbort); }
 }
 
-const requested = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('classifier') : null;
+const f2 = (n) => (typeof n === 'number' ? n.toFixed(2).replace(/^0/, '') : '?');
+function logVerdict(j) {
+  const a = j.answers;
+  if (!import.meta.env?.DEV) return;
+  console.log(`[jev] ${j.verdict}${j.reason ? ' (' + j.reason + ')' : ''} ${f2(j.confidence)} (${j.model ?? '?'})` + (a ? ` does_task=${f2(a.does_task?.noul)} extra=${f2(a.has_unrelated_content?.noul)} lang=${a.reply_language?.choice} rude=${f2(a.is_rude?.noul)}` : ''));
+}
 
-export async function classify(payload) {
-  let mode = requested === 'mock' || requested === 'jev' ? requested : (await probe()) ? 'jev' : 'mock';
+const REASON_LINES = { language: 'Try it in Hindi.', extra: 'Just the answer, nothing extra.', rude: 'Arre, tameez se!', partial: 'Almost! Say the whole thing.' };
+export const reasonLine = (reason) => REASON_LINES[reason] ?? null;
+
+const requested = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('classifier') : null;
+const abortErr = () => { const e = new Error('aborted'); e.name = 'AbortError'; return e; };
+
+export async function classify(payload, { signal } = {}) {
+  if (signal?.aborted) throw abortErr();
+  const mode = requested === 'mock' || requested === 'jev' ? requested : (await probe()) ? 'jev' : 'mock';
+  if (signal?.aborted) throw abortErr();
   if (mode === 'jev') {
-    try { return await jevClassify(payload); }
-    catch (e) { console.warn('[classifier] jev unavailable (' + (e?.message ?? e) + '); using the local mock'); }
+    try { const j = await jevClassify(payload, signal); logVerdict(j); return j; }
+    catch (e) {
+      if (signal?.aborted) throw abortErr(); // cancelled by the player: no fallback
+      console.warn('[classifier] jev unavailable (' + (e?.message ?? e) + '); using the local mock');
+    }
   }
   return mockClassify(payload);
 }

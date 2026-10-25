@@ -60,11 +60,13 @@ export default {
 classify({ worldId, npcId, lang, persona, goal, step: { id, intent, instruction, npc, suggest, accept }, attempt, reply })
   -> Promise<{ verdict: 'valid' | 'retry', confidence?: number, reason?: string }>
 ```
-- Implementations: `jev` (real; called through a server proxy so the API key never ships to the browser: a Vite dev-server middleware
-  at `POST /api/classify` that reads the key from `.env.local`, which is git-ignored) and `mock` (local fallback: normalized fuzzy
-  match against `accept` + `suggest`, tolerant of romanized/Devanagari spelling and Whisper-style punctuation).
-- Choose with `?classifier=mock|jev` (default: jev if the server reports a key, otherwise mock). Timeouts and errors fall back to mock with a
-  console warning; never block the player.
+- Implementations: `jev` (real; see `docs/JEV.md`. `server/jev.js` uses `@typesafe-ai/sdk` with a fan-out of noul/choice questions, decided in code;
+  called via the Vite dev middleware `POST /api/classify`, key `JEV_API_KEY` in the git-ignored project-root `.env`, never sent to the browser)
+  and `mock` (local fallback: normalized fuzzy match against `accept` + `suggest`, tolerant of romanized/Devanagari spelling and Whisper-style punctuation).
+- Result: `{ verdict, confidence, reason?, source, model?, answers? }`; `reason` (retry only) is one of `empty | off_task | partial | extra | language | rude`
+  and drives a small line under the hint. `classify(payload, { signal })`: Esc aborts the request (late answers are ignored).
+- Choose with `?classifier=mock|jev` (default: jev if `/api/classify/status` reports a key, otherwise mock). 8 s client timeout; errors fall back to mock with a
+  console warning; never block the player. Dev console prints one `[jev] ...` line per verdict. Tune with `npm run jev:eval`.
 
 ## Voice
 Browser `speechSynthesis` with a `hi-IN` voice for Hindi (and `en-IN`/`en-GB` for English NPCs). Pick the best available voice and

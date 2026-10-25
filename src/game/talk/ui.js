@@ -65,6 +65,10 @@ const CSS = `
 .t-card.shake .t-input{animation:t-shake .3s}
 @keyframes t-shake{20%{transform:translateX(-6px)}50%{transform:translateX(6px)}80%{transform:translateX(-3px)}}
 .t-hint{min-height:26px;margin-top:8px;font-size:18px;color:#7a3a10}
+.t-think{display:none;font-size:30px;letter-spacing:.12em;margin-top:4px;animation:t-pulse 1s ease-in-out infinite}
+.t-card.thinking .t-think{display:block}
+@keyframes t-pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.t-reason{font-size:17px;color:#9a3b52;margin-top:2px}
 .t-hint .lv{display:inline-block;margin-right:8px;color:${INK}}
 .t-hint .pip{display:inline-block;width:11px;height:11px;border:2px solid ${INK};border-radius:50%;margin-right:3px;vertical-align:-1px}
 .t-hint .pip.on{background:#e85d75}
@@ -141,7 +145,8 @@ export function createTalkUI() {
     <div class="t-row"><input class="t-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type or dictate your reply, then press Enter" />
       <svg class="t-tick" viewBox="0 0 42 34"><path d="M4 18 C 10 22, 14 27, 17 30 C 22 18, 30 9, 39 3" fill="none" stroke="#2f9e44" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <button class="t-btn t-go" type="button">Enter ↵</button></div>
-    <div class="t-hint"></div>
+    <div class="t-think" aria-live="polite">…</div>
+    <div class="t-hint"></div><div class="t-reason"></div>
     <div class="t-reward-slot"></div>
     <div class="t-keys"><span>Enter = send &nbsp;·&nbsp; Tab = hide/show phrase &nbsp;·&nbsp; Esc = leave</span><span class="pb">Phrasebook [P]</span></div>`, 11);
   const guide = paper('t-guide', `<span class="txt"></span> <kbd>E</kbd><svg class="arr" viewBox="0 0 60 30"><path d="M4 15 C 18 12, 34 18, 52 15 M42 6 C 48 10, 52 13, 54 15 C 52 18, 47 22, 41 25" fill="none" stroke="#2b2a33" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`, 41);
@@ -189,8 +194,8 @@ export function createTalkUI() {
     hideBubble() { bubble.style.display = 'none'; },
     showSpeech(x, y, line) { speech.querySelector('.dv').textContent = line.text ?? ''; speech.querySelector('.ro').textContent = line.roman ?? ''; position(speech, x, y); speech.style.display = 'block'; draw(speech); },
     hideSpeech() { speech.style.display = 'none'; },
-    openCard({ name }) { q('.nm').textContent = name; card.classList.add('show'); card.classList.remove('ok', 'shake', 'speaking'); q('.t-reward-slot').innerHTML = ''; hot.classList.add('up'); requestAnimationFrame(() => draw(card)); },
-    closeCard() { card.classList.remove('show', 'ok', 'speaking'); input.blur(); input.value = ''; q('.t-reward-slot').innerHTML = ''; hot.classList.remove('up'); },
+    openCard({ name }) { q('.nm').textContent = name; card.classList.add('show'); card.classList.remove('ok', 'shake', 'speaking', 'thinking'); q('.t-reason').textContent = ''; q('.t-reward-slot').innerHTML = ''; hot.classList.add('up'); requestAnimationFrame(() => draw(card)); },
+    closeCard() { card.classList.remove('show', 'ok', 'speaking', 'thinking'); input.blur(); input.value = ''; q('.t-reward-slot').innerHTML = ''; hot.classList.remove('up'); },
     cardOpen() { return card.classList.contains('show'); },
     setSpeaking(on) { card.classList.toggle('speaking', !!on); },
     setNpc(line, { react = false } = {}) { setLine(q('.t-npc'), line); q('.t-npc').classList.toggle('react', react); requestAnimationFrame(() => draw(card)); },
@@ -198,7 +203,7 @@ export function createTalkUI() {
       q('.t-instr').innerHTML = instruction ? `<b>Your turn:</b> ${esc(instruction)}` : '';
       hasSuggest = !!suggest; sug.style.display = hasSuggest ? '' : 'none';
       if (suggest) { q('.ro', sug).textContent = suggest.roman ?? ''; q('.dv', sug).textContent = suggest.text ?? ''; }
-      card.classList.remove('ok'); api.setHint(null, 0, 3); input.value = ''; syncSuggest();
+      card.classList.remove('ok', 'thinking'); api.setReason(null); api.setHint(null, 0, 3); input.value = ''; syncSuggest();
       requestAnimationFrame(() => draw(card));
     },
     /** hint text (or null) and how many of `max` tries were used */
@@ -207,6 +212,9 @@ export function createTalkUI() {
       q('.t-hint').innerHTML = text ? `<span class="lv">${pips}</span>💡 ${esc(text)}` : (used ? `<span class="lv">${pips}</span>` : '');
       requestAnimationFrame(() => draw(card));
     },
+    /** the "…" scribble while the classifier thinks (input disabled via setBusy) */
+    setThinking(on) { card.classList.toggle('thinking', !!on); requestAnimationFrame(() => draw(card)); },
+    setReason(text) { q('.t-reason').textContent = text ?? ''; requestAnimationFrame(() => draw(card)); },
     setBusy(b) { input.disabled = !!b; q('.t-go').disabled = !!b; if (!b) { input.focus(); input.select(); } },
     flashValid() { card.classList.add('ok'); },
     flashRetry() { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); },

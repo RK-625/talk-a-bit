@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "jev:eval": "node scripts/jev-eval.mjs"
   },
   "dependencies": {
+    "@typesafe-ai/sdk": "^0.7.0",
     "three": "^0.186.1"
   },
   "devDependencies": {

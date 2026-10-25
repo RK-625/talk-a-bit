@@ -22,32 +22,35 @@ const shotPlugin = () => ({
   },
 });
 
-// Dev only: the classifier proxy. POST /api/classify forwards to Jev (TypeSafe AI) with the key from .env.local (git-ignored), so the
-// key never ships to the browser. GET /api/classify/status -> { hasKey }. Without a key: 501 and the client falls back to the mock.
+// Dev only: the classifier proxy. POST /api/classify judges the player's reply with Jev (TypeSafe AI) via server/jev.js, with the
+// key from the project-root .env (JEV_API_KEY, optional JEV_MODEL), so the key never ships to the browser.
+// GET /api/classify/status -> { hasKey, model }. Without a key: 501 and the client falls back to the mock.
 const classifyPlugin = (env) => ({
   name: 'dev-classifier-proxy',
   apply: 'serve',
   configureServer(server) {
-    const key = env.JEV_API_KEY, url = env.JEV_API_URL;
+    const key = env.JEV_API_KEY, model = env.JEV_MODEL || 'jev-latest';
+    let jev = null;
+    const getJev = async () => (jev ??= (await import('./server/jev.js')).createJev({ apiKey: key, model }));
     server.middlewares.use('/api/classify', (req, res) => {
       res.setHeader('Content-Type', 'application/json');
-      if (req.method === 'GET') return res.end(JSON.stringify({ hasKey: !!(key && url) }));
+      if (req.method === 'GET') return res.end(JSON.stringify({ hasKey: !!key, model }));
       if (req.method !== 'POST') { res.statusCode = 405; return res.end('{}'); }
-      if (!key || !url) { res.statusCode = 501; return res.end(JSON.stringify({ error: 'JEV_API_KEY / JEV_API_URL not set in .env.local' })); }
+      if (!key) { res.statusCode = 501; return res.end(JSON.stringify({ error: 'JEV_API_KEY not set in .env' })); }
       const chunks = [];
+      const ac = new AbortController();
+      res.on('close', () => { if (!res.writableFinished) ac.abort(); }); // the browser cancelled (Esc / timeout)
       req.on('data', (c) => chunks.push(c));
       req.on('end', async () => {
         try {
           const payload = JSON.parse(Buffer.concat(chunks).toString() || '{}');
-          // TODO(jev): we do not have Jev's API docs yet. Map our payload to Jev's request format here (auth header, field names,
-          // how the step intent/examples are passed) and map its answer back to { verdict: 'valid' | 'retry', confidence?, reason? }.
-          const jevRequest = payload; // TODO: replace with the real Jev request body
-          const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` }, body: JSON.stringify(jevRequest) });
-          if (!r.ok) throw new Error('Jev HTTP ' + r.status);
-          const jev = await r.json();
-          const result = { verdict: jev.verdict === 'valid' ? 'valid' : 'retry', confidence: jev.confidence, reason: jev.reason }; // TODO: replace with the real Jev response mapping
-          res.end(JSON.stringify(result));
-        } catch (e) { res.statusCode = 502; res.end(JSON.stringify({ error: String(e?.message ?? e) })); }
+          const out = await (await getJev()).classify(payload, { signal: ac.signal });
+          const { verdict, confidence, reason, model: used, answers } = out;
+          if (!res.writableEnded) res.end(JSON.stringify({ verdict, confidence, reason, model: used, answers }));
+        } catch (e) {
+          if (ac.signal.aborted || res.writableEnded) return;
+          res.statusCode = 502; res.end(JSON.stringify({ error: String(e?.message ?? e).slice(0, 200) }));
+        }
       });
     });
   },
