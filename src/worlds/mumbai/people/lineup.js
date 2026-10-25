@@ -9,6 +9,7 @@ import { createDecal } from '../../../engine/ink.js';
 import { makeCanvas, drawText, rng } from '../../../engine/doodle.js';
 import { createHero } from './hero.js';
 import { createNPC } from './roles.js';
+import { createCitizen } from './citizens.js';
 import { autoAnimate } from './animate.js';
 import { mat, mk } from './kit.js';
 
@@ -16,6 +17,9 @@ const ROWS = [
   [['hero', 'Chotu (hero)'], ['vadaPavWala', 'vada pav wala'], ['chaiwalaUncle', 'chai uncle'], ['taxiDriver', 'taxi driver'], ['dabbawala', 'dabbawala'], ['koliFisherwoman', 'Koli fisherwoman'], ['busConductor', 'bus conductor']],
   [['trafficCop', 'traffic cop'], ['collegeStudentA', 'student A'], ['collegeStudentB', 'student B'], ['auntyWithSabzi', 'aunty + sabzi'], ['cricketKidBatter', 'cricket: batter'], ['cricketKidBowler', 'cricket: bowler'], ['bollywoodHopeful', 'Bollywood hopeful']],
   [['bhelWala', 'bhel wala'], ['golaWala', 'gola wala'], ['balloonSeller', 'balloon seller'], ['newspaperVendor', 'newspaper vendor'], ['strayDog', 'stray dog'], ['crow', 'crow'], ['pigeon', 'pigeon']],
+  [['priest', 'priest (pujari)'], ['pilgrim', 'pilgrim'], ['photographer', 'photographer'], ['tourist', 'tourist'], ['jogger', 'jogger'], ['couple', 'couple (seated)'], ['beachKid', 'beach kid']],
+  [['bhuttaSeller', 'bhutta seller'], ['coconutSeller', 'coconut seller'], ['officeGoer', 'office-goer'], ['coolie', 'coolie'], ['commuter', 'commuter'], ['securityGuard', 'security guard'], ['watchman', 'watchman']],
+  [['sweeper', 'sweeper'], ['doorman', 'doorman'], ['studentWithBooks', 'student + books'], ['bookSeller', 'book seller'], ['chanaSeller', 'chana seller'], ['ladiesCommuter', 'ladies commuter'], ['pilgrim:1', 'pilgrim (woman)']],
 ];
 
 function nameCard(text) {
@@ -26,25 +30,49 @@ function nameCard(text) {
   return createDecal(c, 1.7, 0.5, { depth: 0.06, thickness: 1.6 });
 }
 
-export function createLineup(ink, { animate = true } = {}) {
+export function createLineup(ink, { animate = true, citizens = true } = {}) {
   const g = new THREE.Group();
   const DX = 2.9, DZ = 3.6;
-  const floor = mk(new THREE.BoxGeometry(DX * 7 + 1, 0.3, DZ * 3 + 0.5), mat(0xc4e4a8, { spacing: 0.15, strength: 1, lightHatch: 1 }), { o: 3 });
-  floor.position.set(0, -0.17, -DZ + 0.1);
+  const nRows = ROWS.length + (citizens ? 4 : 0);
+  const floor = mk(new THREE.BoxGeometry(DX * 7 + 1, 0.3, DZ * nRows + 0.5), mat(0xc4e4a8, { spacing: 0.15, strength: 1, lightHatch: 1 }), { o: 3 });
+  floor.position.set(0, -0.17, -DZ * (nRows - 1) / 2 + 0.1);
   g.add(floor);
+  const place = (p, x, z, label) => {
+    p.position.set(x, 0, z);
+    if (animate) autoAnimate(p);
+    g.add(p);
+    const card = nameCard(label);
+    card.position.set(x, 0.25, z + 1.35); card.rotation.x = -0.25;
+    g.add(card);
+  };
   ROWS.forEach((row, ri) => {
     row.forEach(([role, label], ci) => {
       const seed = ri * 7 + ci + 1;
-      const p = role === 'hero' ? createHero(ink) : createNPC(role, ink, seed, { props: true });
-      p.position.set((ci - 3 + (row.length === 6 ? 0.5 : 0)) * DX, 0, -ri * DZ);
-      if (animate) autoAnimate(p);
-      g.add(p);
-      const card = nameCard(label);
-      card.position.set(p.position.x, 0.25, p.position.z + 1.35);
-      card.rotation.x = -0.25;
-      g.add(card);
+      let p;
+      if (role === 'hero') p = createHero(ink);
+      else if (role === 'pilgrim:1') p = createNPC('pilgrim', ink, seed, { variant: 1 });
+      else p = createNPC(role, ink, seed, { props: true });
+      place(p, (ci - 3 + (row.length === 6 ? 0.5 : 0)) * DX, -ri * DZ, label);
     });
   });
+  if (citizens) { // 4 x 4 grid of generic Mumbaikars, seeds 1..16
+    for (let i = 0; i < 16; i++) {
+      const cx = i % 4, cz = Math.floor(i / 4);
+      place(createCitizen(ink, i + 1), (cx - 1.5) * DX, -(ROWS.length + cz) * DZ, 'citizen ' + (i + 1));
+    }
+  }
+  return g;
+}
+
+/** 4 x 4 grid of createCitizen(seed 1..16) on its own, to review variety. */
+export function createCitizenGrid(ink, { seed0 = 1 } = {}) {
+  const g = new THREE.Group();
+  for (let i = 0; i < 16; i++) {
+    const p = createCitizen(ink, seed0 + i);
+    p.position.set((i % 4 - 1.5) * 2.4, 0, -Math.floor(i / 4) * 2.6);
+    autoAnimate(p);
+    g.add(p);
+  }
   return g;
 }
 export default createLineup;

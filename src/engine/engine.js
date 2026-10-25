@@ -8,6 +8,7 @@
  *     sky:{paper, doodles, extra(skyApi)}, spawn:{dir,facing}, createHero(ink)->Group,
  *     build(ctx)->{ colliders?:[], update?(dt,t) } }
  *   ctx = { scene, camera, renderer, planet, ink, quality, rng, player, actors, colliders, placer, culler }
+ *     occlusion = engine/occlusion.js (register buildings that should fade when they block the camera's view of the hero)
  *     culler = engine/lod.js distance/horizon culler (the engine calls culler.update() each frame, after build.update)
  *     helpers worlds import directly: engine/place.js (placeOnSphere, registerAsset, frameAt, localToDir)
  *     ink = the engine/ink.js namespace; placer = engine/scatter.js placer (world.scatter.groups configures its clusters)
@@ -24,6 +25,7 @@ import { createColliders } from './colliders.js';
 import { createActors } from './actors.js';
 import { createPlacer, mulberry32 } from './scatter.js';
 import { createCuller } from './lod.js';
+import { createOcclusion } from './occlusion.js';
 import { createPost } from './post.js';
 import { QUALITY } from './quality.js';
 
@@ -54,7 +56,8 @@ export function createEngine(world) {
   const placer = createPlacer({ planet, rng, spawnDir, ...(world.scatter ?? {}) });
 
   const player = createPlayer({ hero: world.createHero(ink), planet, colliders, spawn: world.spawn });
-  const built = world.build({ scene, camera, renderer, planet, ink, quality: QUALITY, rng, player, actors, colliders, placer, culler }) ?? {};
+  const occlusion = createOcclusion({ camera, player });
+  const built = world.build({ scene, camera, renderer, planet, ink, quality: QUALITY, rng, player, actors, colliders, placer, culler, occlusion }) ?? {};
   (built.colliders ?? []).forEach((c) => colliders.add(c));
   scene.add(player.object);
   const cameraRig = createCameraRig(camera, player, planet);
@@ -83,6 +86,7 @@ export function createEngine(world) {
     cameraRig.update(dt, state);
     camera.updateMatrixWorld();
     culler.update();
+    occlusion.update(dt);
     planet.update(dt, time);
     sky.update(dt, player.object.position, player.up, cameraRig.zoom01);
     if (draw) {
@@ -95,7 +99,7 @@ export function createEngine(world) {
     advance(Math.min(timer.getDelta(), MAX_DT));
   }
 
-  const engine = { scene, camera, renderer, planet, player, sky, colliders, actors, cameraRig, culler, step: advance, start() { renderer.setAnimationLoop(frame); } };
-  if (import.meta.env.DEV) window.__game = { step: advance, renderer, composer: post.composer, post, player, camera, cameraRig, scene, colliders: colliders.list, planet, culler, actors, world, built, QUALITY };
+  const engine = { scene, camera, renderer, planet, player, sky, colliders, actors, cameraRig, culler, occlusion, step: advance, start() { renderer.setAnimationLoop(frame); } };
+  if (import.meta.env.DEV) window.__game = { occlusion, step: advance, renderer, composer: post.composer, post, player, camera, cameraRig, scene, colliders: colliders.list, planet, culler, actors, world, built, QUALITY };
   return engine;
 }

@@ -7,7 +7,7 @@
  */
 import * as THREE from 'three';
 import { BRIDGE, GEO, R, stepAlong, tangentTo, seaField, smooth, LAND_H, polar, dist, shoreToward } from './geo.js';
-import { createDeckSegment, createPylon, createHajiAli, createCauseway } from './landmarks/index.js';
+import { createDeckSegment, createPylon, createPier, createEmbankment, createHajiAli, createCauseway } from './landmarks/index.js';
 import { createBoat } from './props/index.js';
 import { HAJI } from './layout.js';
 
@@ -44,14 +44,34 @@ function seaLink(W, out) {
     g.rotateX(-pitch); // nose up while climbing (+z forward)
     g.updateMatrixWorld(true);
   }
+  // piers under the water spans (down to the sea bed) and embankments carrying the land approaches down to the ground
+  const bed = 2.8; // sea bed is ~2.4 below the sea surface out here
+  for (const s of [-15.5, -0.5, 15.5]) {
+    const g = createPier(W.ink, h(s) + bed);
+    const pitch = Math.atan2(h(s + 1) - h(s - 1), 2);
+    W.add(g, { dir: point(s), fwd: tangentAt(s), radius: seaR + h(s), maxDist: 120, height: 7, walkable: false, collide: false });
+    g.rotateX(-pitch);
+  }
+  const EB = 4.1;
+  for (const side of [-1, 1]) {
+    for (let k = 0; k < 5; k++) {
+      const s = side * (17.5 + EB * (k + 0.5));
+      if (Math.abs(s) > half - 0.5) break;
+      const depth = Math.max(1.2, h(s) - (LAND_H - 0.1) + 0.9);
+      const g = createEmbankment(W.ink, EB + 0.1, depth);
+      const pitch = Math.atan2(h(s + 1) - h(s - 1), 2);
+      W.add(g, { dir: point(s), fwd: tangentAt(s), radius: seaR + h(s), maxDist: 110, height: 5, walkable: false });
+      g.rotateX(-pitch);
+    }
+  }
   // pylons in the water
   for (const s of [-8, 8]) {
-    const g = createPylon(W.ink);
+    const g = createPylon(W.ink, { baseDepth: deckH + 3.2 }); // caissons reach the sea bed
     W.add(g, { dir: point(s), fwd: tangentAt(s), radius: seaR + deckH, maxDist: Infinity, height: 24, walkable: false });
   }
   // one walkable floor for the whole bridge
   const n_ = new THREE.Vector3().crossVectors(c, t).normalize();
-  const hw = 2.0;
+  const hw = 3.35, ROAD_HALF = 1.95, FOOT = 0.22; // deck: road 3.6 wide flanked by 1.5 footpaths raised 0.22
   const surface = {
     c: c.clone(), cosR: Math.cos((half + 4) / R),
     contains(d) {
@@ -63,7 +83,8 @@ function seaLink(W, out) {
     },
     heightAt(d) {
       const s = Math.atan2(d.dot(t), d.dot(c)) * R;
-      return seaR + h(THREE.MathUtils.clamp(s, -half, half));
+      const lat = Math.abs(Math.asin(THREE.MathUtils.clamp(d.dot(n_), -1, 1)) * R);
+      return seaR + h(THREE.MathUtils.clamp(s, -half, half)) + (lat > ROAD_HALF ? FOOT : 0) + 0.06;
     },
   };
   W.planet.addWalkableSurface(surface);

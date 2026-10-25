@@ -3,7 +3,10 @@
  * analytic surface queries, an optional animated sea shell, and walkability.
  *
  * createPlanet({ radius=50, detail=26, heightFn, colorFn, sea=null,
- *                outlinePx=3.2, hatchSpacing=0.15, outlineWobbleFreq=0.35 }) -> planet
+ *                outlinePx=3.2, hatchSpacing=0.15, outlineWobbleFreq=0.35, layers=null }) -> planet
+ *   layers: null | { defs:[{color,hatch,line,fill}] (max 8, see ink.js `layers`), valueFn(dir, h, out:Float32Array(8)) }
+ *        valueFn fills, PER VERTEX, the signed distance (units, negative = inside) to each layer's edge. The paint is resolved per
+ *        fragment, so road/sand/coast boundaries are smooth and hand-drawn instead of face-sized stair steps.
  *   heightFn(dir (unit Vector3, reused: don't keep)) -> number      radial offset from `radius` (keep it gentle)
  *   colorFn(dir, height, faceIndex) -> { color: THREE.Color, hatch: 0..1, angle: radians }
  *        called once per triangle at its centroid. `hatch` = how strongly the ground is pencil-hatched even
@@ -71,6 +74,7 @@ export function createPlanet({
   outlinePx = 3.2,
   hatchSpacing = 0.15,
   outlineWobbleFreq = 0.35,
+  layers = null,
 } = {}) {
   const hd = new THREE.Vector3();
   const surfaces = [];
@@ -132,12 +136,21 @@ export function createPlanet({
   const v = new THREE.Vector3();
   // the icosphere is non-indexed, so every vertex appears ~6 times: evaluate heightFn once per distinct position
   const hCache = new Map();
+  const nLay = layers ? 8 : 0;
+  const layerVals = layers ? new Float32Array(pos.count * 8) : null;
+  const tmpVals = new Float32Array(8);
   for (let i = 0; i < pos.count; i++) {
     v.fromBufferAttribute(pos, i).normalize();
     const key = ((Math.round(v.x * 2e4) + 20000) * 40001 + (Math.round(v.y * 2e4) + 20000)) * 40001 + (Math.round(v.z * 2e4) + 20000);
-    let rr = hCache.get(key);
-    if (rr === undefined) { rr = getSurfaceRadius(v); hCache.set(key, rr); }
-    v.multiplyScalar(rr);
+    let ent = hCache.get(key);
+    if (ent === undefined) {
+      const rr = getSurfaceRadius(v);
+      ent = { rr, vals: null };
+      if (layers) { tmpVals.fill(1e3); layers.valueFn(v, rr - radius, tmpVals); ent.vals = Float32Array.from(tmpVals); }
+      hCache.set(key, ent);
+    }
+    if (layers) layerVals.set(ent.vals, i * 8);
+    v.multiplyScalar(ent.rr);
     pos.setXYZ(i, v.x, v.y, v.z);
   }
   hCache.clear();
@@ -162,8 +175,14 @@ export function createPlanet({
   }
   geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   geo.setAttribute('aHatch', new THREE.BufferAttribute(hatch, 2));
+  if (layers) {
+    const A = new Float32Array(pos.count * 4), B = new Float32Array(pos.count * 4);
+    for (let i = 0; i < pos.count; i++) for (let k = 0; k < 4; k++) { A[i * 4 + k] = layerVals[i * 8 + k]; B[i * 4 + k] = layerVals[i * 8 + 4 + k]; }
+    geo.setAttribute('aLayerA', new THREE.BufferAttribute(A, 4));
+    geo.setAttribute('aLayerB', new THREE.BufferAttribute(B, 4));
+  }
 
-  const mat = createInkMaterial({ vertexColors: true, hatchSpacing, lightHatch: 1, hatchAttribute: true });
+  const mat = createInkMaterial({ vertexColors: true, hatchSpacing, lightHatch: 1, hatchAttribute: true, layers: layers ? layers.defs : null });
   const mesh = new THREE.Mesh(geo, mat);
   mesh.receiveShadow = true;
   mesh.castShadow = true;

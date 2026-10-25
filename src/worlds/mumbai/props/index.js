@@ -9,11 +9,55 @@ import { nameCard, triCount, resolveInk, vcMat } from './kit.js';
 import * as V from './vehicles.js';
 import * as S from './stalls.js';
 import * as T from './street.js';
+import * as D from './siteDetails.js';
+import * as D2 from './siteDetails2.js';
 
 export * from './vehicles.js';
 export * from './stalls.js';
 export * from './street.js';
+export * from './siteDetails.js';
+export * from './siteDetails2.js';
 export { C, Mix, triCount, nameCard, meshOf, plaque, hand } from './kit.js';
+
+
+// ---- integration metadata for the site-detail props (explicit exports shadow the `export *` above) --------------
+// userData.anchors: { name: {x,y,z,facing?} } where NPCs / props belong (facing = yaw radians, 0 faces +z);
+// userData.pad {w,d}, userData.bounds {min,max}, userData.occluder (false = never fades).
+import { annotate } from './meta.js';
+const PI = Math.PI;
+const A = (anchors, extra = {}) => ({ anchors, ...extra });
+export const createElephantaBooth = annotate(D.createElephantaBooth, A({ clerk: { x: 0, y: 0.3, z: 0.1, facing: 0 }, queue: { x: 0, y: 0, z: 3.4, facing: PI } }));
+export const createFerry = annotate(D.createFerry, A({ captain: { x: 0, y: 4.9, z: 2.4, facing: 0 }, deck: { x: 0, y: 2.1, z: -1.5, facing: 0 }, gangway: { x: 0, y: 2.1, z: -5.3, facing: PI } }));
+export const createPhotographerTripod = annotate(D.createPhotographerTripod, A({ photographer: { x: 0, y: 0, z: -1.2, facing: 0 }, client: { x: 0, y: 0, z: 3.2, facing: PI } }));
+export const createDanaMat = annotate(D.createDanaMat, A({ seller: { x: -1.3, y: 0.1, z: -0.5, facing: 0.6 }, feeder: { x: 0.2, y: 0, z: 1.8, facing: PI } }));
+export const createVintageCar = annotate(D.createVintageCar, A({ doorman: { x: 1.8, y: 0, z: 0.6, facing: -PI / 2 }, driver: { x: -0.4, y: 0.8, z: -0.2, facing: 0 } }));
+export const createBullStatue = annotate(D.createBullStatue, A({ admirer: { x: 0, y: 0, z: 2.6, facing: PI }, selfie: { x: 2.6, y: 0, z: 1.8, facing: PI } }));
+export const createStockTicker = annotate(D.createStockTicker, A({ reader: { x: 0, y: 0, z: 1.6, facing: PI } }));
+export const createTiffinPile = annotate(D.createTiffinPile, A({ sorterA: { x: -0.8, y: 0, z: 1.5, facing: PI }, sorterB: { x: 1.0, y: 0, z: 1.6, facing: PI }, tallyKeeper: { x: 0, y: 0, z: -1.7, facing: 0 } }));
+export const createLuggageTrolley = annotate(D.createLuggageTrolley, A({ coolie: { x: 0, y: 0, z: 3.1, facing: PI } }));
+export const createBookStall = annotate(D.createBookStall, A({ seller: { x: 0, y: 0.4, z: -0.4, facing: 0 }, browser: { x: -0.8, y: 0, z: 2.2, facing: PI }, stool: { x: 2.0, y: 0.5, z: 1.9, facing: PI } }));
+export const createMarineBench = annotate(D.createMarineBench, A({ seatL: { x: -0.8, y: 0.74, z: 0.05, facing: 0 }, seatR: { x: 0.8, y: 0.74, z: 0.05, facing: 0 }, seatMid: { x: 0, y: 0.74, z: 0.05, facing: 0 } }));
+export const createTollBooth = annotate(D.createTollBooth, A({ collector: { x: 0, y: 0.3, z: -0.6, facing: 0 }, laneL: { x: -1.9, y: 0, z: 3, facing: PI }, laneR: { x: 1.9, y: 0, z: 3, facing: PI } }));
+export const createChadarStall = annotate(D.createChadarStall, A({ seller: { x: 0, y: 0, z: -0.4, facing: 0 }, pilgrim: { x: 0.4, y: 0, z: 1.9, facing: PI } }));
+export const createHajiAliJuice = annotate(D.createHajiAliJuice, A({ juiceMan: { x: 0, y: 0.2, z: 0.2, facing: 0 }, customer: { x: 0, y: 0, z: 2.9, facing: PI }, stool: { x: 2.0, y: 0.5, z: 2.8, facing: PI } }));
+export const createPavBhajiStall = annotate(D2.createPavBhajiStall, A({ cook: { x: -0.8, y: 0.2, z: -0.8, facing: 0 }, customer: { x: 0, y: 0, z: 2.0, facing: PI }, stoolA: { x: 1.7, y: 0.45, z: 2.2, facing: PI }, stoolB: { x: 2.5, y: 0.45, z: 2.0, facing: PI } }));
+export const createHorse = annotate(D2.createHorse, A({ rider: { x: 0, y: 2.75, z: 0.05, facing: 0 }, handler: { x: 1.3, y: 0, z: 1.0, facing: -PI / 2 } }));
+export const createSandArt = annotate(D2.createSandArt, A({ artist: { x: -2.9, y: 0, z: 0.8, facing: PI / 2 }, onlooker: { x: 0, y: 0, z: 3.4, facing: PI } }));
+export const createBhuttaCart = annotate(D2.createBhuttaCart, A({ seller: { x: -0.55, y: 0, z: -1.2, facing: 0 }, customer: { x: 0, y: 0, z: 1.7, facing: PI } }));
+export const createCoconutCart = annotate(D2.createCoconutCart, A({ seller: { x: 0, y: 0, z: -1.2, facing: 0 }, customer: { x: 0, y: 0, z: 1.8, facing: PI } }));
+export const createCarromBoard = annotate(D2.createCarromBoard, A({ seatN: { x: 0, y: 0.38, z: -1.55, facing: 0 }, seatS: { x: 0, y: 0.38, z: 1.55, facing: PI }, seatE: { x: 1.55, y: 0.38, z: 0, facing: -PI / 2 }, seatW: { x: -1.55, y: 0.38, z: 0, facing: PI / 2 } }));
+export const createCommonTap = annotate(D2.createCommonTap, A({ waiter: { x: 0, y: 0.16, z: 1.5, facing: PI }, carrier: { x: -1.2, y: 0.16, z: 1.4, facing: PI } }));
+export const createRangoli = annotate(D2.createRangoli, A({ artist: { x: 0, y: 0, z: 1.6, facing: PI } }, { occluder: false }));
+export const createGanpatiPoster = annotate(D2.createGanpatiPoster, A({ devotee: { x: 0, y: 0, z: 1.9, facing: PI } }));
+export const createPuddle = annotate(D2.createPuddle, A({}));
+export const createTempleBells = annotate(D2.createTempleBells, A({ devotee: { x: 0, y: 0, z: 1.2, facing: PI } }));
+export const createOfferingStall = annotate(D2.createOfferingStall, A({ seller: { x: 0, y: 0, z: -0.4, facing: 0 }, devotee: { x: 0.4, y: 0, z: 2.0, facing: PI } }));
+export const createChappalRow = annotate(D2.createChappalRow, A({ owner: { x: 2.3, y: 0, z: 0.4, facing: PI } }));
+export const createTimetableBoard = annotate(D2.createTimetableBoard, A({ reader: { x: 0, y: 0, z: 1.6, facing: PI } }));
+export const createFastSlowIndicator = annotate(D2.createFastSlowIndicator, A({ waiter: { x: 0, y: 0, z: 1.4, facing: PI } }));
+export const createPlatformChaiStall = annotate(D2.createPlatformChaiStall, A({ chaiwala: { x: 0, y: 0, z: -0.4, facing: 0 }, customer: { x: 0, y: 0, z: 1.9, facing: PI } }));
+export const createStoolCluster = annotate(D2.createStoolCluster, (g) => ({ anchors: { seatA: { x: 1.0, y: 0.5, z: 0, facing: PI / 2 }, seatB: { x: -1.0, y: 0.5, z: 0, facing: -PI / 2 }, seatC: { x: 0, y: 0.5, z: 1.0, facing: PI }, seatD: { x: 0, y: 0.5, z: -1.0, facing: 0 } } }));
+export const createCrateStack = annotate(D2.createCrateStack, A({}));
 
 /** everything, in showcase order: [label, sublabel, factory, opts?] */
 export const CATALOG = [
@@ -21,7 +65,8 @@ export const CATALOG = [
   ['BEST bus', 'double-decker', V.createBus],
   ['Auto-rickshaw', '', V.createAutoRickshaw],
   ['Dabbawala cycle', '', V.createDabbawalaBike],
-  ['Train car', 'cabin + crowd', V.createTrainCar],
+  ['Train car', 'general: mixed crowd', V.createTrainCar],
+  ['Ladies car', 'महिला / LADIES', (ink) => V.createTrainCar(ink, { ladies: true, seed: 5 })],
   ['Train engine', 'cab front', (ink) => V.createTrainCar(ink, { isEngine: true, livery: 'purple' })],
   ['Track', 'segment x2', (ink) => { const g = new THREE.Group(); const a = V.createTrackSegment(ink, 4); const b = V.createTrackSegment(ink, 4); b.position.z = 4; g.add(a, b); g.position.z = 0; g.userData = { footprint: { w: 4, l: 8 } }; return g; }],
   ['Level crossing', '', V.createLevelCrossing],
@@ -59,6 +104,41 @@ export const CATALOG = [
   ['Beach umbrella', '', T.createBeachUmbrella],
   ['Sandcastle', '', T.createSandcastle],
   ['Boat', 'bobbing', T.createBoat],
+  ['Elephanta booth', 'Gateway', D.createElephantaBooth],
+  ['Elephanta ferry', 'bobbing', D.createFerry],
+  ['Photographer', 'tripod stand', D.createPhotographerTripod],
+  ['Dana mat', 'pigeon feed', D.createDanaMat],
+  ['Vintage car', 'Taj', D.createVintageCar],
+  ['Bull statue', 'BSE', D.createBullStatue],
+  ['Stock ticker', 'scrolls', D.createStockTicker],
+  ['Tiffin pile', 'CST dabbawalas', D.createTiffinPile],
+  ['Luggage trolley', 'CST', D.createLuggageTrolley],
+  ['Book stall', 'Rajabai', D.createBookStall],
+  ['Marine bench', '', D.createMarineBench],
+  ['Toll booth', 'Sea Link', D.createTollBooth],
+  ['Chadar stall', 'Haji Ali', D.createChadarStall],
+  ['Haji Ali Juice', 'shop', D.createHajiAliJuice],
+  ['Pav bhaji stall', 'Juhu', D2.createPavBhajiStall],
+  ['Horse', 'rides, idle', D2.createHorse],
+  ['Sand art', 'Juhu', D2.createSandArt],
+  ['Bhutta cart', 'coals flicker', D2.createBhuttaCart],
+  ['Coconut cart', '', D2.createCoconutCart],
+  ['Carrom board', 'chawl', D2.createCarromBoard],
+  ['Common tap', 'chawl', D2.createCommonTap],
+  ['Rangoli 0', 'lotus', (ink) => D2.createRangoli(ink, { seed: 0 })],
+  ['Rangoli 1', 'star', (ink) => D2.createRangoli(ink, { seed: 1 })],
+  ['Rangoli 2', 'kolam', (ink) => D2.createRangoli(ink, { seed: 2 })],
+  ['Rangoli 3', 'peacock', (ink) => D2.createRangoli(ink, { seed: 3 })],
+  ['Ganpati poster', 'chowk', D2.createGanpatiPoster],
+  ['Puddle', 'decal', (ink) => D2.createPuddle(ink, { seed: 2 })],
+  ['Temple bells', 'swing', D2.createTempleBells],
+  ['Offering stall', 'temple', D2.createOfferingStall],
+  ['Chappal row', 'temple', D2.createChappalRow],
+  ['Timetable board', 'station', D2.createTimetableBoard],
+  ['Fast/Slow', 'indicator', D2.createFastSlowIndicator],
+  ['Platform chai stall', 'station', D2.createPlatformChaiStall],
+  ['Stool cluster', 'plastic', D2.createStoolCluster],
+  ['Crate stack', '', D2.createCrateStack],
   ['Kite', 'patang', T.createKite],
 ];
 

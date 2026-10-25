@@ -342,26 +342,43 @@ const LIVERY = {
 const SKINS = ['#e9b58f', '#c98a62', '#a56a48', '#f1c9a5'];
 const CLOTH = ['#f4a0b8', '#8fd3c6', '#f6cf5a', '#a9c8f0', '#c4b2ee', '#f4a05a', '#9fd68e'];
 
-function warliFigure(ctx, x, y, s, r, { lean = 0, cloth = CLOTH[0], skin = SKINS[0], wave = false } = {}) {
+function warliFigure(ctx, x, y, s0, r, { lean = 0, cloth = CLOTH[0], skin = SKINS[0], wave = false, kind = 'man' } = {}) {
+  const s = kind === 'kid' ? s0 * 0.68 : s0;
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(lean);
   const lw = Math.max(2, s * 0.06);
-  // legs (sticks), two triangles, round head
+  const woman = kind === 'woman';
+  // legs (sticks), two triangles (a woman's lower triangle is a wide saree skirt), round head
   ctx.strokeStyle = INK; ctx.lineWidth = lw;
-  wobblyLine(ctx, [[-s * 0.1, s * 0.0], [-s * 0.14, -s * 0.32], [-s * 0.12, -s * 0.5]], { r, amp: 1, lw });
-  wobblyLine(ctx, [[s * 0.1, s * 0.0], [s * 0.14, -s * 0.3], [s * 0.18, -s * 0.5]], { r, amp: 1, lw });
-  drawShape(ctx, [[-s * 0.2, -s * 0.46], [s * 0.2, -s * 0.46], [s * 0.04, -s * 0.78], [-s * 0.04, -s * 0.78]], { fill: cloth, hatch: 'rgba(60,40,80,0.5)', w: 512, h: 512, r, amp: 1, lw: lw * 0.8 });
-  drawShape(ctx, [[-s * 0.3, -s * 1.12], [s * 0.3, -s * 1.12], [s * 0.04, -s * 0.78], [-s * 0.04, -s * 0.78]], { fill: cloth, hatch: 'rgba(60,40,80,0.5)', w: 512, h: 512, r, amp: 1, lw: lw * 0.8 });
+  if (!woman) {
+    wobblyLine(ctx, [[-s * 0.1, s * 0.0], [-s * 0.14, -s * 0.32], [-s * 0.12, -s * 0.5]], { r, amp: 1, lw });
+    wobblyLine(ctx, [[s * 0.1, s * 0.0], [s * 0.14, -s * 0.3], [s * 0.18, -s * 0.5]], { r, amp: 1, lw });
+  }
+  const lowW = woman ? 0.4 : 0.2;
+  const lowTop = woman ? -s * 0.0 : -s * 0.46;
+  drawShape(ctx, [[-s * lowW, lowTop], [s * lowW, lowTop], [s * 0.04, -s * 0.78], [-s * 0.04, -s * 0.78]], { fill: woman ? '#f08aa6' : cloth, hatch: 'rgba(60,40,80,0.5)', w: 512, h: 512, r, amp: 1, lw: lw * 0.8 });
+  drawShape(ctx, [[-s * 0.3, -s * 1.12], [s * 0.3, -s * 1.12], [s * 0.04, -s * 0.78], [-s * 0.04, -s * 0.78]], { fill: woman ? '#9fd68e' : cloth, hatch: 'rgba(60,40,80,0.5)', w: 512, h: 512, r, amp: 1, lw: lw * 0.8 });
   wobblyLine(ctx, [[-s * 0.3, -s * 1.1], [-s * 0.5, wave ? -s * 1.5 : -s * 0.9]], { r, amp: 1, lw });
   wobblyLine(ctx, [[s * 0.3, -s * 1.1], [s * 0.5, wave ? -s * 1.45 : -s * 0.9]], { r, amp: 1, lw });
-  drawShape(ctx, Array.from({ length: 9 }, (_, i) => [Math.cos((i / 9) * TAU) * s * 0.2, -s * 1.34 + Math.sin((i / 9) * TAU) * s * 0.2]), { fill: skin, hatch: 'rgba(120,70,40,0.4)', w: 512, h: 512, r, amp: 1, lw: lw * 0.8 });
+  const hy = -s * 1.34;
+  drawShape(ctx, Array.from({ length: 9 }, (_, i) => [Math.cos((i / 9) * TAU) * s * 0.2, hy + Math.sin((i / 9) * TAU) * s * 0.2]), { fill: skin, hatch: 'rgba(120,70,40,0.4)', w: 512, h: 512, r, amp: 1, lw: lw * 0.8 });
   ctx.fillStyle = INK;
-  for (const sx of [-1, 1]) { ctx.beginPath(); ctx.arc(sx * s * 0.07, -s * 1.35, s * 0.025, 0, TAU); ctx.fill(); }
+  if (woman) { // hair bun + bindi
+    ctx.beginPath(); ctx.arc(0, hy - s * 0.25, s * 0.11, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#d9453b'; ctx.beginPath(); ctx.arc(0, hy - s * 0.1, s * 0.03, 0, TAU); ctx.fill(); ctx.fillStyle = INK;
+  } else if (kind === 'dabba') { // white Gandhi cap + tiffin carrier
+    ctx.fillStyle = '#fbf8ee'; ctx.strokeStyle = INK; ctx.beginPath(); ctx.moveTo(-s * 0.22, hy - s * 0.1); ctx.lineTo(s * 0.22, hy - s * 0.1); ctx.lineTo(s * 0.16, hy - s * 0.32); ctx.lineTo(-s * 0.16, hy - s * 0.32); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#c8d1d8'; ctx.fillRect(s * 0.44, -s * 1.0, s * 0.24, s * 0.4); ctx.strokeRect(s * 0.44, -s * 1.0, s * 0.24, s * 0.4); ctx.fillStyle = INK;
+  } else if (kind === 'man') { // short hair and a moustache
+    ctx.fillRect(-s * 0.2, hy - s * 0.22, s * 0.4, s * 0.09);
+    ctx.fillRect(-s * 0.09, hy + s * 0.07, s * 0.18, s * 0.025);
+  }
+  for (const sx of [-1, 1]) { ctx.beginPath(); ctx.arc(sx * s * 0.07, hy, s * 0.025, 0, TAU); ctx.fill(); }
   ctx.restore();
 }
 
-function trainSideCanvas(L, isEngine, seed) {
+function trainSideCanvas(L, isEngine, seed, ladies = false) {
   // 8 x 2.7 units -> 1280 x 432 px (160 px/unit)
   const W = 1280, H = 432;
   return paintCanvas(W, H, (ctx) => {
@@ -398,6 +415,8 @@ function trainSideCanvas(L, isEngine, seed) {
           const fx = x + w * (0.3 + r() * 0.4);
           drawShape(ctx, Array.from({ length: 8 }, (_, j) => [fx + Math.cos((j / 8) * TAU) * 20, y + h * 0.62 + Math.sin((j / 8) * TAU) * 21]), { fill: SKINS[Math.floor(r() * 4)], hatch: 'rgba(120,70,40,0.4)', w: W, h: H, r, amp: 1, lw: 2.4 });
           ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(fx - 7, y + h * 0.6, 2.6, 0, TAU); ctx.arc(fx + 7, y + h * 0.6, 2.6, 0, TAU); ctx.fill();
+          if (ladies || r() < 0.4) { ctx.beginPath(); ctx.arc(fx, y + h * 0.62 - 25, 8, 0, TAU); ctx.fill(); ctx.fillStyle = '#d9453b'; ctx.beginPath(); ctx.arc(fx, y + h * 0.6 - 8, 2.2, 0, TAU); ctx.fill(); } // hair bun + bindi
+          else if (r() < 0.6) { ctx.fillRect(fx - 7, y + h * 0.66, 14, 3); ctx.fillStyle = '#fbf8ee'; ctx.fillRect(fx - 15, y + h * 0.62 - 26, 30, 9); } // moustache + white cap
         }
       }
     }
@@ -406,14 +425,23 @@ function trainSideCanvas(L, isEngine, seed) {
       const x = d - dw / 2, y = H * 0.1, w = dw, h = H * 0.68;
       drawShape(ctx, [[x, y], [x + w, y], [x + w, y + h], [x, y + h]], { fill: '#59527a', hatch: 'rgba(20,15,45,0.8)', w: W, h: H, r, amp: 2, lw: 4 });
       // inner crowd (smaller, paler)
-      for (let k = 0; k < 2; k++) warliFigure(ctx, x + w * (0.3 + k * 0.4), y + h - 4, 62, r, { cloth: CLOTH[(di + k + 2) % 7], skin: SKINS[(di + k) % 4] });
+      const KINDS = ladies ? ['woman', 'woman'] : [['man', 'woman'], ['kid', 'man'], ['dabba', 'man']][di % 3];
+      for (let k = 0; k < 2; k++) warliFigure(ctx, x + w * (0.3 + k * 0.4), y + h - 4, 62, r, { cloth: CLOTH[(di + k + 2) % 7], skin: SKINS[(di + k) % 4], kind: KINDS[k] });
       // vertical grab-pole
       wobblyLine(ctx, [[x + w - 12, y + 8], [x + w - 12, y + h + 20]], { r, lw: 5, amp: 1, color: '#c8d1d8' });
       wobblyLine(ctx, [[x + w - 12, y + 8], [x + w - 12, y + h + 20]], { r, lw: 2, amp: 1 });
     });
-    // lettering
+    // lettering: labels must match the car
     hand(ctx, L.label, W * 0.335, H * 0.97, { size: H * 0.19, fill: '#fff8de', seed: 2 });
-    hand(ctx, isEngine ? 'सामान्य · GENERAL' : 'महिला · LADIES', W * 0.66, H * 0.965, { size: H * 0.15, fill: '#fff8de', seed: 6 });
+    if (ladies) {
+      hand(ctx, 'महिला · LADIES', W * 0.66, H * 0.965, { size: H * 0.16, fill: '#ffe1ec', seed: 6 });
+      // a pink LADIES board over the middle door + a pink stripe along the roof line
+      ctx.fillStyle = '#f48fb1'; ctx.fillRect(0, 0, W, H * 0.04);
+      drawShape(ctx, [[W * 0.5 - 140, 2], [W * 0.5 + 140, 2], [W * 0.5 + 140, H * 0.1], [W * 0.5 - 140, H * 0.1]], { fill: '#f9a8c4', hatch: 'rgba(190,60,110,0.6)', w: W, h: H, r, amp: 1.2, lw: 3 });
+      hand(ctx, 'महिला · LADIES', W * 0.5, H * 0.082, { size: H * 0.068, fill: '#7a1741', seed: 9, maxW: 270 });
+    } else {
+      hand(ctx, 'सामान्य · GENERAL', W * 0.66, H * 0.965, { size: H * 0.15, fill: '#fff8de', seed: 6 });
+    }
     hand(ctx, '' + (90000 + Math.floor(seed * 137) % 9000), W * 0.08, H * 0.965, { size: H * 0.14, fill: '#fff8de', seed: 4 });
     // little flower sticker on the lower band
     hand(ctx, '✿', W * 0.5, H * 0.98, { size: H * 0.13, fill: '#ffd1a1', seed: 3 });
@@ -425,7 +453,9 @@ function trainSideCanvas(L, isEngine, seed) {
  * opts: { isEngine=false (cab front at +z with face + pantograph), livery:'maroon'|'purple', seed, crowd=true }
  */
 export function createTrainCar(ink, opts = {}) {
+  if (ink && !ink.createInkMaterial && typeof ink === 'object') { opts = ink; ink = undefined; } // lab: &spec={"ladies":true}
   const isEngine = !!opts.isEngine;
+  const ladies = !!opts.ladies && !isEngine;
   const seed = opts.seed ?? 1;
   const L = LIVERY[opts.livery ?? 'maroon'];
   const g = new THREE.Group();
@@ -474,7 +504,7 @@ export function createTrainCar(ink, opts = {}) {
   body.add(Object.assign(meshOf(ink, p, { spacing: 0.12, thickness: 2.4 }), { name: 'train-body' }));
 
   // painted sides (lit ink material so they shade like the shell)
-  const canvas = trainSideCanvas(L, isEngine, seed);
+  const canvas = trainSideCanvas(L, isEngine, seed, ladies);
   const sideMat = texMat(ink, canvas, { spacing: 0.1, strength: 0.4 });
   for (const sx of [-1, 1]) {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(LEN - 0.3, 2.7 * (LEN - 0.3) / 8 * 0.995), sideMat);
@@ -484,28 +514,46 @@ export function createTrainCar(ink, opts = {}) {
     m.layers.enableAll();
     body.add(m);
   }
-  // passengers hanging out of the doors: 3D heads, torsos, arms
+  // passengers hanging out of the doors: 3D heads, torsos, arms. Ladies car = women only; general = mixed
   const pp = new Mix();
   const rr = mulberry32(seed * 91 + 5);
   const dz = [(0.17 - 0.5) * (LEN - 0.3), 0, (0.83 - 0.5) * (LEN - 0.3)];
+  const MIXED = ['man', 'woman', 'kid', 'man', 'dabba', 'woman', 'man'];
+  const passenger = (sx, zz, kind) => {
+    const skin = [C.skin1, C.skin2, C.skin3, C.skin4][Math.floor(rr() * 4)];
+    const cloth = kind === 'woman' ? [C.rose, C.marigoldY, C.teal, C.pink, C.lilac][Math.floor(rr() * 5)] : [C.sky, C.pistachio, C.cream, C.lilac, C.butter][Math.floor(rr() * 5)];
+    const k = kind === 'kid' ? 0.68 : 1;
+    const lean = 0.38 + rr() * 0.2;
+    pp.cone(0.42 * k, 1.0 * k, cloth, { pos: [sx * (HW + 0.18 * k), 1.95 + (1 - k) * 0.35, zz], rot: [0, 0, -sx * lean], seg: 7 });
+    const hx = sx * (HW + 0.52 * k), hy = 2.58 - (1 - k) * 0.35;
+    pp.ball(0.3 * k, skin, { pos: [hx, hy, zz], w: 8, h: 6 });
+    pp.ball(0.05, INKC, { pos: [hx + sx * 0.24 * k, hy + 0.04, zz - 0.1 * k], outline: false, w: 4, h: 3 });
+    pp.ball(0.05, INKC, { pos: [hx + sx * 0.24 * k, hy + 0.04, zz + 0.1 * k], outline: false, w: 4, h: 3 });
+    pp.ball(0.09, 0xf49bb2, { pos: [hx + sx * 0.2 * k, hy - 0.08, zz + 0.22 * k], scale: [0.5, 0.6, 0.5], outline: false, w: 4, h: 3 });
+    pp.tube([sx * (HW + 0.3), 2.25, zz + 0.1], [sx * (HW + 0.05), 2.6, zz + 0.62], 0.07 * k, skin, { seg: 5 });
+    pp.tube([sx * (HW + 0.3), 2.2, zz - 0.1], [sx * (HW + 0.1), 2.5, zz + 0.55], 0.07 * k, skin, { seg: 5, outline: false });
+    pp.cyl(0.05, 0.05, 2.6, C.steel, { pos: [sx * (HW + 0.08), 2.1, zz + 0.62], seg: 5, outline: false });
+    if (kind === 'woman') { // hair bun + long braid + red bindi
+      pp.ball(0.31 * k, C.kaali, { pos: [hx - sx * 0.04, hy + 0.06, zz], scale: [0.85, 0.7, 0.95], w: 8, h: 5, outline: false });
+      pp.ball(0.12, C.kaali, { pos: [hx - sx * 0.1, hy + 0.34, zz], w: 6, h: 4, outline: false });
+      pp.tube([hx - sx * 0.1, hy + 0.1, zz], [hx - sx * 0.34, hy - 0.7, zz + 0.03], 0.06, C.kaali, { seg: 5, outline: false });
+      pp.ball(0.035, 0xe9362f, { pos: [hx + sx * 0.28 * k, hy + 0.1, zz], w: 4, h: 3, outline: false });
+    } else if (kind === 'dabba') { // white topi, tiffin carrier hooked on the pole
+      pp.cyl(0.26, 0.3, 0.2, C.white, { pos: [hx, hy + 0.3, zz], seg: 7, outline: false });
+      for (let i = 0; i < 3; i++) pp.cyl(0.14, 0.14, 0.17, i % 2 ? C.steel : 0xdde5ea, { pos: [sx * (HW + 0.08), 1.25 + i * 0.18, zz + 0.62], seg: 7, outline: false });
+    } else if (kind === 'man') { // short hair + moustache
+      pp.ball(0.31, C.kaali, { pos: [hx - sx * 0.02, hy + 0.12, zz], scale: [0.9, 0.5, 0.95], w: 8, h: 5, outline: false });
+      pp.box(0.04, 0.05, 0.2, C.kaali, { pos: [hx + sx * 0.3, hy - 0.06, zz], outline: false });
+    } else { // kid: two small pigtails
+      for (const s2 of [-1, 1]) pp.ball(0.08, C.kaali, { pos: [hx, hy + 0.22, zz + s2 * 0.26], w: 5, h: 4, outline: false });
+    }
+  };
   if (opts.crowd !== false) {
     for (const sx of [-1, 1]) {
       dz.forEach((z, i) => {
         if (i === 1 && sx === 1 && !isEngine) return; // not every door is crowded
-        const skin = [C.skin1, C.skin2, C.skin3, C.skin4][Math.floor(rr() * 4)];
-        const cloth = [C.pink, C.teal, C.marigoldY, C.sky, C.lilac][Math.floor(rr() * 5)];
         const zz = z + (i === 0 ? -0.05 : 0.0) + (rr() - 0.5) * 0.12;
-        const lean = 0.38 + rr() * 0.2;
-        // torso cone leaning out, head ball, arms to the pole
-        pp.cone(0.42, 1.0, cloth, { pos: [sx * (HW + 0.18), 1.95, zz], rot: [0, 0, -sx * lean], seg: 7 });
-        pp.ball(0.3, skin, { pos: [sx * (HW + 0.52), 2.58, zz], w: 8, h: 6 });
-        pp.ball(0.05, INKC, { pos: [sx * (HW + 0.76), 2.62, zz - 0.1], outline: false, w: 4, h: 3 });
-        pp.ball(0.05, INKC, { pos: [sx * (HW + 0.76), 2.62, zz + 0.1], outline: false, w: 4, h: 3 });
-        pp.ball(0.09, 0xf49bb2, { pos: [sx * (HW + 0.72), 2.5, zz + 0.22], scale: [0.5, 0.6, 0.5], outline: false, w: 4, h: 3 });
-        pp.tube([sx * (HW + 0.3), 2.25, zz + 0.1], [sx * (HW + 0.05), 2.6, zz + 0.62], 0.07, skin, { seg: 5 });
-        pp.tube([sx * (HW + 0.3), 2.2, zz - 0.1], [sx * (HW + 0.1), 2.5, zz + 0.55], 0.07, skin, { seg: 5, outline: false });
-        pp.cyl(0.05, 0.05, 2.6, C.steel, { pos: [sx * (HW + 0.08), 2.1, zz + 0.62], seg: 5, outline: false });
-        if (rr() < 0.6) pp.ball(0.34, rr() < 0.5 ? C.kaali : C.maroon, { pos: [sx * (HW + 0.52), 2.72, zz], scale: [0.9, 0.5, 0.95], w: 8, h: 5, outline: false }); // hair
+        passenger(sx, zz, ladies ? 'woman' : MIXED[Math.floor(rr() * MIXED.length)]);
       });
     }
   }
@@ -521,6 +569,7 @@ export function createTrainCar(ink, opts = {}) {
   g.userData.length = LEN;
   g.userData.spacing = 8.3; // distance between car centres when chained
   g.userData.isEngine = isEngine;
+  g.userData.ladies = ladies;
   return finish(g, { footprint: { w: 3.1, l: LEN }, colliders: [-2.8, 0, 2.8].map((z) => ({ x: 0, z, radius: 1.7, height: 4 })) });
 }
 
@@ -541,7 +590,8 @@ export function trackParts(length = 4) {
   p.add(bed, 0xd7cbb8, { outline: false });
   for (let i = 0; i < n; i++) {
     const z = -length / 2 + sp * (i + 0.5);
-    p.box(2.7, 0.14, 0.3, C.woodDark, { pos: [0, 0.31, z], outline: false });
+    p.box(3.0, 0.2, 0.36, 0x6b4a3a, { pos: [0, 0.33, z], outline: false });
+    p.box(2.7, 0.04, 0.12, 0x8a6347, { pos: [0, 0.44, z], outline: false });
   }
   for (const sx of [-1, 1]) {
     p.box(0.13, 0.2, length, C.steelDark, { pos: [sx * TRACK.gauge / 2, 0.48, 0], outline: false });

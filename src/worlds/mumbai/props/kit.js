@@ -19,6 +19,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import * as INKMOD from '../../../engine/ink.js';
+import { computeBounds } from './meta.js';
 import { Parts, mulberry32, sphere, cyl, cone } from '../../../engine/scatter.js';
 import { makeCanvas, rng, drawShape, wobblyLine, INK, toTexture } from '../../../engine/doodle.js';
 
@@ -349,7 +350,9 @@ export function plateDecal(ink, text, { w = 1, h = 0.3, bg = '#1f1b2b', fg = '#f
 
 // ---- finishing / animation helpers -----------------------------------------------------
 export function finish(group, { footprint = { w: 1, l: 1 }, colliders = [], ...extra } = {}) {
-  group.userData = { ...group.userData, footprint, colliders, ...extra };
+  // integration defaults: props never fade (occluder false), pad = footprint, bounds of the drawn geometry, anchors {}
+  group.userData = { occluder: false, pad: { w: footprint.w, d: footprint.l }, anchors: {}, ...group.userData, footprint, colliders, ...extra };
+  try { group.userData.bounds = computeBounds(group); } catch (e) { /* bounds are best-effort */ }
   group.traverse((o) => { if (o.isMesh && o.name !== 'ink-outline') { o.castShadow = o.castShadow !== false; o.receiveShadow = true; } });
   return group;
 }

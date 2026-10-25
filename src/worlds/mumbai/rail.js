@@ -8,12 +8,15 @@
  */
 import * as THREE from 'three';
 import { PATHS, ROAD_DEFS, R, stepAlong, tangentTo, pathNearest, dist, STATION_B, polar, RAIL_RADIUS } from './geo.js';
-import { createTrackSegment, trackParts, createTrainCar, createLevelCrossing } from './props/index.js';
+import { createTrackSegment, trackParts, createTrainCar, createLevelCrossing, Mix, C } from './props/index.js';
+import * as THREE_ from 'three';
 import { createStation } from './landmarks/index.js';
+import { STATION } from './layout.js';
 import { setSegment } from '../../engine/colliders.js';
 import { flagShadows } from './world.js';
 
-const SINK = 0.42; // track sunk into the ground
+const SINK = 0.36; // track sunk into the ground
+const RAIL_TOP = 0.44; // rail head above the ground (wheels sit here)
 const TRAIN = { vmax: 12.5, acc: 3.0, dec: 3.2, dwell: 3.5, cars: 5, spacing: 8.3 };
 
 export function rail(W) {
@@ -22,8 +25,7 @@ export function rail(W) {
   W.crossings = out.crossings;
 
   // ---- track -------------------------------------------------------------------------------------------------------
-  const tp = trackParts(4); // every part is outline:false; give the ballast bed an ink hull
-  const bedHull = tp.all[0].clone(); bedHull.deleteAttribute('color'); bedHull.deleteAttribute('normal'); tp.hull.push(bedHull);
+  const tp = trackBed(4); // own track parts: sleepers must stand clear of the ground even though the bed is sunk
   W.bank.specs.track = { parts: tp, collide: null, bodyRadius: 2, scale: [1, 1], hatch: 0.1, thickness: 1.5 };
   const f = {};
   const nSeg = Math.round(path.length / 4);
@@ -34,13 +36,8 @@ export function rail(W) {
   }
 
   // ---- station -----------------------------------------------------------------------------------------------------
-  const nS = path.nearest(polar(RAIL_RADIUS, STATION_B));
-  const sc = nS.s;
-  path.at(sc, f);
-  const up = f.dir.clone();
-  const zObj = new THREE.Vector3().crossVectors(f.tan, up).normalize(); // platform +Z = track side; x_obj = train direction
-  const PLAT_TO_TRACK = 4.7;
-  const stationDir = stepAlong(f.dir, zObj, -PLAT_TO_TRACK);
+  const sc = STATION.s;
+  const stationDir = STATION.dir, zObj = STATION.fwd;
   const station = createStation(W.ink, { names: ['चर्चगेट', 'CHURCHGATE'] });
   station.name = 'station';
   W.add(station, { dir: stationDir, fwd: zObj, maxDist: Infinity, height: 8 });
@@ -70,7 +67,7 @@ export function rail(W) {
     flagShadows(car);
     const sCar = sHead - i * TRAIN.spacing;
     const actor = W.actors.add(car, { type: 'spline', dirs, speed: 0, closed: true, phase: (((sCar % L) + L) % L) / L },
-      { radiusFn: (d) => W.planet.getSurfaceRadius(d) + 0.17, collider: { radius: 1.6, height: 4.2, length: 6.6 } });
+      { radiusFn: (d) => W.planet.getSurfaceRadius(d) + RAIL_TOP, collider: { radius: 1.6, height: 4.2, length: 6.6 } });
     W.root.add(car);
     const item = W.cull(car, { maxDist: 130, radius: 6, height: 5, dynamic: true, outlineDist: 50 });
     cars.push({ car, actor, item });
@@ -127,12 +124,12 @@ function makeCrossing(W, road, best, rail) {
     const zObj = f.tan.clone().multiplyScalar(sgn); // object +Z points away from the track (toward oncoming traffic)
     const xObj = new THREE.Vector3().crossVectors(up, zObj).normalize(); // boom extends along +X
     const pos0 = stepAlong(f.dir, zObj, 3.7);
-    const pos = stepAlong(pos0, xObj, -(w / 2 + 0.7)); // stand on the near road edge, boom reaches across
-    const g = createLevelCrossing(W.ink, { reach: w + 0.5, closed: false });
+    const pos = stepAlong(pos0, xObj, -(w / 2 + 1.2)); // stand just off the near road edge, boom reaches across
+    const g = createLevelCrossing(W.ink, { reach: w + 1.2, closed: false });
     g.userData.setClosed(false);
     W.add(g, { dir: pos, fwd: zObj, maxDist: 90, height: 5, collide: false, walkable: false });
     // boom collider (segment across the road), toggled by height
-    const a = pos.clone(), b = stepAlong(pos, xObj, w + 0.5);
+    const a = pos.clone(), b = stepAlong(pos, xObj, w + 1.2);
     const col = setSegment({ radius: 0.45, height: -1 }, a, b, R);
     W.colliders.add(col);
     // signal-box post collider
@@ -142,3 +139,23 @@ function makeCrossing(W, road, best, rail) {
   return x;
 }
 void tangentTo; void createTrackSegment;
+
+/** ballast bed + chunky wooden sleepers (clearly proud of the bed) + two steel rails; spans z in [-len/2, len/2] */
+function trackBed(len) {
+  const p = new Mix();
+  const T = THREE_;
+  const shape = new T.Shape([new T.Vector2(-1.9, 0), new T.Vector2(1.9, 0), new T.Vector2(1.45, 0.34), new T.Vector2(-1.45, 0.34)]);
+  const bed = new T.ExtrudeGeometry(shape, { depth: len, bevelEnabled: false });
+  bed.translate(0, 0, -len / 2);
+  p.add(bed, 0xd7cbb8, { outline: false });
+  const n = Math.round(len / 0.62), sp = len / n;
+  for (let i = 0; i < n; i++) p.box(3.0, 0.2, 0.34, C.woodDark, { pos: [0, 0.43, -len / 2 + sp * (i + 0.5)], outline: false });
+  for (const sx of [-1, 1]) {
+    p.box(0.16, 0.26, len, C.steelDark, { pos: [sx * 0.95, 0.66, 0], outline: false });
+    p.box(0.26, 0.07, len, C.steel, { pos: [sx * 0.95, 0.8, 0], outline: false });
+  }
+  const bedHull = bed.clone(); bedHull.deleteAttribute('normal'); bedHull.deleteAttribute('uv');
+  const first = p.all[0].clone(); first.deleteAttribute('color'); first.deleteAttribute('normal');
+  p.hull.push(first);
+  return p;
+}

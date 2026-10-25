@@ -77,6 +77,10 @@ varying vec3 vONorm;
 #ifdef INK_AHATCH
 varying vec2 vHatchP; // x: how strongly this patch is hatched in light, y: stroke angle offset (radians)
 #endif
+#ifdef INK_LAYERS
+varying vec4 vLA; // per-vertex signed distances (units) to the edge of paint layers 0..3 (negative = inside)
+varying vec4 vLB; // layers 4..7
+#endif
 `;
 
 const HATCH_FRAG_FUNCS = /* glsl */ `
@@ -86,6 +90,14 @@ uniform float uHatchStrength;
 uniform float uLightHatch;  // strength of sparse hatch in the lit band
 uniform vec3  uHatchColor;
 uniform float uUseHatchColor;
+float inkHatchX = 1.0; // light-hatch amount / stroke angle offset actually used by inkShade (the paint layers override them per fragment)
+float inkHatchY = 0.0;
+#ifdef INK_LAYERS
+uniform vec3 uLayerCol[INK_NLAYERS];
+uniform float uLayerHatch[INK_NLAYERS];
+uniform float uLayerLine[INK_NLAYERS];
+uniform float uLayerFill[INK_NLAYERS];
+#endif
 
 // One family of diagonal pencil strokes on a 2D plane. dirSign flips the diagonal.
 // Returns stroke coverage 0..1 with irregular width, wobble, broken ends and grain.
@@ -138,8 +150,8 @@ vec3 inkShade(vec3 base, float lit, vec3 p, vec3 n){
   float angOff = 0.0;
   float lightAmt = uLightHatch;
   #ifdef INK_AHATCH
-  lightAmt *= vHatchP.x;
-  angOff = vHatchP.y;
+  lightAmt *= inkHatchX;
+  angOff = inkHatchY;
   #endif
   const float D45 = 0.7853982;
   // light band: "drawn on" strokes in patches (strength + direction vary per patch)
@@ -172,6 +184,9 @@ export function createInkMaterial({
   hatchStrength = 1,
   lightHatch = 0, // sparse hatch in lit areas (0 = none)
   hatchAttribute = false, // modulate lightHatch with geometry attribute `aHatch`
+  layers = null, // paint layers resolved PER FRAGMENT from per-vertex distances (geometry attributes aLayerA, aLayerB: vec4 each):
+  //   [{ color, hatch (light-hatch amount), line (0..1 ink edge line), fill = true }] (max 8, painted in order). Smooth, wobbly,
+  //   hand-drawn boundaries instead of per-face stair steps (see engine/planet.js `layers`).
 } = {}) {
   const mat = new THREE.MeshLambertMaterial({ color, vertexColors });
   const u = {
@@ -182,8 +197,15 @@ export function createInkMaterial({
     uUseHatchColor: { value: hatchColor === null ? 0 : 1 },
   };
   if (hatchAttribute) mat.defines = { INK_AHATCH: '' };
+  if (layers) {
+    mat.defines = { ...(mat.defines ?? {}), INK_LAYERS: '', INK_NLAYERS: layers.length };
+    u.uLayerCol = { value: layers.map((l) => new THREE.Color(l.color ?? 0xffffff)) };
+    u.uLayerHatch = { value: layers.map((l) => l.hatch ?? 0.3) };
+    u.uLayerLine = { value: layers.map((l) => l.line ?? 0) };
+    u.uLayerFill = { value: layers.map((l) => (l.fill === false ? 0 : 1)) };
+  }
   mat.userData.ink = u;
-  mat.customProgramCacheKey = () => 'ink' + (hatchAttribute ? 'A' : '');
+  mat.customProgramCacheKey = () => 'ink' + (hatchAttribute ? 'A' : '') + (layers ? 'L' + layers.length : '');
 
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, u);
@@ -194,6 +216,10 @@ export function createInkMaterial({
 ${HATCH_PARS}
 #ifdef INK_AHATCH
 attribute vec2 aHatch;
+#endif
+#ifdef INK_LAYERS
+attribute vec4 aLayerA;
+attribute vec4 aLayerB;
 #endif`
       )
       .replace(
@@ -202,6 +228,9 @@ attribute vec2 aHatch;
 vOPos = position; vONorm = normal;
 #ifdef INK_AHATCH
 vHatchP = aHatch;
+#endif
+#ifdef INK_LAYERS
+vLA = aLayerA; vLB = aLayerB;
 #endif`
       );
     shader.fragmentShader = shader.fragmentShader
@@ -216,7 +245,28 @@ ${HATCH_FRAG_FUNCS}`
         '#include <color_fragment>',
         `#include <color_fragment>
 vec3 inkBase = diffuseColor.rgb;
-diffuseColor.rgb = vec3(1.0);`
+diffuseColor.rgb = vec3(1.0);
+#ifdef INK_AHATCH
+inkHatchX = vHatchP.x; inkHatchY = vHatchP.y;
+#endif
+#ifdef INK_LAYERS
+{
+  float lv[8];
+  lv[0] = vLA.x; lv[1] = vLA.y; lv[2] = vLA.z; lv[3] = vLA.w; lv[4] = vLB.x; lv[5] = vLB.y; lv[6] = vLB.z; lv[7] = vLB.w;
+  // hand-drawn wobble: low + mid frequency noise shifts every edge a little, the same way for all layers
+  float wob = (inkNoise2(vOPos.xz * 1.9 + vOPos.y * 1.3) - 0.5) * 0.34 + (inkNoise2(vOPos.xy * 6.3 + vOPos.z * 2.1) - 0.5) * 0.12;
+  float mott = 0.95 + 0.1 * inkNoise2(vOPos.xz * 3.1 + vOPos.y);
+  for (int i = 0; i < INK_NLAYERS; i++) {
+    float d = lv[i] + wob;
+    float aa = max(fwidth(lv[i]) * 0.9, 0.05);
+    float cov = uLayerFill[i] * (1.0 - smoothstep(-aa, aa, d));
+    inkBase = mix(inkBase, uLayerCol[i] * mott, cov);
+    inkHatchX = mix(inkHatchX, uLayerHatch[i], cov);
+    float ln = (1.0 - smoothstep(0.0, 0.05 + aa * 1.3, abs(d))) * uLayerLine[i];
+    inkBase = mix(inkBase, vec3(0.17, 0.14, 0.25), ln * 0.6);
+  }
+}
+#endif`
       )
       .replace(
         '#include <opaque_fragment>',
@@ -265,7 +315,8 @@ void main(){
 `;
 const OUTLINE_FRAG = /* glsl */ `
 uniform vec3 uColor;
-void main(){ gl_FragColor = vec4(uColor, 1.0); }
+uniform float uAlpha;
+void main(){ gl_FragColor = vec4(uColor, uAlpha); }
 `;
 
 // Hull normals must be smooth or faces separate when inflated: weld by position and recompute.
@@ -293,6 +344,7 @@ export function addOutline(
       uWobble: { value: wobble },
       uWobbleFreq: { value: wobbleFreq },
       uColor: { value: new THREE.Color(color) },
+      uAlpha: { value: 1 }, // < 1 (with material.transparent) fades the line: engine/occlusion.js
     },
   });
   let outline;

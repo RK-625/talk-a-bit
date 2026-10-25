@@ -208,10 +208,10 @@ export class Kit {
     return this;
   }
   face(ox, oy, oz, ry = 0) { return new Face(this, ox, oy, oz, ry); }
-  plane(canvas, w, h, pos, ry = 0) {
+  plane(canvas, w, h, pos, ry = 0, rx = 0) {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), planeMaterial(canvas));
     m.position.set(...pos);
-    m.rotation.y = ry;
+    m.rotation.set(rx, ry, 0);
     m.layers.set(OVERLAY);
     this.planes.push(m);
     return m;
@@ -242,7 +242,7 @@ export class Kit {
       const r = this.r;
       mesh.rotation.z = (r() - 0.5) * 2 * lean;
       mesh.rotation.x = (r() - 0.5) * lean;
-      for (const p of this.planes) { p.rotation.z = mesh.rotation.z; }
+      for (const p of this.planes) { if (!p.rotation.x) p.rotation.z = mesh.rotation.z; }
     }
     return this.group;
   }

@@ -11,6 +11,7 @@ import { bridges } from './bridges.js';
 import { traffic } from './traffic.js';
 import { npcs } from './npcs.js';
 import { installDevTools } from './devtools.js';
+import { validateWorld } from './validate.js';
 
 export function buildWorld(ctx) {
   const t0 = performance.now();
@@ -26,6 +27,7 @@ export function buildWorld(ctx) {
   if (import.meta.env.DEV) {
     console.log(`[mumbai] built in ${(performance.now() - t0).toFixed(0)} ms: ${ctx.culler.items.length} culled items, ${ctx.colliders.list.length} colliders, ${W.bank.count()} instances`);
     installDevTools(W, { S, R, B, T, N });
+    window.__mumbaiValidation = validateWorld(W, { T });
   }
   return {
     update(dt, t) { for (let i = 0; i < W.updaters.length; i++) W.updaters[i](dt, t); },

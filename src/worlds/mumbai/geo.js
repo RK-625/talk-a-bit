@@ -165,17 +165,17 @@ export const BRIDGE = (() => {
 // --- roads (centreline waypoints in polar coords) ---
 // kind: 'road' (asphalt + lane dashes), 'lane' (terracotta, no dashes), 'promenade'
 export const ROAD_DEFS = {
-  ring: { kind: 'road', w: 6.4, closed: true, pts: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((b) => [32, b]) },
+  ring: { kind: 'road', w: 6.4, closed: true, pts: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((b) => [38, b]) },
   great: { kind: 'road', w: 6.6, closed: false, pts: [[32, 0], [50, 0], [66, 0], [84, 0], [106, 0], [124, 0], [142, 0], [158, 0], [169, 0]] },
   // Marine Drive: an arc round the bay, built below (needs the bay centre)
   east: { kind: 'road', w: 5.6, closed: false, pts: [[32, -58], [50, -58], [66, -55], [82, -52], [98, -49], [112, -47]] },
   west: { kind: 'road', w: 5.6, closed: false, dirs: [...P([[32, 92], [56, 98], [80, 104], [102, 109]]), BRIDGE.start] },
   juhuRoad: { kind: 'road', w: 5.0, closed: false, dirs: [BRIDGE.end, ...P([[118, 168], [124, 180], [130, 190]])] },
   // lanes in the chawl district
-  laneL: { kind: 'lane', w: 3.4, closed: false, pts: [[4, -90], [12, -90], [22, -90], [32, -90]] },
-  laneR: { kind: 'lane', w: 3.4, closed: false, pts: [[4, 90], [12, 90], [22, 90], [32, 90]] },
-  laneS: { kind: 'lane', w: 3.4, closed: false, pts: [[4, 180], [12, 180], [22, 180], [32, 180]] },
-  laneN: { kind: 'lane', w: 3.8, closed: false, pts: [[4, 0], [12, 0], [22, 0], [32, 0]] },
+  laneL: { kind: 'lane', w: 3.4, closed: false, pts: [[4, -90], [12, -90], [22, -90], [38, -90]] },
+  laneR: { kind: 'lane', w: 3.4, closed: false, pts: [[4, 90], [12, 90], [22, 90], [38, 90]] },
+  laneS: { kind: 'lane', w: 3.4, closed: false, pts: [[4, 180], [12, 180], [22, 180], [38, 180]] },
+  laneN: { kind: 'lane', w: 3.8, closed: false, pts: [[4, 0], [12, 0], [22, 0], [38, 0]] },
 };
 
 // Marine Drive: follows the real shoreline of Back Bay. shore(a) = distance from the bay centre to the water's edge at angle

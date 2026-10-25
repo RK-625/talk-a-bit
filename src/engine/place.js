@@ -104,6 +104,7 @@ function mergeRuns(list) {
   return out;
 }
 
+const FLOOR_LIFT = 0.06;
 function planeSurface(group, base, n, test) {
   // generic flat-plane surface: n = unit plane normal (world), base = a point on the plane; test(q) -> bool in plane coords
   const nb = n.dot(base);
@@ -114,7 +115,7 @@ function planeSurface(group, base, n, test) {
       const t = nb / den;
       return test(_v.copy(dir).multiplyScalar(t).sub(base));
     },
-    heightAt(dir) { return nb / n.dot(dir); },
+    heightAt(dir) { return nb / n.dot(dir) + FLOOR_LIFT; }, // a hair above the drawn slab so feet never sink into its top
   };
 }
 

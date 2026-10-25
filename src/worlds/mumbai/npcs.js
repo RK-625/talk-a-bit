@@ -84,8 +84,8 @@ export function npcs(W, S) {
   }
   const dabba = itemFrame('dabbaBike');
   if (dabba) person('dabbawala', { seed: 9 }, dabba.at(1.6, 0.4), dabba.fr.fwd.clone().applyAxisAngle(dabba.fr.up, 0.9));
-  const cop = resolveAt({ road: 'great', s: 4.2, lat: 6.3 });
-  person('trafficCop', { seed: 10, wave: true }, cop.dir, tangentTo(cop.dir, PATHS.great.at(4.2).dir ?? cop.dir));
+  const cop = resolveAt({ road: 'great', s: 12.5, lat: 6.3 });
+  person('trafficCop', { seed: 10, wave: true }, cop.dir, tangentTo(cop.dir, PATHS.great.at(12.5).dir ?? cop.dir));
 
   // ---- the Gateway: balloon seller, pigeons ------------------------------------------------------------------------------
   const bal = itemFrame('balloons');

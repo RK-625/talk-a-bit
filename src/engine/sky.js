@@ -76,12 +76,12 @@ function moonTexture() {
     ctx.save(); ctx.translate(pass * 1.2, pass * -1); ctx.lineWidth = pass ? 1.8 : 3.4; ctx.globalAlpha = pass ? 0.6 : 1;
     crescent(); ctx.stroke(); ctx.restore();
   }
-  // sleepy face on the thick part
+  // sleepy face centred in the thick part of the crescent body (x ~ 50..95 at y ~ 140): two closed eyes, blush, tiny smile
   ctx.strokeStyle = INK; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.arc(66, 150, 8, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+  for (const ex of [63, 83]) { ctx.beginPath(); ctx.arc(ex, 138, 6, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke(); }
   ctx.fillStyle = 'rgba(244,140,165,0.75)';
-  ctx.beginPath(); ctx.ellipse(62, 170, 8, 5, 0, 0, TAU); ctx.fill();
-  ctx.beginPath(); ctx.arc(76, 176, 6, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
+  for (const bx of [58, 88]) { ctx.beginPath(); ctx.ellipse(bx, 151, 6, 4, 0, 0, TAU); ctx.fill(); }
+  ctx.beginPath(); ctx.arc(73, 150, 4.5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
   // nightcap flopping over the top
   drawShape(ctx, [[70, 104], [98, 66], [140, 42], [184, 58], [206, 86], [152, 72], [112, 100]], { fill: '#9fb7ee', hatch: '#5f78c8', r });
   drawShape(ctx, circlePts(207, 92, 12, 9), { fill: '#fff7e0', r, lw: 2.6 });

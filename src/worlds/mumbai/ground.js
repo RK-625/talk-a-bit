@@ -8,8 +8,8 @@
  */
 import * as THREE from 'three';
 import { noise3, hash3 } from '../../engine/planet.js';
-import { R, LAND_H, GEO, PATHS, seaField, beachness, smooth, dist, polar } from './geo.js';
-import { resolveAt, placed } from './layout.js';
+import { R, LAND_H, GEO, PATHS, seaField, beachness, smooth, dist, polar, pathNearest } from './geo.js';
+import { resolveAt, placed, resolveAll, padList } from './layout.js';
 import { QUALITY } from '../../engine/quality.js';
 
 const U32 = 4294967295;
@@ -17,7 +17,38 @@ const lerp = THREE.MathUtils.lerp;
 
 // ---- terrain ----------------------------------------------------------------------------------------------------------
 const RURAL = { c: polar(112, -105), r: 48 }; // left-rear: soft hills (maidan country)
+// ---- flat pads under big flat assets -----------------------------------------------------------------------------------
+let pads = null;
+const _pq = new THREE.Vector3();
+function buildPads() {
+  resolveAll(QUALITY.density < 0.7 ? 0.5 : 1);
+  pads = padList().map((p) => {
+    const up = p.dir.clone().normalize();
+    const fwd = p.fwd.clone().addScaledVector(up, -p.fwd.dot(up)).normalize();
+    const right = new THREE.Vector3().crossVectors(up, fwd).normalize();
+    const hc = baseHeight(up);
+    return { c: up, cosR: Math.cos((Math.hypot(p.hw, p.hd) + 5) / R), up, right, fwd, pc: up.clone().multiplyScalar(R + hc), nb: R + hc, hw: p.hw, hd: p.hd };
+  });
+}
+const PAD_SKIRT = 3.5;
 export function heightFn(d) {
+  let h = baseHeight(d);
+  if (h < -0.3) return h;
+  if (!pads) buildPads();
+  for (let i = 0; i < pads.length; i++) {
+    const p = pads[i];
+    const dc = d.x * p.c.x + d.y * p.c.y + d.z * p.c.z;
+    if (dc < p.cosR) continue;
+    const t = p.nb / dc; // radius at which the ray along d meets the tangent plane
+    _pq.copy(d).multiplyScalar(t).sub(p.pc);
+    const ex = Math.max(Math.abs(_pq.dot(p.right)) - p.hw, 0), ez = Math.max(Math.abs(_pq.dot(p.fwd)) - p.hd, 0);
+    const m = 1 - smooth(Math.hypot(ex, ez), 0, PAD_SKIRT);
+    if (m > 0) h += (t - R - h) * m;
+  }
+  return h;
+}
+
+function baseHeight(d) {
   const s = seaField(d);
   const beach = beachness(d);
   const w = lerp(3.4, 20, beach); // shore transition width (beaches slope gently over ~20 units)
@@ -52,9 +83,9 @@ function buildFeatures() {
   add({ sp: [46, -46] }, 14, 'green');
   add({ sp: [-50, -40] }, 18, 'green');
   add({ sp: [-30, 62] }, 16, 'green');
-  add({ road: 'east', s: 40, lat: -18.5 }, 19, 'plaza'); // CST forecourt
+  add({ road: 'east', s: 54, lat: -18.5 }, 19, 'plaza'); // CST forecourt
   add({ road: 'great', s: 66, lat: 15 }, 11, 'plaza'); // Flora
-  add({ road: 'great', s: 132, lat: 0 }, 15, 'plaza'); // Gateway
+  add({ shore: { from: 'harbour', to: { road: 'great', s: 138, lat: 0 }, inland: 9 } }, 15, 'plaza'); // Gateway
   add({ road: 'great', s: 112, lat: 15.5 }, 13, 'plaza'); // Taj
   add({ road: 'great', s: 50, lat: -17 }, 10, 'plaza'); // BSE
   // built-up areas read as warmer rose-beige from far away
@@ -119,30 +150,41 @@ export function colorFn(cen, h, f) {
   green = Math.max(green, rural * smooth(noise3(cen.x * 3 + 9, cen.y * 3, cen.z * 3 - 4), -0.1, 0.25) * 0.9);
   if (green > 0.4) { _c.copy(C.green).lerp(C.green2, (m + 0.5) * 0.9); hatch = 0.55; angle = noise3(cen.x * 3.3 + 70, cen.y * 3.3 - 20, cen.z * 3.3) * 0.9 + j * 0.12; }
 
-  // shore: sand on the beaches (wide, gently sloping), pale quay stone elsewhere
-  const sf = seaField(cen);
-  const beach = beachness(cen);
-  if (beach > 0.3 && sf > -15) { _c.copy(C.sand).lerp(C.sand2, (m + 0.5) * 0.8); hatch = 0.5; angle = 0.2 + j * 0.2; }
-  else if (sf > -3.2) { _c.copy(C.wall); hatch = 0.25; }
-
-  // roads, footpaths, lanes, promenade, rail bed
-  const rd = nearestPath(cen, ['road', 'promenade', 'lane', 'rail']);
-  if (rd.p) {
-    const p = rd.p, d = rd.d;
-    if (p.kind === 'road') { // soft edges: colours blend over ~1 unit so the face-sized steps read as pencil, not pixels
-      const fc = 1 - smooth(d, p.w / 2 + 0.8, p.w / 2 + 1.9);
-      if (fc > 0.02) { _c.lerp(C.foot, fc); hatch = lerp(hatch, 0.15, fc); }
-      const ac = 1 - smooth(d, p.w / 2 - 0.7, p.w / 2 + 0.6);
-      if (ac > 0.02) { _t.copy(C.asphalt).lerp(C.asphalt2, (m + 0.5) * 0.7); _c.lerp(_t, ac); hatch = lerp(hatch, 0.12, ac); angle = lerp(angle, 1.1 + j * 0.1, ac); }
-    } else if (p.kind === 'lane') { if (d <= p.w / 2 + 0.3) { _c.copy(C.terra).lerp(C.terra2, (m + 0.5) * 0.7); hatch = 0.28; angle = 0.8; } }
-    else if (p.kind === 'promenade') { if (d <= p.w / 2 + 0.4) { _c.copy(C.prom); hatch = 0.18; angle = 0.4; } }
-    else if (p.kind === 'rail') { if (d <= p.w / 2) { _c.copy(C.ballast); hatch = 0.3; angle = 0.2; } }
-  }
+  // (roads, footpaths, lanes, promenade, rail bed, sand and quay stone are paint LAYERS resolved per fragment: see LAYERS below)
   _c.multiplyScalar(1 + j * 0.05);
   return { color: _c, hatch, angle };
 }
 
+// ---- paint layers: smooth, wobbly, hand-drawn boundaries (engine ink.js `layers`) ---------------------------------------------
+const LAYER_DEFS = [
+  { color: 0xd9ceba, hatch: 0.25 }, // 0 quay stone along hard coasts
+  { color: 0xf2dfa8, hatch: 0.5 }, // 1 sand (beaches)
+  { color: 0xf0e6d4, hatch: 0.15 }, // 2 footpaths
+  { color: 0xc2bdd6, hatch: 0.12, line: 0.35 }, // 3 asphalt
+  { color: 0xe2a889, hatch: 0.28, line: 0.25 }, // 4 terracotta lanes
+  { color: 0xe8dfcd, hatch: 0.18, line: 0.3 }, // 5 promenade stone
+  { color: 0xcfc3b0, hatch: 0.3 }, // 6 rail ballast
+  { fill: false, line: 0.85 }, // 7 the waterline, drawn as a wobbly ink line
+];
+function layerValues(d, h, out) {
+  const sf = seaField(d);
+  const beach = beachness(d);
+  out[0] = -(sf + 3.2);
+  out[1] = Math.max(-(sf + 15), (0.3 - beach) * 40);
+  const r = pathNearest(d, ['road']);
+  out[2] = r.p ? r.d - (r.p.w / 2 + 1.5) : 99;
+  out[3] = r.p ? r.d - r.p.w / 2 : 99;
+  const l = pathNearest(d, ['lane']);
+  out[4] = l.p ? l.d - (l.p.w / 2 + 0.3) : 99;
+  const pr = pathNearest(d, ['promenade']);
+  out[5] = pr.p ? pr.d - (pr.p.w / 2 + 0.4) : 99;
+  const rl = pathNearest(d, ['rail']);
+  out[6] = rl.p ? rl.d - rl.p.w / 2 : 99;
+  out[7] = h * 2.5;
+}
+
 export const PLANET = {
+  layers: { defs: LAYER_DEFS, valueFn: layerValues },
   radius: R, detail: QUALITY.touch ? 52 : 68, heightFn, colorFn, // ~95k (desktop) / ~56k (touch) faces
   sea: { level: 0, color: 0xa4d8d6, hatchColor: 0x3f8aa8, detail: QUALITY.touch ? 26 : 36 },
 };

@@ -197,6 +197,89 @@ export const LOOPS = {
     to(P.armR, { x: 0.15, z: 2.35 + Math.sin(lt * 9) * 0.25, e: 0.35, ez: 0 }, w * wv);
     P.hdZ += w * Math.sin(lt * 1.1) * 0.08; P.hipRz += w * Math.sin(lt * 0.8) * 0.04;
   },
+  ring(c) { // priest: ringing a bell with one hand, holding the diya thali with the other
+    const { P, w, lt } = c;
+    to(P.armR, { x: 0.95 + Math.sin(lt * 10) * 0.1, z: 0.25, e: 1.0, ez: 0.1 }, w);
+    to(P.armL, { x: 0.95, z: -0.15, e: 0.85, ez: -0.1 }, w);
+    P.hdX += w * (0.1 + Math.sin(lt * 1.5) * 0.05); P.spX += w * 0.04;
+    const bell = c.acc.bell; if (bell) bell.userData.tilt.x = w * Math.sin(lt * 10) * 0.5;
+  },
+  snap(c) { // photographer / tourist: raise the camera, click
+    const { P, w, lt } = c;
+    const T = 3.4, u = (lt % T) / T, up = sm(0.1, 0.3, u) * (1 - sm(0.8, 0.95, u));
+    to(P.armL, { x: lerp(0.3, 1.25, up), z: lerp(0.15, -0.1, up), e: lerp(0.6, 1.9, up), ez: lerp(0, -0.35, up) }, w);
+    to(P.armR, { x: lerp(0.3, 1.25, up), z: lerp(0.15, -0.1, up), e: lerp(0.6, 1.9, up), ez: lerp(0, -0.35, up) }, w);
+    P.hdX += w * 0.06 * up; P.hdZ += w * 0.1 * up; P.spX += w * -0.04 * up * (u > 0.5 && u < 0.56 ? 2 : 1);
+  },
+  run(c) { // jogger, in place (the world moves them)
+    const { P, w, lt } = c;
+    const f = lt * 11, s = Math.sin(f), cs = Math.cos(f);
+    P.legL.h += w * s * 0.85; P.legR.h -= w * s * 0.85;
+    P.legL.k += w * Math.max(0, cs) * 1.5; P.legR.k += w * Math.max(0, -cs) * 1.5;
+    to(P.armL, { x: -s * 0.9, z: 0.1, e: 1.7, ez: 0 }, w); to(P.armR, { x: s * 0.9, z: 0.1, e: 1.7, ez: 0 }, w);
+    P.hipY += w * (Math.abs(s) * 0.07 - 0.05); P.spX += w * 0.22; P.hipRz += w * s * 0.04;
+  },
+  fan(c) { // bhutta seller fanning the coals
+    const { P, w, lt } = c;
+    const f = Math.sin(lt * 9);
+    to(P.armR, { x: 0.8 + f * 0.1, z: 0.3, e: 1.0 + f * 0.35, ez: 0 }, w);
+    to(P.armL, { x: 0.6, z: 0.2, e: 1.3, ez: -0.15 }, w);
+    P.hdX += w * 0.22; P.spX += w * 0.08; P.hdY += w * Math.sin(lt * 0.6) * 0.2;
+  },
+  sweep(c) { // broom
+    const { P, w, lt } = c;
+    const s = Math.sin(lt * 2.4);
+    to(P.armR, { x: 0.95 + s * 0.12, z: -0.05, e: 0.5, ez: 0 }, w);
+    to(P.armL, { x: 0.8 + s * 0.12, z: -0.3, e: 0.65, ez: -0.2 }, w);
+    P.spY += w * s * 0.35; P.spX += w * 0.3; P.hdX += w * 0.2; P.hdY -= w * s * 0.2;
+    P.legL.k += w * 0.2; P.legR.k += w * 0.2; P.hipY += w * -0.02;
+  },
+  watch(c) { // commuter checking the watch, tapping a foot
+    const { P, w, lt } = c;
+    const T = 6, u = (lt % T) / T, k = sm(0.05, 0.15, u) * (1 - sm(0.4, 0.5, u));
+    to(P.armL, { x: 0.55, z: -0.1, e: 2.1, ez: -0.2 }, w * k);
+    P.hdX += w * 0.32 * k; P.hdY += w * (-0.15 * k + Math.sin(lt * 0.5) * 0.3 * (1 - k));
+    P.legR.a += w * Math.max(0, Math.sin(lt * 6)) * 0.4 * (1 - k); P.spX += w * 0.03;
+  },
+  play(c) { // beach kids
+    const { P, w, lt } = c;
+    const hop = Math.abs(Math.sin(lt * 4.6));
+    P.hipY += w * hop * 0.1; P.legL.k += w * hop * 0.5; P.legR.k += w * hop * 0.5;
+    to(P.armL, { x: 0.3, z: 1.9 + Math.sin(lt * 9) * 0.3, e: 0.3, ez: 0 }, w);
+    to(P.armR, { x: 0.3, z: 1.9 + Math.sin(lt * 9 + 1) * 0.3, e: 0.3, ez: 0 }, w);
+    P.spY += w * Math.sin(lt * 2.3) * 0.4; P.hdZ += w * Math.sin(lt * 4.6) * 0.12;
+    c.talk(w > 0.5 && Math.sin(lt * 5.5) > 0.2);
+  },
+  news(c) { // reading a newspaper
+    const { P, w, lt } = c;
+    to(P.armL, { x: 1.0, z: -0.1, e: 1.35, ez: -0.3 }, w); to(P.armR, { x: 1.0, z: -0.1, e: 1.35, ez: -0.3 }, w);
+    P.hdX += w * (0.3 + Math.sin(lt * 0.9) * 0.04); P.spX += w * 0.05; P.hdY += w * Math.sin(lt * 0.4) * 0.1;
+    const n = c.acc.newspaper; if (n) n.userData.tilt.x = w * 0.45;
+  },
+  pray(c) { // hands joined, bowing
+    const { P, w, lt } = c;
+    to(P.armL, { x: 0.8, z: -0.3, e: 1.9, ez: -1.2 }, w); to(P.armR, { x: 0.8, z: -0.3, e: 1.9, ez: -1.2 }, w);
+    const bow = 0.5 + 0.5 * Math.sin(lt * 0.8);
+    P.hdX += w * (0.25 + 0.25 * bow); P.spX += w * 0.15 * bow;
+  },
+  greet(c) { // doorman: hand on chest, a little bow
+    const { P, w, lt } = c;
+    const T = 4.5, u = (lt % T) / T, bow = sm(0.3, 0.42, u) * (1 - sm(0.55, 0.7, u));
+    to(P.armR, { x: 0.5, z: 0.0, e: 2.2, ez: -1.2 }, w); to(P.armL, { x: 0.0, z: 0.2, e: 0.2 }, w);
+    P.spX += w * 0.35 * bow; P.hdX += w * 0.15 * bow;
+  },
+  guard(c) { // security guard with a register
+    const { P, w, lt } = c;
+    to(P.armL, { x: 0.65, z: 0.0, e: 1.5, ez: -0.15 }, w);
+    to(P.armR, { x: 0.7 + Math.sin(lt * 5) * 0.04, z: 0.1, e: 1.4, ez: -0.1 }, w);
+    P.hdY += w * Math.sin(lt * 0.6) * 0.55; P.hdX += w * 0.12;
+  },
+  scoop(c) { // chana seller
+    const { P, w, lt } = c;
+    to(P.armR, { x: 0.7 + Math.sin(lt * 3) * 0.2, z: 0.2, e: 1.4 + Math.cos(lt * 3) * 0.2, ez: -0.1 }, w);
+    to(P.armL, { x: 0.65, z: 0.1, e: 1.5, ez: -0.3 }, w);
+    P.hdX += w * 0.2; P.hdY += w * Math.sin(lt * 0.5) * 0.25;
+  },
   shout(c) {
     const { P, w, lt } = c;
     const T = 2.2, u = (lt % T) / T;
@@ -239,6 +322,7 @@ export function attachAnimator(person, rig, cfg = {}) {
   let blinkT = 1.5 + (seed % 2), blinkOn = 0, mouth = false;
   let squash = 0, squashV = 0, wasGround = true, wasVr = 0;
   const swayTilt = new Map();
+  let autoWalk = 0, sitOn = false, sitA = 0, sitH = 0.5;
 
   const ctx = { P, w: 1, lt: 0, t: 0, acc: rig.accMap, talk: (b) => { mouth = b; }, arm: to, face: rig.face };
 
@@ -252,7 +336,9 @@ export function attachAnimator(person, rig, cfg = {}) {
   function animate(dt, s = {}) {
     dt = Math.min(Math.max(dt, 0), 0.1);
     t += dt;
-    const walkIn = s.walk ?? (s.speed != null ? clamp(s.speed / 6, 0, 1) : 0);
+    if (cfg.lodLevel && cfg.lodLevel() > 0) return; // far away: frozen
+    sitA = damp(sitA, sitOn ? 1 : 0, 6, dt);
+    const walkIn = (s.walk ?? (s.speed != null ? clamp(s.speed / 6, 0, 1) : autoWalk)) * (1 - sitA);
     walkS = walkIn;
     const grounded = s.grounded ?? true;
     const vr = s.vr ?? 0;
@@ -291,6 +377,14 @@ export function attachAnimator(person, rig, cfg = {}) {
       P.hipRz += s1 * G.sway * w; P.spZ -= s1 * G.sway * 0.6 * w; P.hdZ += s1 * G.sway * 0.5 * w;
       P.spX += G.lean * w + Math.abs(c1) * 0.02 * w;
       P.skX += -Math.abs(s1) * 0.06 * w; P.skZ += c1 * 0.05 * w;
+    }
+    // ---- seated (bench / ledge / steps): hips drop to the seat, thighs forward, shins down
+    if (sitA > 0.002) {
+      const sa = sitA;
+      P.hipY += (((sitH / rig.scale + 0.05) - rig.hipY) - P.hipY) * sa;
+      to(P.legL, { h: 1.5, k: 1.45, a: 0, s: 0.05 }, sa); to(P.legR, { h: 1.5, k: 1.45, a: 0, s: 0.05 }, sa);
+      to(P.armL, { x: 0.45, z: 0.18, e: 0.7, ez: -0.1 }, sa * 0.9); to(P.armR, { x: 0.45, z: 0.18, e: 0.7, ez: -0.1 }, sa * 0.9);
+      P.spX += sa * 0.04; P.skX += sa * 0.7;
     }
     // ---- in the air
     if (!grounded) {
@@ -392,7 +486,13 @@ export function attachAnimator(person, rig, cfg = {}) {
 
   person.userData.animate = animate;
   person.userData.setLookTarget = (v) => { look.target = v ? (look.target ?? new THREE.Vector3()).copy(v) : null; };
+  person.userData.sit = (h = 0.5) => { sitOn = true; sitH = h; };
+  person.userData.stand = () => { sitOn = false; };
   person.userData.playLoop = (name) => {
+    if (name === 'sit') { person.userData.sit(sitH); name = null; }
+    else if (name === 'stand') { person.userData.stand(); name = null; }
+    if (name === 'walk') { autoWalk = 1; name = null; } else if (name === 'idle' || name === null || name === undefined) autoWalk = 0; else if (!(name in ALIAS)) autoWalk = 0;
+    if (name && name in ALIAS) name = ALIAS[name];
     if (name === loopCur) return;
     if (name && !LOOPS[name]) { console.warn('unknown loop', name); return; }
     loopPrev = loopCur; wPrev = wCur; ltPrev = lt;
@@ -406,7 +506,8 @@ export function attachAnimator(person, rig, cfg = {}) {
 }
 
 // loops that keep running while walking (carrying poses)
-const LOOP_WALK = new Set(['carry', 'headLoad', 'sabzi', 'texting']);
+const LOOP_WALK = new Set(['carry', 'headLoad', 'sabzi', 'texting', 'news']);
+const ALIAS = { phone: 'texting', read: 'news', jog: 'run', idle: null, stand: null, sit: null, walk: null };
 
 // ---- demo helper --------------------------------------------------------------------------------------------
 /** Make `person` animate itself during rendering (lab turntable / demos). state: mutable { walk, speed, grounded }. */

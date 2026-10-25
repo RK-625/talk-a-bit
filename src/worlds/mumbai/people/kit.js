@@ -12,7 +12,7 @@
  */
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { createInkMaterial, addOutline, OVERLAY_LAYER, INK_COLOR } from '../../../engine/ink.js';
+import { createInkMaterial, addOutline, OVERLAY_LAYER, INK_COLOR, inkUniforms } from '../../../engine/ink.js';
 import { makeCanvas, toTexture, rng } from '../../../engine/doodle.js';
 
 export { INK_COLOR, OVERLAY_LAYER };
@@ -116,6 +116,7 @@ export function mergeColored(parts, { uv = false } = {}) {
 
 // ---- pencil fabric textures ----------------------------------------------------
 const TEX = new Map();
+const FLOWERS = [[20, 22], [84, 22], [52, 62], [116, 62], [20, 102], [84, 102]];
 /**
  * kind: 'plain' | 'stripes' (horizontal) | 'vstripes' | 'checks' | 'belt' (dark band at the bottom) | 'dots'
  * trim: null or a colour: Warli white triangle/zig-zag + dot hem border along the bottom edge (u wraps around).
@@ -147,6 +148,9 @@ export function pattern(kind, c1, c2 = 0xffffff, trim = null, trimH = 0.2) {
   } else if (kind === 'dots') {
     ctx.fillStyle = hex(c2);
     for (let y = 10; y < S; y += 22) for (let x = (y / 22) % 2 ? 6 : 17; x < S; x += 22) { ctx.beginPath(); ctx.arc(x, y, 3.2, 0, 7); ctx.fill(); }
+  } else if (kind === 'floral') {
+    ctx.fillStyle = hex(c2);
+    for (const [x, y] of FLOWERS) for (let p = 0; p < 5; p++) { const a = p * 1.2566; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 5, y + Math.sin(a) * 5, 3.6, 0, 7); ctx.fill(); }
   }
   if (trim !== null) {
     const y0 = S * (1 - trimH);
@@ -169,9 +173,112 @@ export function pattern(kind, c1, c2 = 0xffffff, trim = null, trimH = 0.2) {
 /** Cloth/pencil material using a pattern texture. */
 export function cloth(kind, c1, c2 = 0xffffff, trim = null, opts = {}) {
   const tex = pattern(kind, c1, c2, trim, opts.trimH);
-  return mat(c1, { spacing: opts.spacing ?? 0.045, strength: opts.strength ?? 0.8, map: tex, mapKey: `${kind}|${c1}|${c2}|${trim}|${opts.trimH ?? 0.2}`, double: !!opts.double });
+  const m = mat(c1, { spacing: opts.spacing ?? 0.045, strength: opts.strength ?? 0.8, map: tex, mapKey: `${kind}|${c1}|${c2}|${trim}|${opts.trimH ?? 0.2}`, double: !!opts.double });
+  m.userData.cloth = { kind, c1, c2, trim };
+  return m;
 }
 
 export const cyl = (rt, rb, h, seg = 8, hs = 1, open = false) =>
   geo(`cyl|${R3(rt)}|${R3(rb)}|${R3(h)}|${seg}|${hs}|${open}`, () => new THREE.CylinderGeometry(rt, rb, h, seg, hs, open));
 export const sph = (r, ws = 14, hs = 10) => geo(`sph|${R3(r)}|${ws}|${hs}`, () => new THREE.SphereGeometry(r, ws, hs));
+
+// ---- shared "people atlas": one skinned ink material for every person --------------------------------
+// Pattern MASKS (red channel) live in a 4x4 atlas of 128px swatches. In the shader the albedo is
+// mix(vertexColor, aColor2, mask), so any colour pair x pattern needs no extra texture or material.
+export const PATTERN_KINDS = ['plain', 'stripes', 'vstripes', 'checks', 'dots', 'floral', 'belt'];
+export const patSlot = (kind, hem) => Math.max(0, PATTERN_KINDS.indexOf(kind)) + (hem ? PATTERN_KINDS.length : 0);
+let ATLAS = null;
+function maskAtlas() {
+  if (ATLAS) return ATLAS;
+  const { c, ctx } = makeCanvas(512, 512);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 512, 512);
+  const r = rng(77);
+  for (let i = 0; i < 14; i++) {
+    const kind = PATTERN_KINDS[i % 7], hem = i >= 7;
+    const ox = (i % 4) * 128, oy = Math.floor(i / 4) * 128;
+    ctx.save(); ctx.beginPath(); ctx.rect(ox, oy, 128, 128); ctx.clip(); ctx.translate(ox, oy);
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#fff';
+    if (kind === 'stripes') for (let y = 8; y < 128; y += 32) ctx.fillRect(0, y + (r() - 0.5) * 2, 128, 14);
+    else if (kind === 'vstripes') for (let x = 0; x < 128; x += 16) ctx.fillRect(x + (r() - 0.5) * 2, 0, 6, 128);
+    else if (kind === 'checks') { ctx.lineWidth = 5; for (let q = 0; q <= 128; q += 21) { ctx.beginPath(); ctx.moveTo(q, 0); ctx.lineTo(q, 128); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, q); ctx.lineTo(128, q); ctx.stroke(); } }
+    else if (kind === 'dots') for (let y = 10; y < 128; y += 22) for (let x = (y / 22) % 2 ? 6 : 17; x < 128; x += 22) { ctx.beginPath(); ctx.arc(x, y, 3.4, 0, 7); ctx.fill(); }
+    else if (kind === 'floral') for (const [x, y] of FLOWERS) for (let p = 0; p < 5; p++) { const a = p * 1.2566; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 5, y + Math.sin(a) * 5, 3.6, 0, 7); ctx.fill(); }
+    else if (kind === 'belt') ctx.fillRect(0, 128 * 0.82, 128, 128 * 0.18);
+    if (hem) { // Warli hem: a line, triangles and dots along the bottom edge
+      ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 102); ctx.lineTo(128, 102); ctx.stroke();
+      for (let t = 0; t < 8; t++) { const x = t * 16; ctx.beginPath(); ctx.moveTo(x + 2, 125); ctx.lineTo(x + 8, 125 - 20); ctx.lineTo(x + 14, 125); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.arc(x + 8, 108, 2.4, 0, 7); ctx.fill(); }
+    }
+    ctx.restore();
+  }
+  ATLAS = new THREE.CanvasTexture(c);
+  ATLAS.colorSpace = THREE.NoColorSpace;
+  return ATLAS;
+}
+/** atlas uv for a swatch slot, local uv in 0..1 */
+export function atlasUv(slot, u, v) {
+  const ox = (slot % 4) * 128, oy = (3 - Math.floor(slot / 4)) * 128; // canvas row 0 is the top (flipY)
+  return [(ox + 1 + Math.min(Math.max(u, 0), 1) * 126) / 512, (oy + 1 + Math.min(Math.max(v, 0), 1) * 126) / 512];
+}
+
+let BODY_MAT = null;
+/** the single skinned, vertex-coloured, pattern-masked ink material shared by all people */
+export function bodyMaterial() {
+  if (BODY_MAT) return BODY_MAT;
+  const m = createInkMaterial({ vertexColors: true, hatchSpacing: 0.045, hatchStrength: 0.85 });
+  const base = m.onBeforeCompile;
+  m.onBeforeCompile = (shader) => {
+    base(shader);
+    shader.uniforms.uMask = { value: maskAtlas() };
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute vec3 aColor2; attribute vec2 aMaskUv; attribute float aHS;\nvarying vec3 vC2; varying vec2 vMUv; varying float vHS;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvC2 = aColor2; vMUv = aMaskUv; vHS = aHS;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform sampler2D uMask; varying vec3 vC2; varying vec2 vMUv; varying float vHS;')
+      .replace('vec3 inkBase = diffuseColor.rgb;', 'vec3 inkBase = mix(diffuseColor.rgb, vC2, texture2D(uMask, vMUv).r);')
+      .split('* uHatchStrength, 0.0, 1.0)').join('* uHatchStrength * vHS, 0.0, 1.0)');
+  };
+  m.customProgramCacheKey = () => 'ink-people-atlas';
+  BODY_MAT = m;
+  return m;
+}
+
+const OUT_VERT = /* glsl */ `
+uniform float uBoil; uniform float uPxScale; uniform float uWobble; uniform float uWobbleFreq;
+attribute float aThick;
+#include <common>
+#include <skinning_pars_vertex>
+float h31(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.yzx + 33.33); return fract((p.x + p.y) * p.z); }
+float n3(vec3 p){
+  vec3 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(h31(i), h31(i + vec3(1,0,0)), f.x), mix(h31(i + vec3(0,1,0)), h31(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(h31(i + vec3(0,0,1)), h31(i + vec3(1,0,1)), f.x), mix(h31(i + vec3(0,1,1)), h31(i + vec3(1,1,1)), f.x), f.y), f.z);
+}
+void main(){
+  #include <beginnormal_vertex>
+  #include <skinbase_vertex>
+  #include <skinnormal_vertex>
+  #include <begin_vertex>
+  #include <skinning_vertex>
+  vec4 wp = modelMatrix * vec4(transformed, 1.0);
+  vec3 wn = normalize(mat3(modelMatrix) * objectNormal);
+  float px = uPxScale * length(cameraPosition - wp.xyz);
+  vec3 q = wp.xyz * uWobbleFreq + vec3(uBoil * 1.7, uBoil * 2.3, uBoil * 0.9);
+  float a = n3(q), b = n3(q * 1.9 + 7.1), c = n3(q * 1.3 + 3.7);
+  float thick = aThick * (1.0 + (a - 0.5) * uWobble * 1.3);
+  float off = clamp(thick * px, 0.003, 1.2);
+  vec3 jitter = (vec3(a, b, c) - 0.5) * uWobble * aThick * px * 1.2;
+  wp.xyz += wn * off + jitter;
+  gl_Position = projectionMatrix * viewMatrix * wp;
+}`;
+let OUT_MAT = null;
+/** inverted-hull outline material that works on SkinnedMesh and plain Mesh, thickness per vertex (aThick) */
+export function bodyOutlineMaterial() {
+  if (OUT_MAT) return OUT_MAT;
+  OUT_MAT = new THREE.ShaderMaterial({
+    vertexShader: OUT_VERT,
+    fragmentShader: 'uniform vec3 uColor; void main(){ gl_FragColor = vec4(uColor, 1.0); }',
+    side: THREE.BackSide,
+    uniforms: { ...inkUniforms, uWobble: { value: 1 }, uWobbleFreq: { value: 2.2 }, uColor: { value: new THREE.Color(INK_COLOR) } },
+  });
+  return OUT_MAT;
+}

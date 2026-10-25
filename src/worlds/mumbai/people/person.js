@@ -37,6 +37,7 @@ import { mk, mat, geo, cloth, basic, mergeColored, cyl, sph, r3, SKIN, HAIR, PAS
 import { makeCanvas, toTexture, rng } from '../../../engine/doodle.js';
 import { makeAccessory } from './accessories.js';
 import { attachAnimator } from './animate.js';
+import { bakePerson } from './bake.js';
 
 const OUTFITS = {
   shirtTrousers: { sleeves: 'short', legs: 'trousers', skirt: null },
@@ -46,6 +47,9 @@ const OUTFITS = {
   nauvari: { sleeves: 'short', legs: 'trousers', skirt: null, pallu: true, pleats: true, stride: 0.9 },
   banyanLungi: { sleeves: 'none', legs: 'skin', skirt: { len: 0.62, flare: 0.32, color: 'bottom' }, stride: 0.75 },
   uniform: { sleeves: 'short', legs: 'trousers', skirt: null, belt: true },
+  dhoti: { sleeves: 'none', legs: 'skin', skirt: { len: 0.72, flare: 0.3, color: 'bottom' }, pallu: true, bare: true, stride: 0.75 },
+  sherwani: { sleeves: 'long', legs: 'trousers', skirt: { len: 0.8, flare: 0.2, color: 'top' }, stride: 0.8 },
+  shirtTie: { sleeves: 'long', legs: 'trousers', skirt: null, tie: true },
 };
 
 const hexCss = (n) => '#' + n.toString(16).padStart(6, '0');
@@ -151,6 +155,14 @@ function faceTexture(f, state) {
   } else {
     ctx.beginPath(); ctx.arc(cx, my - 5, 16, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
   }
+  if (f.tilak === 'ash') { // three ash bars
+    ctx.fillStyle = '#f4efe6'; ctx.strokeStyle = 'rgba(80,60,70,0.5)'; ctx.lineWidth = 1.6;
+    for (const y of [30, 42, 54]) { ctx.beginPath(); ctx.roundRect(cx - 24, y, 48, 6, 3); ctx.fill(); ctx.stroke(); }
+    ctx.fillStyle = '#d9304f'; ctx.beginPath(); ctx.arc(cx, 70, 5, 0, 7); ctx.fill();
+  } else if (f.tilak) { // vertical red/orange tilak with a white sandal bar
+    ctx.fillStyle = '#f4efe6'; ctx.beginPath(); ctx.roundRect(cx - 16, 52, 32, 7, 3); ctx.fill();
+    ctx.fillStyle = '#e8532e'; ctx.beginPath(); ctx.roundRect(cx - 4, 22, 8, 34, 4); ctx.fill();
+  }
   if (f.bindi) {
     ctx.fillStyle = typeof f.bindi === 'number' ? hexCss(f.bindi) : '#d9304f';
     ctx.beginPath(); ctx.arc(cx, 46, 7.5, 0, 7); ctx.fill();
@@ -246,6 +258,12 @@ function buildHair(h, r, seed) {
     }
     default: break;
   }
+  if (h.band) out.push(mk(geo(`hair|band|${rr}`, () => mergeColored([{ g: new THREE.TorusGeometry(r * 1.0, r * 0.075, 4, 12), pos: [0, r * 0.42, -r * 0.05], rot: [Math.PI / 2 - 0.12, 0, 0] }])), mat(h.band, { spacing: 0.03 }), { o: 0 }));
+  if (h.flower) out.push(mk(geo(`hair|flower|${rr}`, () => mergeColored([
+    { g: new THREE.SphereGeometry(r * 0.16, 5, 4), pos: [r * 0.78, r * 0.45, -r * 0.28], color: 0xf6a53d },
+    { g: new THREE.SphereGeometry(r * 0.13, 5, 4), pos: [r * 0.9, r * 0.28, -r * 0.18], color: 0xf9d56a },
+    { g: new THREE.SphereGeometry(r * 0.12, 5, 4), pos: [r * 0.66, r * 0.58, -r * 0.4], color: 0xfff1f4 },
+  ])), mat(0xffffff, { vertexColors: true, spacing: 0.03 }), { o: 0 }));
   return out;
 }
 function hatVC(col) { return mat(col, { spacing: 0.045, strength: 0.85 }); }
@@ -293,12 +311,13 @@ export function createPerson(spec = {}, ink) {
 
   const group = new THREE.Group();
   group.scale.setScalar(k);
-  const root = new THREE.Group(); group.add(root);
-  const hips = new THREE.Group(); hips.position.y = hipY; root.add(hips);
-  const spine = new THREE.Group(); hips.add(spine);
+  const root = new THREE.Bone(); group.add(root);
+  const hips = new THREE.Bone(); hips.position.y = hipY; root.add(hips);
+  const spine = new THREE.Bone(); hips.add(spine);
 
   const skinM = mat(S.skin, { spacing: 0.07, strength: 0.1 });
-  const topM = cloth(S.topPattern, S.top, S.top2, null, { spacing: 0.045 });
+  skinM.userData.smooth = true;
+  const topM = O.bare ? skinM : cloth(S.topPattern, S.top, S.top2, null, { spacing: 0.045 });
   const topBeltM = O.belt ? cloth('belt', S.top, 0x4a4060, null, { spacing: 0.045 }) : topM;
   const botM = cloth(S.bottomPattern, S.bottom, S.bottom2, null, { spacing: 0.045 });
   const botT = S.trim !== null ? cloth(S.bottomPattern, S.bottom, S.bottom2, S.trim, { spacing: 0.045, trimH: 0.18 }) : botM;
@@ -322,9 +341,9 @@ export function createPerson(spec = {}, ink) {
   const cloLegs = O.legs === 'trousers' || O.legs === 'shorts';
   const legs = [];
   for (const s of [1, -1]) {
-    const hip = new THREE.Group(); hip.position.set(s * legX, 0, 0); hips.add(hip);
-    const knee = new THREE.Group(); knee.position.y = -thighLen; hip.add(knee);
-    const ankle = new THREE.Group(); ankle.position.y = -shinLen; knee.add(ankle);
+    const hip = new THREE.Bone(); hip.position.set(s * legX, 0, 0); hips.add(hip);
+    const knee = new THREE.Bone(); knee.position.y = -thighLen; hip.add(knee);
+    const ankle = new THREE.Bone(); ankle.position.y = -shinLen; knee.add(ankle);
     let thigh, shin;
     if (O.legs === 'trousers') {
       thigh = mk(limb(0.13 * bws, 0.105 * bws, thighLen, 6, false), botM, { o: 2 });
@@ -354,7 +373,7 @@ export function createPerson(spec = {}, ink) {
   let skirt = null;
   if (O.skirt) {
     const sk = O.skirt;
-    skirt = new THREE.Group(); hips.add(skirt);
+    skirt = new THREE.Bone(); hips.add(skirt);
     const len = Math.min(sk.len * S.legScale, hipY - 0.12);
     const rh = (0.17 + sk.flare) * bws * (S.build === 'round' ? 1.08 : 1);
     const rt = 0.13 * bws;
@@ -403,7 +422,7 @@ export function createPerson(spec = {}, ink) {
   }
 
   // ---- head
-  const neck = new THREE.Group(); neck.position.y = torsoH; spine.add(neck);
+  const neck = new THREE.Bone(); neck.position.y = torsoH; spine.add(neck);
   const headG = neck;
   const HI = S.detail === 'high';
   const head = mk(geo(`head|${r3(hr)}|${HI}`, () => new THREE.SphereGeometry(hr, HI ? 16 : 10, HI ? 11 : 7)), skinM, { o: 2.4 });
@@ -419,7 +438,7 @@ export function createPerson(spec = {}, ink) {
   const faceMat = new THREE.MeshBasicMaterial({ map: faceTexture(S.face, 'open'), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
   const faceMesh = new THREE.Mesh(faceGeo, faceMat);
   faceMesh.position.y = headOff; faceMesh.scale.set(1.05, 0.95, 1.0);
-  faceMesh.layers.set(OVERLAY_LAYER); faceMesh.name = 'face'; faceMesh.renderOrder = 2;
+  faceMesh.layers.set(OVERLAY_LAYER); faceMesh.name = 'face'; faceMesh.userData.noBake = true; faceMesh.renderOrder = 2;
   headG.add(faceMesh);
   let faceState = 'open';
   const face = {
@@ -439,9 +458,9 @@ export function createPerson(spec = {}, ink) {
   const arms = [];
   const sleeves = S.sleeves ?? O.sleeves;
   for (const s of [1, -1]) {
-    const sh = new THREE.Group(); sh.position.set(s * (0.3 * bw - 0.01), torsoH - 0.035, 0); spine.add(sh);
-    const el = new THREE.Group(); el.position.y = -ua; sh.add(el);
-    const hand = new THREE.Group(); hand.position.y = -fa; el.add(hand);
+    const sh = new THREE.Bone(); sh.position.set(s * (0.3 * bw - 0.01), torsoH - 0.035, 0); spine.add(sh);
+    const el = new THREE.Bone(); el.position.y = -ua; sh.add(el);
+    const hand = new THREE.Bone(); hand.position.y = -fa; el.add(hand);
     const upperM = sleeves === 'none' ? skinM : topM;
     const foreM = sleeves === 'long' ? topM : skinM;
     const upper = mk(limb(sleeves === 'none' ? 0.058 : 0.075, sleeves === 'none' ? 0.046 : 0.062, ua, 5), upperM, { o: 1.9 });
@@ -463,6 +482,9 @@ export function createPerson(spec = {}, ink) {
     shoulderL: mkSlot(spine, 0.17 * bw, torsoH, 0),
     shoulderR: mkSlot(spine, -0.17 * bw, torsoH, 0),
     spine: mkSlot(spine, 0, 0, 0),
+    back: mkSlot(spine, 0, torsoH * 0.55, 0),
+    armL: mkSlot(arms[0].sh, 0, -ua * 0.55, 0), armR: mkSlot(arms[1].sh, 0, -ua * 0.55, 0),
+    wristL: mkSlot(arms[0].el, 0, -fa * 0.8, 0), wristR: mkSlot(arms[1].el, 0, -fa * 0.8, 0),
     ground: mkSlot(group, 0, 0, 0),
   };
   const acc = {};
@@ -474,9 +496,29 @@ export function createPerson(spec = {}, ink) {
     slots[slotName].add(o);
     if (e.pos) o.position.fromArray(e.pos);
     if (slotName === 'shoulderR') o.scale.x = -1;
+    o.userData.dynamic = !!(o.userData.orient || o.userData.update || e.name === 'whistle' || e.name === 'ball');
     acc[e.name] = o;
     accList.push({ obj: o, name: e.name, slot: slotName });
   }
+
+  // ---- bake rigid parts into one skinned mesh (+ one outline) and a static far copy
+  const bones = [];
+  group.traverse((o) => { if (o.isBone) bones.push(o); });
+  const baked = bakePerson(group, bones);
+  let lodLevel = 0;
+  group.userData.lod = (level) => {
+    if (level === lodLevel) return lodLevel;
+    lodLevel = level;
+    group.visible = level < 2;
+    const near = level === 0;
+    baked.body.visible = baked.outline.visible = near;
+    baked.farBody.visible = baked.farOutline.visible = level === 1;
+    faceMesh.visible = near;
+    for (const a of accList) if (a.obj.userData.dynamic) a.obj.visible = near;
+    return lodLevel;
+  };
+  group.userData.lodLevel = () => lodLevel;
+  group.userData.baked = baked;
 
   // ---- animation
   const rig = { root, hips, spine, headG, headBaseY: hipY + torsoH, arms, legs, skirt, face, acc: accList, accMap: acc, hipY, scale: k };
@@ -489,8 +531,9 @@ export function createPerson(spec = {}, ink) {
   group.userData.spec = S;
   attachAnimator(group, rig, {
     gait: { ...(O.stride ? { strideMul: O.stride } : {}), ...S.gait },
-    hold: S.hold, seed, kid: S.headScale > 1.05,
+    hold: S.hold, seed, kid: S.height < 1.8, lodLevel: () => lodLevel,
   });
+  if (S.sit != null) group.userData.sit(S.sit === true ? 0.5 : S.sit);
   group.traverse((o) => { if (o.isMesh && o.material.isMeshBasicMaterial) o.layers.set(OVERLAY_LAYER); });
   return group;
 }

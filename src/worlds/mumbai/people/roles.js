@@ -16,6 +16,9 @@ import { createPerson } from './person.js';
 import { createDog, createCrow, createPigeon } from './animals.js';
 import { PASTEL, HAIR, SKIN } from './kit.js';
 import { rng } from '../../../engine/doodle.js';
+import { EXTRA_DEFS } from './roles2.js';
+import { createCitizen, createCouple } from './citizens.js';
+import { vary, chance } from './variation.js';
 
 const pick = (r, a) => a[Math.floor(r() * a.length) % a.length];
 const warm = (r, idx) => SKIN[pick(r, idx)];
@@ -204,6 +207,8 @@ const ROLE_DEFS = {
   },
 };
 
+Object.assign(ROLE_DEFS, EXTRA_DEFS);
+
 const ALIASES = {
   collegeStudentA: ['collegeStudent', { variant: 0 }],
   collegeStudentB: ['collegeStudent', { variant: 1 }],
@@ -211,13 +216,22 @@ const ALIASES = {
   cricketKidBowler: ['cricketKid', { variant: 'bowler' }],
 };
 
-export const ROLES = [...Object.keys(ROLE_DEFS), 'cricketKidBowler', 'strayDog', 'crow', 'pigeon'];
+export const ROLES = [...Object.keys(ROLE_DEFS), 'cricketKidBowler', 'couple', 'strayDog', 'crow', 'pigeon'];
 export const ROLE_LOOPS = Object.fromEntries(Object.entries(ROLE_DEFS).map(([k, v]) => [k, typeof v.loop === 'function' ? v.loop({}) : v.loop]));
 
+// per-role variation flags for the original roles (uniform roles keep their colours; civilians get new looks)
+const DEFAULT_VARY = {
+  vadaPavWala: { build: [1, 1, 2], moustache: 0.0, grey: 0.25 }, chaiwalaUncle: { look: true, grey: 0.1, build: true },
+  taxiDriver: { grey: 0.2, build: true }, dabbawala: { build: true, moustache: 0.3 }, koliFisherwoman: { flower: 0.5, build: [1, 1, 2] },
+  busConductor: { grey: 0.15, build: true }, trafficCop: { build: true, grey: 0.1 }, collegeStudent: { look: true, flower: 0.3 },
+  auntyWithSabzi: { flower: 0.4, grey: 0.4, build: [0, 1, 3] }, cricketKid: {}, bollywoodHopeful: { look: true, build: true },
+  bhelWala: { look: true, grey: 0.2 }, golaWala: { grey: 0.1 }, balloonSeller: { look: true, floral: false, specs: 0.1 }, newspaperVendor: { look: true },
+};
 export function createNPC(role, ink, seed = 1, opts = {}) {
   if (role === 'strayDog') return Object.assign(createDog(ink, seed), { name: role });
   if (role === 'crow') return createCrow(ink, seed);
   if (role === 'pigeon') return createPigeon(ink, seed);
+  if (role === 'couple') return createCouple(ink, seed, opts);
   if (ALIASES[role]) { const [r, o] = ALIASES[role]; return createNPC(r, ink, seed, { ...o, ...opts }); }
   const def = ROLE_DEFS[role];
   if (!def) throw new Error('unknown role: ' + role);
@@ -225,12 +239,15 @@ export function createNPC(role, ink, seed = 1, opts = {}) {
   const r = rng(Math.abs(Math.floor(seed * 7919 + role.length * 131)) % 2147483646 + 1);
   r(); r();
   const spec = def.make(r, o);
+  // seeded individuality for every role (heights, builds, shirt looks, grey hair, specs, flowers ...)
+  vary(spec, r, { height: 0.04, build: false, specs: null, ...(def.vary ?? DEFAULT_VARY[role] ?? {}) });
   spec.seed = Math.floor(seed * 3 + 1);
   const p = createPerson(spec, ink);
   p.name = role;
   p.userData.role = role;
-  const loop = o.loop === undefined ? (typeof def.loop === 'function' ? def.loop(o) : def.loop) : o.loop;
+  const loop = o.loop === undefined ? (typeof def.loop === 'function' ? def.loop({ ...o, seed }) : def.loop) : o.loop;
   if (loop) p.userData.playLoop(loop);
   return p;
 }
 export default createNPC;
+export { createCitizen, createCouple };

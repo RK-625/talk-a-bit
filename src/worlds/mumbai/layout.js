@@ -10,6 +10,7 @@
  *     { polar:[d,b] }
  *     { road:'great', s:50, lat:14 }           arc-length s along a road (geo.js ROAD_DEFS), lat>0 = LEFT of travel (increasing s)
  *     { item:'cst', right:3, fwd:2 }           relative to an already-placed item's frame
+ *     { shore:{from:'harbour', to:<at spec>, inland:7} }  a point `inland` units off the waterline of GEO[from] on the way to `to`; faces the water
  *     { arc:'marine', a:-30, off:22 }          Marine Drive: angle `a` degrees about the bay centre (0 = toward the spawn),
  *                                              `off` units inland of the waterline (promenade ~2.5, road ~11, buildings ~22)
  *   Facing `face` (item's front, +Z):  number = yaw degrees turning RIGHT from the reference frame's forward
@@ -22,7 +23,7 @@
  *   dev overlap check: scenery.js calls checkOverlaps() in dev and logs any footprint collisions.
  */
 import * as THREE from 'three';
-import { R, polar, stepAlong, tangentTo, PATHS, MARINE, bayAngle, BRIDGE, GEO, shorePoint, seaField, pathNearest, dist } from './geo.js';
+import { R, polar, stepAlong, tangentTo, PATHS, MARINE, bayAngle, BRIDGE, GEO, shorePoint, seaField, pathNearest, dist, shoreToward, RAIL_RADIUS, STATION_B, LAND_H } from './geo.js';
 import { frameAt, localToDir } from '../../engine/place.js';
 import { mulberry32 } from '../../engine/scatter.js';
 
@@ -52,6 +53,7 @@ function offsetDir(frame, right, fwd, out) { return localToDir(frame, -right, fw
 
 /** -> { dir, fwd, ref:{fwd, right}, extra } for an `at` spec (fwd = the spec's natural facing) */
 export function resolveAt(at) {
+  if (at.fixed) return { dir: at.fixed.dir.clone(), fwd: at.fixed.fwd.clone() };
   if (at.sp) {
     const f = frameOfSpawn();
     const dir = offsetDir(f, at.sp[0], at.sp[1], new THREE.Vector3());
@@ -73,6 +75,12 @@ export function resolveAt(at) {
     const f = frameAt(it.dir, it.fwd, {});
     const dir = offsetDir(f, at.right ?? 0, at.fwd ?? 0, new THREE.Vector3());
     return { dir, fwd: transport(f.up, f.fwd, dir) };
+  }
+  if (at.shore) { // a point `inland` units from the waterline of a named bay (GEO key), toward a target spec; faces the water
+    const c = GEO[at.shore.from].c;
+    const sh = shoreToward(c, resolveAt(at.shore.to).dir);
+    const dir = stepAlong(sh.dir, sh.heading, at.shore.inland ?? 0);
+    return { dir, fwd: tangentTo(dir, c) };
   }
   if (at.arc) {
     const dir = MARINE.pt(at.a, at.off ?? 0); // `off` units inland of the water's edge at angle a about the bay centre
@@ -129,6 +137,15 @@ export const placed = (id) => registry.get(id);
 const S = (right, fwd) => ({ sp: [right, fwd] });
 const toS = (right, fwd) => ({ to: { sp: [right, fwd] } });
 
+/** the Churchgate-style station on the rail straight: platform centre + facing (+Z = track side, +X = direction of travel) */
+export const STATION = (() => {
+  const path = PATHS.rail;
+  const sc = path.nearest(polar(RAIL_RADIUS, STATION_B)).s;
+  const f = path.at(sc, {});
+  const z = new THREE.Vector3().crossVectors(f.tan, f.dir).normalize();
+  return { s: sc, dir: stepAlong(f.dir, z, -4.7), fwd: z, railDir: f.dir.clone(), tan: f.tan.clone() };
+})();
+
 /** Landmarks, shops, stalls, big props. Order matters only for {item:id} references. */
 export const ITEMS = [
   // ---- the chowk: Chotu's chai tapri and the lane around it ------------------------------------------------------
@@ -140,18 +157,16 @@ export const ITEMS = [
   { id: 'marigold', kind: 'marigold', at: S(4.6, -6.4), face: toS(0, 0) },
   { id: 'irani', kind: 'irani', at: S(20.5, 4), face: toS(0, 0), major: true },
   { id: 'poster', kind: 'poster', at: S(0, -13.2), face: 0, major: true },
-  { id: 'shrine', kind: 'shrine', at: S(-16, 13), face: toS(0, 0) },
+  { id: 'shrine', kind: 'shrine', at: S(-14.2, 10.6), face: toS(0, 0) },
   { id: 'paanShop', kind: 'paanShop', at: S(14.5, -8.5), face: toS(0, 0) },
   // chawl ring around the chowk (front/balcony faces the chowk)
   { id: 'ch1', kind: 'chawl', opts: { seed: 1 }, at: S(-8, 17.5), face: 180 },
   { id: 'ch2', kind: 'chawl', opts: { seed: 2 }, at: S(7.5, 18), face: 180 },
   { id: 'ch3', kind: 'chawl', opts: { seed: 3 }, at: S(-23, 7.5), face: 90 },
-  { id: 'ch4', kind: 'chawl', opts: { seed: 4 }, at: S(-23, -14), face: 90 },
-  { id: 'ch5', kind: 'chawl', opts: { seed: 5 }, at: S(25, -15), face: -90 },
+  { id: 'ch4', kind: 'chawl', opts: { seed: 4 }, at: S(-22, -13), face: 90 },
+  { id: 'ch5', kind: 'chawl', opts: { seed: 5 }, at: S(22, -12), face: -90 },
   { id: 'ch6', kind: 'chawl', opts: { seed: 6 }, at: S(-8, -26), face: 0 },
   { id: 'ch7', kind: 'chawl', opts: { seed: 7 }, at: S(9, -26), face: 0 },
-  { id: 'ch8', kind: 'chawl', opts: { seed: 8 }, at: S(24, 17), face: -135 },
-  { id: 'ch9', kind: 'chawl', opts: { seed: 9 }, at: S(-22, 22), face: 135 },
   // cricket gully (left lane): stumps + 3 kids are NPCs; the stumps are a scatter prop
   { id: 'laundry1', kind: 'laundry', at: S(-15.5, 0), face: 90, opts: { length: 8 }, noOverlap: true },
   { id: 'pole1', kind: 'pole', at: S(-12, 9.5), face: 0, noOverlap: true },
@@ -169,24 +184,23 @@ export const ITEMS = [
   { id: 'busStopFort', kind: 'busStop', at: { road: 'great', s: 58, lat: 5.4 }, face: 'road' },
   // taxi stand
   { id: 'parkedTaxi', kind: 'taxi', at: { road: 'great', s: 72, lat: -6.4 }, face: 0 },
-  { id: 'dabbaBike', kind: 'dabbaBike', at: { road: 'great', s: 70, lat: 5.6 }, face: 90 },
+  { id: 'dabbaBike', kind: 'dabbaBike', at: { road: 'great', s: 70, lat: 7 }, face: 90 },
 
   // ---- CST (east road) -------------------------------------------------------------------------------------------
-  { id: 'cst', kind: 'cst', at: { road: 'east', s: 40, lat: -18.5 }, major: true },
-  { id: 'cstBusStop', kind: 'busStop', at: { road: 'east', s: 28, lat: 4.8 }, face: 'road' },
-  { id: 'eastChawl', kind: 'chawl', opts: { seed: 15 }, at: { road: 'east', s: 12, lat: 12.5 } },
+  { id: 'cst', kind: 'cst', at: { road: 'east', s: 54, lat: -18.5 }, major: true },
+  { id: 'cstBusStop', kind: 'busStop', at: { road: 'east', s: 46, lat: 5.2 }, face: 'road' },
   { id: 'eastChawl2', kind: 'chawl', opts: { seed: 16 }, at: { road: 'east', s: 60, lat: 12 } },
 
   // ---- the Gateway and the Taj (tip of the tongue, end of the Great Road) ----------------------------------------
-  { id: 'gateway', kind: 'gateway', at: { road: 'great', s: 132, lat: 0 }, face: 0, major: true },
+  { id: 'gateway', kind: 'gateway', at: { shore: { from: 'harbour', to: { road: 'great', s: 138, lat: 0 }, inland: 6.5 } }, major: true },
   { id: 'taj', kind: 'taj', at: { road: 'great', s: 112, lat: 15.5 }, face: -90, major: true },
   { id: 'balloons', kind: 'balloons', at: { road: 'great', s: 125, lat: -7 }, face: 0 },
 
   // ---- Marine Drive (angle about the bay centre; r = 52 road, 42.4 promenade, 61 buildings) ----------------------
   ...[-46, -33, -20, -7, 6, 19, 32, 45].map((a, i) => ({ id: 'deco' + i, kind: 'deco' + (i % 3), at: { arc: 'marine', a, off: 22 }, face: 0, major: i === 3, opts: { variant: i % 3 } })),
 
-  // ---- Churchgate-style station on the rail ----------------------------------------------------------------------
-  // (placed by rail.js: it needs the rail frame)
+  // ---- Churchgate-style station on the rail (built by rail.js) ---------------------------------------------------
+  { id: 'station', kind: 'station', at: { fixed: STATION }, size: [24, 7], major: true, skipScenery: true },
 ];
 
 // Haji Ali sits on its island: placed by its own centre direction (bridges.js builds the causeway)
@@ -216,7 +230,7 @@ function autoFill(density = 1) {
         if (other.d < path.w / 2 + 7.5 && other.p !== path) continue;
         if (other.p === path && other.d < path.w / 2 + 6) continue;
         let clash = false;
-        for (const p of PLACED) if (dist(cand.dir, p.dir) < p.radius * 0.85 + 6.2) { clash = true; break; }
+        for (const p of PLACED) if (dist(cand.dir, p.dir) < p.radius + 6.8) { clash = true; break; }
         if (clash) continue;
         out.push(place({ id: 'fill' + seed, kind: 'chawl', opts: { seed: seed++ }, at: { road: id, s, lat }, face: 'road' }));
       }
@@ -225,10 +239,20 @@ function autoFill(density = 1) {
   return out;
 }
 
+let _resolved = null;
 export function resolveAll(density = 1) {
+  if (_resolved && _resolved.density === density) return _resolved.items; // ground.js and scenery.js share one resolution
   PLACED.length = 0; registry.clear();
   const items = ITEMS.map(place);
-  return items.concat(autoFill(density));
+  _resolved = { density, items: items.concat(autoFill(density)) };
+  return _resolved.items;
+}
+
+/** flat "pads": big flat assets stand on a plane tangent at their centre, so the ground under them is raised to that plane
+ *  (plus a skirt) and the hero walks on the same surface the plinth is drawn at. [{dir, fwd, hw, hd}] */
+export function padList() {
+  return PLACED.filter((p) => !p.noOverlap && Math.max(p.size[0], p.size[1]) >= 7 && p.kind !== 'banyan')
+    .map((p) => ({ id: p.id, dir: p.dir, fwd: p.fwd, hw: p.size[0] / 2 + 1.4, hd: p.size[1] / 2 + 1.8 }));
 }
 
 /** simple oriented-rectangle overlap test; logs collisions in dev */
@@ -255,7 +279,7 @@ export function checkOverlaps(log = console.warn) {
   for (let i = 0; i < rects.length; i++) for (let j = i + 1; j < rects.length; j++) {
     const A = rects[i], B = rects[j];
     if (A.p.dir.dot(B.p.dir) < Math.cos((A.p.radius + B.p.radius) / R)) continue;
-    if (inRect(A, B, 0.92) || inRect(B, A, 0.92)) hits.push([A.p.id, B.p.id]);
+    if (inRect(A, B, 1.0) || inRect(B, A, 1.0)) hits.push([A.p.id, B.p.id]);
   }
   if (hits.length) log('[mumbai layout] footprint overlaps:', hits.map((h) => h.join(' x ')).join(', '));
   else log('[mumbai layout] no footprint overlaps');

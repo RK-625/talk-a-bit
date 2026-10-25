@@ -29,6 +29,7 @@ export function scenery(W) {
   const items = new Map();
   const placedItems = resolveAll(W.dens < 0.7 ? 0.5 : 1);
   for (const it of placedItems) {
+    if (it.skipScenery) continue;
     const k = KINDS[it.kind];
     if (!k) { console.warn('scenery: no factory for', it.kind); continue; }
     if (W.dens < 0.7 && /^(fortChawl|eastChawl|ch[6-9])/.test(it.id ?? '')) continue; // touch devices: fewer filler blocks
@@ -39,7 +40,6 @@ export function scenery(W) {
   }
   marineDrive(W);
   juhuStalls(W, items);
-  if (import.meta.env.DEV) { checkOverlaps(); }
   return { items };
 }
 

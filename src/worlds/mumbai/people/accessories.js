@@ -134,7 +134,7 @@ export function makeGamcha(o = {}) {
     { g: new THREE.CylinderGeometry(0.07, 0.085, 0.3, 7), pos: [0.0, -0.12, -rad * 0.78 + 0.02], rot: [-0.32, 0, -0.05], scale: [1, 1, 0.38] },
     { g: new THREE.SphereGeometry(0.13, 7, 4), pos: [0.09, -0.42, rad * 0.78 - 0.09], rot: [0.32, 0, 0], scale: [1, 0.35, 0.4] },
   ], { uv: true }));
-  g.add(mk(gg, cloth('checks', c1, 0xfff6ea, null, { spacing: 0.06, strength: 0.35 }), { o: 1.5 }));
+  g.add(mk(gg, cloth(o.pattern ?? 'checks', c1, o.color2 ?? 0xfff6ea, null, { spacing: 0.06, strength: 0.35 }), { o: 1.5 }));
   return g;
 }
 
@@ -426,6 +426,196 @@ export function makeGolaStick() {
   return g;
 }
 
+// ---- extra role gear ---------------------------------------------------------------------------------
+const dyn = (g) => { g.userData.dynamic = true; return g; };
+export function makeTie(o = {}) {
+  const g = group('chest');
+  const bw = o.bw ?? 1, y = 0.36, z = (0.115 + 0.2 * Math.pow(y / (o.torsoH ?? 0.56), 0.85)) * bw + 0.02;
+  const m = vcMesh('tie', () => [
+    { g: cone(0.045, 0.1, 5), pos: [0, 0.2, 0], rot: [Math.PI, 0, 0], color: o.color ?? 0xe9776a },
+    { g: cone(0.06, 0.34, 5), pos: [0, 0.02, 0.0], rot: [Math.PI, 0, 0], scale: [0.8, 1, 0.3], color: o.color ?? 0xe9776a },
+  ], 0, 0.03);
+  m.position.set(0, 0, z); g.add(m); g.position.y = y - 0.14;
+  return g;
+}
+export function makeThali() { // brass plate with a lit diya, kept level
+  const g = dyn(group('handL', { orient: 'up', baseTilt: { x: 0.1, z: 0 }, tilt: { x: 0, z: 0 } }));
+  g.add(vcMesh('thali', () => [
+    { g: cyl(0.17, 0.12, 0.03, 9), pos: [0, 0.02, 0], color: 0xe3b84a },
+    { g: cyl(0.09, 0.09, 0.015, 8), pos: [0, 0.04, 0], color: 0xc9992e },
+    { g: sph(0.045, 6, 4), pos: [0, 0.06, 0], scale: [1, 0.6, 1], color: 0xd9a46a },
+    { g: cone(0.02, 0.075, 5), pos: [0, 0.12, 0], color: 0xffd34a },
+    { g: sph(0.03, 5, 3), pos: [0.1, 0.05, 0.03], color: 0xe9776a }, { g: sph(0.03, 5, 3), pos: [-0.09, 0.05, -0.04], color: 0xf6c453 },
+  ], 1.5, 0.03));
+  return g;
+}
+export function makeBell() {
+  const g = dyn(group('handR', { orient: 'hang', baseTilt: { x: 0, z: 0 }, tilt: { x: 0, z: 0 } }));
+  g.add(vcMesh('bell', () => [
+    { g: cyl(0.015, 0.015, 0.12, 5), pos: [0, -0.04, 0], color: 0xc9992e },
+    { g: lathe([[0.1, -0.3], [0.09, -0.25], [0.06, -0.19], [0.03, -0.14], [0, -0.13]], 7), color: 0xe3b84a },
+    { g: sph(0.02, 4, 3), pos: [0, -0.31, 0], color: 0xc9992e },
+  ], 1.5, 0.03));
+  return g;
+}
+export function makeFlowerBasket() {
+  const g = dyn(group('handL', { orient: 'hang', baseTilt: { x: 0, z: 0 }, tilt: { x: 0, z: 0 } }));
+  g.add(vcMesh('flowerBasket', () => {
+    const p = [
+      { g: torus(0.12, 0.012, Math.PI, 4, 8), pos: [0, -0.1, 0], color: 0xb98652 },
+      { g: lathe([[0, -0.32], [0.1, -0.32], [0.15, -0.22], [0.17, -0.16], [0, -0.16]], 8), color: 0xd9a96a },
+    ];
+    [[0.06, 0.04], [-0.07, 0.0], [0, -0.07], [0.0, 0.08], [-0.08, 0.08], [0.09, -0.05]].forEach(([x, z], i) => p.push({ g: sph(0.06, 5, 4), pos: [x, -0.15 + (i % 2) * 0.02, z], color: [0xf6a53d, 0xf9d56a, 0xe9776a][i % 3] }));
+    return p;
+  }, 1.6, 0.03));
+  return g;
+}
+export function makeTripod() { // photographer's tripod + camera (stands on the ground in front of the person)
+  const g = group('ground');
+  g.add(vcMesh('tripod', () => [
+    seg([0, 1.25, 0], [0.4, 0, 0.1], 0.025, 0x4a4560), seg([0, 1.25, 0], [-0.4, 0, 0.1], 0.025, 0x4a4560), seg([0, 1.25, 0], [0, 0, -0.42], 0.025, 0x4a4560),
+    { g: box(0.3, 0.2, 0.16), pos: [0, 1.38, 0], color: 0x59557a }, { g: cyl(0.075, 0.09, 0.2, 7), pos: [0, 1.38, 0.18], rot: [Math.PI / 2, 0, 0], color: 0x3d3a55 },
+    { g: sph(0.05, 5, 4), pos: [0, 1.38, 0.3], color: 0x9fd0e8 },
+  ], 1.6, 0.04));
+  return g;
+}
+export function makeCamera() { // hand-held / neck camera
+  const g = group('handL');
+  g.add(vcMesh('camera', () => [
+    { g: box(0.2, 0.12, 0.1), pos: [0, 0, 0.05], color: 0x59557a }, { g: cyl(0.045, 0.055, 0.1, 7), pos: [0, 0, 0.14], rot: [Math.PI / 2, 0, 0], color: 0x3d3a55 },
+    { g: box(0.06, 0.03, 0.04), pos: [0.06, 0.08, 0.05], color: 0xd9d4e6 },
+  ], 1.4, 0.03));
+  return g;
+}
+export function makeBackpack() {
+  const g = group('back');
+  const bw = o_bw(arguments[0]);
+  const m = vcMesh('backpack', () => [
+    { g: sph(0.2, 7, 5), pos: [0, 0, 0], scale: [1, 1.15, 0.6], color: 0xe9776a }, { g: sph(0.12, 6, 4), pos: [0, -0.1, -0.1], scale: [1.1, 0.8, 0.6], color: 0xc65a4e },
+  ], 1.8, 0.04);
+  m.position.set(0, -0.0, -0.3 * bw - 0.05); g.add(m);
+  return g;
+}
+const o_bw = (o) => (o && o.bw) || 1;
+export function makeBriefcase() {
+  const g = dyn(group('handR', { orient: 'hang', baseTilt: { x: 0, z: 0 }, tilt: { x: 0, z: 0 } }));
+  g.add(vcMesh('briefcase', () => [
+    { g: torus(0.06, 0.012, Math.PI, 4, 8), pos: [0, -0.04, 0], color: 0x3d3a55 }, { g: box(0.34, 0.24, 0.1), pos: [0, -0.19, 0], color: 0x8a6a52 },
+    { g: box(0.04, 0.03, 0.02), pos: [0, -0.1, 0.055], color: 0xe3b84a },
+  ], 1.6, 0.04));
+  return g;
+}
+export function makeTiffinBag() {
+  const g = dyn(group('handL', { orient: 'hang', baseTilt: { x: 0, z: 0 }, tilt: { x: 0, z: 0 } }));
+  g.add(vcMesh('tiffinBag', () => [
+    { g: torus(0.05, 0.01, Math.PI, 4, 8), pos: [0, -0.04, 0], color: 0xc9992e },
+    ...[0, 1, 2].map((i) => ({ g: cyl(0.08, 0.08, 0.07, 7), pos: [0, -0.12 - i * 0.075, 0], color: [0xdfe5e9, 0xbfd3df, 0xdfe5e9][i] })),
+  ], 1.5, 0.03));
+  return g;
+}
+export function makeLuggage() { // coolie's head load
+  const g = group('head');
+  g.add(vcMesh('luggage', () => [
+    { g: box(0.62, 0.3, 0.38), pos: [0, 0.15, 0], color: 0x8a6a52 }, { g: box(0.64, 0.04, 0.4), pos: [0, 0.2, 0], color: 0x5a4a52 },
+    { g: box(0.44, 0.24, 0.3), pos: [0.04, 0.42, 0], rot: [0, 0.3, 0], color: 0x6c8fb0 }, { g: cyl(0.1, 0.1, 0.5, 7), pos: [-0.04, 0.68, 0], rot: [0, 0, Math.PI / 2], color: 0xcdbb7f },
+    { g: box(0.04, 0.3, 0.4), pos: [0.15, 0.15, 0], color: 0xe3b84a },
+  ], 2, 0.04));
+  return g;
+}
+export function makeArmband() {
+  const g = group('armR');
+  g.add(vcMesh('armband', () => [{ g: cyl(0.09, 0.09, 0.07, 8), color: 0xe3b84a }, { g: box(0.05, 0.05, 0.02), pos: [0, 0, 0.09], color: 0xb98652 }], 1.2, 0.03));
+  return g;
+}
+export function makeWatch() {
+  const g = group('wristL');
+  g.add(vcMesh('watch', () => [{ g: cyl(0.055, 0.055, 0.05, 7), color: 0x59557a }, { g: cyl(0.04, 0.04, 0.012, 7), pos: [0, 0, 0.0], rot: [Math.PI / 2, 0, 0], color: 0xfff6ea }], 1, 0.03));
+  g.children[0].position.z = 0.0;
+  return g;
+}
+export function makeRegister() {
+  const g = group('handL');
+  g.add(vcMesh('register', () => [
+    { g: box(0.2, 0.28, 0.04), pos: [0, 0.0, 0.06], color: 0xb23a48 }, { g: box(0.17, 0.25, 0.03), pos: [0.01, 0.0, 0.085], color: 0xfaf3df },
+  ], 1.5, 0.03));
+  return g;
+}
+export function makeBroom() {
+  const g = group('handR');
+  g.add(vcMesh('broom', () => [
+    { g: cyl(0.018, 0.018, 1.3, 5), pos: [0, -0.35, 0], color: 0xb98652 },
+    { g: cone(0.14, 0.34, 7), pos: [0, -1.12, 0], rot: [Math.PI, 0, 0], color: 0xe3c46a },
+    { g: cyl(0.06, 0.06, 0.07, 7), pos: [0, -0.96, 0], color: 0xe9776a },
+  ], 1.6, 0.04));
+  return g;
+}
+export function makeBooks() {
+  const g = group('handL');
+  g.add(vcMesh('books', () => [
+    { g: box(0.2, 0.05, 0.26), pos: [0, 0.0, 0.07], color: 0x6c8fb0 }, { g: box(0.19, 0.045, 0.25), pos: [0.01, 0.05, 0.07], color: 0xe9776a },
+    { g: box(0.2, 0.05, 0.26), pos: [0, 0.1, 0.07], color: 0xf6c453 }, { g: box(0.17, 0.04, 0.24), pos: [0, 0.145, 0.07], color: 0x8ccf9c },
+  ], 1.5, 0.03));
+  return g;
+}
+export function makeBookTray(o = {}) {
+  const g = group('chest');
+  const bw = o.bw ?? 1, y = 0.08, z = (0.115 + 0.2 * Math.pow(y / (o.torsoH ?? 0.56), 0.85)) * bw + 0.2;
+  const cols = [0x6c8fb0, 0xe9776a, 0xf6c453, 0x8ccf9c, 0xc9b7e8, 0xf0a3c3];
+  const m = vcMesh('bookTray', () => [
+    { g: box(0.6, 0.03, 0.34), color: 0xb98652 },
+    ...cols.map((c, i) => ({ g: box(0.085, 0.24 + (i % 3) * 0.03, 0.22), pos: [-0.25 + i * 0.1, 0.14, 0], rot: [0, 0, (i % 2 ? 0.08 : -0.06)], color: c })),
+  ], 1.6, 0.04);
+  m.position.set(0, 0, z - 0.05); g.add(m); g.position.y = y;
+  return g;
+}
+export function makeChanaBasket(o = {}) {
+  const g = group('chest');
+  const bw = o.bw ?? 1, y = 0.08, z = (0.115 + 0.2 * Math.pow(y / (o.torsoH ?? 0.56), 0.85)) * bw + 0.22;
+  const m = vcMesh('chanaBasket', () => [
+    { g: lathe([[0, 0], [0.16, 0], [0.26, 0.12], [0.27, 0.14], [0.24, 0.14], [0.14, 0.05], [0, 0.04]], 8), color: 0xd9a96a },
+    { g: sph(0.2, 7, 4), pos: [0, 0.1, 0], scale: [1, 0.45, 1], color: 0xd9b66a },
+    ...[[0.1, 0.1], [-0.1, 0.05], [0, -0.12]].map(([x, zz], i) => ({ g: cone(0.045, 0.14, 5), pos: [x, 0.21, zz], color: [0xfaf3df, 0xf0d9b0, 0xfaf3df][i] })),
+  ], 1.6, 0.04);
+  m.position.set(0, 0, z - 0.1); g.add(m); g.position.y = y;
+  return g;
+}
+export function makePalmFan() {
+  const g = group('handR');
+  g.add(vcMesh('palmFan', () => [{ g: cyl(0.014, 0.014, 0.22, 5), pos: [0, -0.1, 0], color: 0xb98652 }, { g: cyl(0.13, 0.13, 0.015, 8), pos: [0, -0.3, 0], rot: [0, 0, 0], color: 0xe3c46a }], 1.3, 0.03));
+  return g;
+}
+export function makeCoconut() {
+  const g = group('handL');
+  g.add(vcMesh('coconut', () => [{ g: sph(0.1, 6, 5), pos: [0, 0.02, 0.04], color: 0x7fbf6a }, seg([0.02, 0.1, 0.04], [0.06, 0.24, 0.0], 0.008, 0xf0ece0)], 1.4, 0.03));
+  return g;
+}
+export function makeTorch() {
+  const g = group('handR');
+  g.add(vcMesh('torch', () => [{ g: cyl(0.035, 0.03, 0.22, 6), pos: [0, -0.1, 0.0], color: 0x59557a }, { g: cyl(0.055, 0.04, 0.06, 6), pos: [0, -0.24, 0], color: 0xd9d4e6 }], 1.3, 0.03));
+  return g;
+}
+export function makeCart(o = {}) { // bhutta / coconut cart (ground prop in front of the seller)
+  const kind = o.kind ?? 'bhutta';
+  const g = group('ground');
+  g.add(vcMesh('cart|' + kind, () => {
+    const p = [
+      { g: box(1.0, 0.1, 0.6), pos: [0, 0.75, 0], color: kind === 'bhutta' ? 0xe9a73a : 0x6fb3a0 },
+      { g: box(1.0, 0.45, 0.6), pos: [0, 0.45, 0], color: 0xb98652 },
+      { g: cyl(0.22, 0.22, 0.06, 9), pos: [-0.5, 0.22, 0.34], rot: [Math.PI / 2, 0, 0], color: 0x4a4560 }, { g: cyl(0.22, 0.22, 0.06, 9), pos: [-0.5, 0.22, -0.34], rot: [Math.PI / 2, 0, 0], color: 0x4a4560 },
+      seg([0.55, 0.4, 0], [0.9, 0.1, 0], 0.03, 0x4a4560),
+    ];
+    if (kind === 'bhutta') {
+      p.push({ g: lathe([[0, 0], [0.16, 0], [0.22, 0.12], [0.2, 0.12], [0, 0.05]], 8), pos: [0.2, 0.8, 0], color: 0x4a4560 }, { g: sph(0.15, 6, 4), pos: [0.2, 0.86, 0], scale: [1, 0.5, 1], color: 0xe9553a });
+      [-0.35, -0.2, -0.05].forEach((x, i) => p.push({ g: cyl(0.045, 0.045, 0.26, 6), pos: [x, 0.86, 0.1 - i * 0.04], rot: [0, 0, 1.4], color: 0xf6d34a }));
+    } else {
+      [[-0.3, 0.1], [-0.1, -0.1], [0.15, 0.1], [0.3, -0.12], [-0.2, -0.2], [0.0, 0.2], [0.2, -0.0], [-0.05, 0.02]].forEach(([x, z], i) => p.push({ g: sph(0.14, 6, 4), pos: [x, 0.93 + (i > 4 ? 0.18 : 0), z], color: 0x7fbf6a }));
+      p.push(seg([0.1, 1.0, 0], [0.2, 1.3, 0.05], 0.01, 0xf0ece0), seg([-0.1, 1.0, 0.05], [-0.18, 1.28, 0.0], 0.01, 0xf0ece0));
+    }
+    return p;
+  }, 2, 0.05));
+  return g;
+}
+
 // ---- registry -------------------------------------------------------------------------------------
 export const ACCESSORIES = {
   kettle: makeKettle, chaiGlass: makeChaiGlass, wireCarrier: makeWireCarrier, gamcha: makeGamcha, tiffinCrate: makeTiffinCrate,
@@ -433,6 +623,10 @@ export const ACCESSORIES = {
   whistle: makeWhistle, ticketMachine: makeTicketMachine, fishBasket: makeFishBasket, balloons: makeBalloons,
   newspaperBundle: makeNewspaperBundle, newspaper: makeNewspaper, jhara: makeJhara, sunglasses: makeSunglasses, phone: makePhone,
   kadhai: makeKadhai, bhelTub: makeBhelTub, golaTray: makeGolaTray, golaStick: makeGolaStick,
+  tie: makeTie, thali: makeThali, bell: makeBell, flowerBasket: makeFlowerBasket, tripod: makeTripod, camera: makeCamera,
+  backpack: makeBackpack, briefcase: makeBriefcase, tiffinBag: makeTiffinBag, luggage: makeLuggage, armband: makeArmband, watch: makeWatch,
+  register: makeRegister, broom: makeBroom, books: makeBooks, bookTray: makeBookTray, chanaBasket: makeChanaBasket, palmFan: makePalmFan,
+  coconut: makeCoconut, torch: makeTorch, cart: makeCart,
 };
 
 export function makeAccessory(name, opts = {}) {

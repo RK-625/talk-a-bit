@@ -8,7 +8,8 @@ import { createBSE } from './bse.js';
 import { createRajabai } from './rajabai.js';
 import { createFloraFountain } from './floraFountain.js';
 import { createArtDeco, createStreetlight, createTetrapods, createPromenadeSegment } from './marineDrive.js';
-import { createPylon, createDeckSegment } from './seaLink.js';
+import { createPylon, createDeckSegment, createPier, createEmbankment } from './seaLink.js';
+import { createAntilia } from './antilia.js';
 import { createHajiAli, createCauseway } from './hajiAli.js';
 import { createChawl } from './chawl.js';
 import { createStation } from './station.js';
@@ -30,7 +31,8 @@ export function createShowcase(ink) {
     [['Gateway of India', createGateway], ['Taj Mahal Palace', createTaj], ['CST', createCST]],
     [['BSE / P.J. Towers', createBSE], ['Rajabai Clock Tower', createRajabai], ['Flora Fountain', createFloraFountain], ['Haji Ali Dargah', createHajiAli]],
     [['Art Deco 0', (i) => createArtDeco(i, 0)], ['Art Deco 1', (i) => createArtDeco(i, 1)], ['Art Deco 2', (i) => createArtDeco(i, 2)], ['Streetlight', createStreetlight], ['Tetrapods', createTetrapods], ['Promenade', (i) => createPromenadeSegment(i, 6)]],
-    [['Sea Link pylon', createPylon], ['Deck segment x3', (i) => { const s = new THREE.Group(); for (let n = -1; n <= 1; n++) { const d = createDeckSegment(i, 4); d.position.z = n * 4; s.add(d); } s.userData = { footprint: 7 }; return s; }], ['Causeway', (i) => createCauseway(i, 6)]],
+    [['Antilia', createAntilia], ['Sea Link span', createSeaLinkSpan]],
+    [['Sea Link pylon', createPylon], ['Pier (10 deep)', (i) => createPier(i, 10)], ['Embankment', (i) => createEmbankment(i, 8, 4)], ['Deck segment x3', (i) => { const s = new THREE.Group(); for (let n = -1; n <= 1; n++) { const d = createDeckSegment(i, 4); d.position.z = n * 4; s.add(d); } s.userData = { footprint: 7 }; return s; }], ['Causeway', (i) => createCauseway(i, 6)]],
     [['Chawl 1', (i) => createChawl(i, 1)], ['Chawl 2', (i) => createChawl(i, 2)], ['Chawl 3', (i) => createChawl(i, 3)], ['Chawl 4', (i) => createChawl(i, 4)]],
     [['Local train station', (i) => createStation(i, { footbridge: true })], ['Irani Cafe', createIraniCafe], ['Paan Shop', createPaanShop], ['Film Poster Wall', createFilmPosterWall], ['Temple Shrine', createTempleShrine]],
   ];
@@ -64,4 +66,15 @@ export function createShowcase(ink) {
   void totalW;
   g.name = 'landmarkShowcase';
   return g;
+}
+
+/** A review span: 8 deck segments, 2 piers at joints, the pylon in the middle and an embankment at one end. */
+export function createSeaLinkSpan(i) {
+  const s = new THREE.Group();
+  for (let n = -4; n <= 3; n++) { const d = createDeckSegment(i, 4); d.position.z = n * 4 + 2; s.add(d); }
+  for (const z of [-8, 8]) { const pr = createPier(i, 9); pr.position.z = z; s.add(pr); }
+  s.add(createPylon(i));
+  const e = createEmbankment(i, 8, 3.5); e.position.z = -20; s.add(e);
+  s.userData = { footprint: 30 };
+  return s;
 }

@@ -90,15 +90,36 @@ export function createChawl(ink, seed = 1) {
   k.box(wall, W + 0.1, 0.45, 0.2, 0, H + 0.35, -D / 2 - 0.05);
   k.box(wall, 0.2, 0.45, D, W / 2 + 0.05, H + 0.35, 0);
   k.box(wall, 0.2, 0.45, D, -W / 2 - 0.05, H + 0.35, 0);
-  const tx = (rnd() - 0.5) * (W - 3);
-  k.cyl(0x6f8fb4, 0.62, 0.62, 1.0, tx, H + 0.35, -0.6, { seg: 10 });
-  k.cyl(0x56789c, 0.66, 0.66, 0.1, tx, H + 0.9, -0.6, { seg: 10 });
-  k.box(PAL.woodDark, 0.12, 0.35, 0.12, tx - 0.4, H + 0.35, 0.3); // tank legs
-  k.box(PAL.terracotta, 1.5, 0.12, 1.6, -W / 2 + 1.4, H + 1.0, 0.2, { rz: 0.15 });
-  for (const sx of [-0.6, 0.6]) k.box(PAL.woodDark, 0.08, 0.7, 0.08, -W / 2 + 1.4 + sx, H + 0.35, 0.8);
-  // TV antenna
-  k.cyl(PAL.ink, 0.02, 0.02, 1.6, W / 2 - 1.2, H + 0.35, 0.4, { seg: 4 });
-  k.box(PAL.ink, 0.9, 0.03, 0.03, W / 2 - 1.2, H + 1.7, 0.4); k.box(PAL.ink, 0.6, 0.03, 0.03, W / 2 - 1.2, H + 1.4, 0.4);
+  // rooftop life (no poles-with-crossbars): a satellite TV dish + a black Sintex tank, pigeon coop or a bamboo-and-tarp shed
+  const tx = (rnd() - 0.5) * (W - 4);
+  const kind = Math.floor(rnd() * 3);
+  if (kind === 0) { // black Sintex tank on a brick stand
+    k.box(PAL.brick, 1.5, 0.45, 1.5, tx, H + 0.35, -0.7);
+    k.cyl(0x34303f, 0.62, 0.7, 1.15, tx, H + 0.8, -0.7, { seg: 12 });
+    k.dome(0x34303f, 0.62, tx, H + 1.95, -0.7, { seg: 12, ring: 4, sy: 0.55 });
+    k.cyl(0x4a4560, 0.2, 0.2, 0.12, tx, H + 2.25, -0.7, { seg: 8 });
+    k.cyl(0x55506b, 0.72, 0.72, 0.07, tx, H + 1.45, -0.7, { seg: 12, outline: false });
+  } else if (kind === 1) { // pigeon coop: slatted wooden box on legs with a pitched tin roof
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) k.box(PAL.woodDark, 0.1, 0.5, 0.1, tx + sx * 0.7, H + 0.35, -0.7 + sz * 0.5);
+    k.box(PAL.wood, 1.7, 0.9, 1.2, tx, H + 0.85, -0.7);
+    for (let i = 0; i < 7; i++) k.box(PAL.ink, 0.04, 0.7, 0.04, tx - 0.72 + i * 0.24, H + 0.95, -0.7 + 0.62, { outline: false });
+    k.box(0x3d3748, 0.5, 0.4, 0.04, tx, H + 1.0, -0.7 + 0.63, { outline: false });
+    k.add(new THREE.BoxGeometry(1.1, 0.07, 1.5), 0xb4c4cd, { pos: [tx - 0.52, H + 1.88, -0.7], rot: [0, 0, 0.5] });
+    k.add(new THREE.BoxGeometry(1.1, 0.07, 1.5), 0xa3b4be, { pos: [tx + 0.52, H + 1.88, -0.7], rot: [0, 0, -0.5] });
+    for (let i = 0; i < 3; i++) { k.ball(0xb9b6c8, 0.14, tx - 0.7 + i * 0.7, H + 1.45, -0.1, { sx: 1, sy: 0.9, sz: 1.3, seg: 6, ring: 4, outline: false }); k.ball(0x9a97ae, 0.08, tx - 0.7 + i * 0.7, H + 1.6, 0.0, { seg: 5, ring: 4, outline: false }); }
+  } else { // tangled bamboo-and-tarp shed
+    for (const [dx, dz, lean] of [[-0.8, -0.4, 0.1], [0.8, -0.5, -0.12], [-0.7, 0.5, -0.08], [0.9, 0.4, 0.14]]) k.cyl(0xd9c67e, 0.05, 0.06, 1.7, tx + dx, H + 0.35, -0.7 + dz, { seg: 5, rz: lean });
+    k.add(new THREE.BoxGeometry(2.1, 0.06, 1.5), 0x5a8fc4, { pos: [tx, H + 1.95, -0.7], rot: [0.12, 0, 0.1] });
+    k.add(new THREE.BoxGeometry(1.2, 0.05, 1.0), 0xd9a23f, { pos: [tx + 0.5, H + 2.05, -0.5], rot: [-0.1, 0.3, -0.12] });
+    k.box(PAL.woodDark, 1.4, 0.05, 0.05, tx, H + 1.0, -0.2, { rz: 0.06 });
+    for (const sx of [-0.8, 0.4]) k.box(PAL.pink, 0.4, 0.5, 0.03, tx + sx, H + 0.6, -0.15, { outline: false }); // laundry under the tarp
+  }
+  // satellite TV dish on a short pipe (parabolic cap tilted toward the sky + feed arm)
+  const dx = (rnd() > 0.5 ? 1 : -1) * (W / 2 - 1.1);
+  k.cyl(0x6f6a82, 0.05, 0.06, 0.8, dx, H + 0.35, 0.5, { seg: 5 });
+  k.add(new THREE.SphereGeometry(0.55, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2.4), 0xf1ebdb, { pos: [dx, H + 1.25, 0.5], rot: [-0.9, 0.5, 0], scale: [1, 0.45, 1] });
+  k.cyl(0x6f6a82, 0.015, 0.015, 0.7, dx - 0.15, H + 1.3, 0.62, { seg: 4, rx: -0.8, outline: false });
+  k.ball(0x6f6a82, 0.06, dx - 0.08, H + 1.7, 0.1, { seg: 5, ring: 4, outline: false });
 
   // common balcony on every floor above ground + doors/windows on every floor
   const n = Math.round(W / 2.1);
@@ -197,8 +218,7 @@ export function createChawl(ink, seed = 1) {
       k.box(PAL.terracotta, 0.55, 0.5, 0.55, x, y, z);
       k.box(PAL.cream, 0.7, 0.1, 0.7, x, y + 0.5, z);
       k.ball(PAL.leaf, 0.3, x, y + 0.88, z, { seg: 7, ring: 5 });
-      k.cyl(PAL.ink, 0.015, 0.015, 0.5, x + 0.12, y + 1.0, z, { seg: 4, outline: false });
-      k.box(PAL.marigold, 0.16, 0.1, 0.02, x + 0.2, y + 1.4, z, { outline: false });
+      k.ball(PAL.marigold, 0.08, x + 0.12, y + 1.12, z, { seg: 5, ring: 4, outline: false });
     } else {
       k.cyl(PAL.terracotta, 0.14, 0.1, 0.22, x, y, z, { seg: 7 });
       k.ball(i2c(rnd), 0.17, x, y + 0.36, z, { seg: 6, ring: 4 });

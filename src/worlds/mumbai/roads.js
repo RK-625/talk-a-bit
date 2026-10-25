@@ -96,7 +96,7 @@ function furniture(W, S) {
   for (const id of Object.keys(sideOf)) {
     const path = PATHS[id];
     let k = 0;
-    for (let s = 9; s < path.length - 6; s += lampSpacing) {
+    for (let s = id === 'ring' ? 9 : 15; s < path.length - 6; s += lampSpacing) {
       const f = path.at(s, {});
       const side = k++ % 2 ? 1 : -1;
       const lat = side * (path.w / 2 + 1.9);
@@ -105,7 +105,7 @@ function furniture(W, S) {
       if (nearRail(dir, 5)) continue;
       const face = tangentTo(dir, f.dir); // lamp arm toward the road
       bank.add('lampPost', dir, face);
-      if (rnd() < 0.5 * dens) bank.add('hydrant', stepAlong(dir, f.tan, 3.2), face);
+      if (!(id === 'great' && s > 74 && s < 106) && rnd() < 0.5 * dens) bank.add('hydrant', stepAlong(dir, f.tan, 3.2), face);
     }
     // potholes & manholes on the carriageway
     const nHoles = Math.round(path.length / 30 * dens);
@@ -184,8 +184,8 @@ function scatterShore(W, rnd, dens) {
 // ---- junctions: traffic signals ------------------------------------------------------------------------------------------
 function junctions(W, S) {
   const spots = [
-    { at: { road: 'great', s: 5.5, lat: -4.9 }, face: 0 },
-    { at: { road: 'great', s: 5.5, lat: 4.9 }, face: 180 },
+    { at: { road: 'great', s: 11, lat: -5.0 }, face: 0 },
+    { at: { road: 'great', s: 11, lat: 5.0 }, face: 180 },
   ];
   for (const sp of spots) {
     const r = resolveAt(sp.at);

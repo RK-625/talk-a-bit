@@ -187,6 +187,18 @@ export function installDevTools(W, { S, R: RL, B, T, N }) {
       key(false);
       return { ...rep, seconds: Math.round(rep.seconds) };
     },
+    /** how far (units) the hero's feet are above (+) / below (-) the first rendered surface straight below, at the current spot */
+    footGap() {
+      const G_ = G(), p = G_.player;
+      const rc = new THREE.Raycaster(); rc.layers.enableAll();
+      const origin = p.up.clone().multiplyScalar(p.radius + 3);
+      rc.set(origin, p.up.clone().negate());
+      const objs = [];
+      G_.scene.traverse((o) => { if (o.isMesh && o.visible && o.name !== 'ink-outline' && !o.isInstancedMesh && o.material && !o.material.transparent && o.name !== 'sea-curls' && o.name !== 'sea' && o.name !== 'lane-dashes') { let q = o, hero = false; while (q) { if (q === p.object) hero = true; q = q.parent; } if (!hero) objs.push(o); } });
+      const hits = rc.intersectObjects(objs, false);
+      if (!hits.length) return null;
+      return +((p.radius - (origin.length() - hits[0].distance))).toFixed(3);
+    },
     traffic: T, npcs: N, rail: RL, bridges: B,
   };
   window.__mumbai = api;
