@@ -6,9 +6,11 @@
  *   &export=createPerson                     export name to call (default: first of default, createAsset,
  *                                            createHero, createCharacter, createPerson, createLandmark)
  *   &spec={"height":2.2}                     optional JSON passed as the factory's first argument
- *   &rotate=0                                stop the turntable (drag to orbit; wheel to zoom)
+ *   &rotate=0                                stop the turntable (drag to orbit; wheel to zoom 2..250; right-drag or shift-drag pans)
+ *   &dist=60                                 initial camera distance (otherwise fitted to the asset)
  * The factory is called as factory(spec ?? ink) and must return a THREE.Object3D (feet/base at y=0, facing +Z).
- * People use a ground disc of radius 4, landmarks radius 12. Press "r" to toggle turntable rotation.
+ * People use a ground disc of radius 4, landmarks radius 12. Press "r" to toggle turntable rotation, "f" to re-centre the pan.
+ * If the asset has userData.animate it is called every frame as animate(dt).
  * Paper background, ink post chain (outlines, crease lines, paper grain), hatched ground, one sun with shadows.
  */
 import * as THREE from 'three';
@@ -33,7 +35,7 @@ document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(ink.PAPER_COLOR);
-const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 500);
+const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1500);
 camera.layers.enable(ink.OVERLAY_LAYER);
 
 const sun = new THREE.DirectionalLight(0xfff1d6, 1);
@@ -72,25 +74,39 @@ scene.add(turntable);
   const box = new THREE.Box3().setFromObject(obj);
   const size = box.getSize(new THREE.Vector3());
   target.y = Math.max(1, size.y * 0.5);
-  dist = Math.max(8, Math.max(size.x, size.y, size.z) * 2.6);
-  distT = dist;
+  home.copy(target);
+  if (q.get('dist')) { dist = distT = Math.max(2, Math.min(250, parseFloat(q.get('dist')))); }
+  else { dist = Math.max(8, Math.max(size.x, size.y, size.z) * 2.6); distT = dist; }
+  animated = typeof obj.userData?.animate === 'function' ? obj : null;
 })();
 
 // orbit camera: drag = yaw/pitch, wheel = zoom
 const target = new THREE.Vector3(0, 1, 0);
+const home = new THREE.Vector3(0, 1, 0);
+let animated = null;
 let yaw = 0.6, pitch = 0.3, dist = 9, distT = 9;
 let rotate = q.get('rotate') !== '0';
 const el = renderer.domElement;
-let dragging = false;
-el.addEventListener('pointerdown', (e) => { dragging = true; el.setPointerCapture(e.pointerId); });
+let dragging = false, panning = false;
+el.addEventListener('contextmenu', (e) => e.preventDefault());
+el.addEventListener('pointerdown', (e) => { dragging = true; panning = e.button === 2 || e.shiftKey; el.setPointerCapture(e.pointerId); });
 el.addEventListener('pointerup', () => (dragging = false));
+const _r = new THREE.Vector3(), _u = new THREE.Vector3();
 el.addEventListener('pointermove', (e) => {
   if (!dragging) return;
+  if (panning) { // slide the target in the camera plane (scaled by distance so it tracks the cursor)
+    camera.updateMatrixWorld();
+    _r.setFromMatrixColumn(camera.matrixWorld, 0);
+    _u.setFromMatrixColumn(camera.matrixWorld, 1);
+    const k = dist * 0.0016;
+    target.addScaledVector(_r, -e.movementX * k).addScaledVector(_u, e.movementY * k);
+    return;
+  }
   yaw -= e.movementX * 0.006;
   pitch = THREE.MathUtils.clamp(pitch + e.movementY * 0.006, -0.1, 1.4);
 });
-el.addEventListener('wheel', (e) => { e.preventDefault(); distT = THREE.MathUtils.clamp(distT * (1 + e.deltaY * 0.0012), 2, 80); }, { passive: false });
-addEventListener('keydown', (e) => { if (e.key === 'r') rotate = !rotate; });
+el.addEventListener('wheel', (e) => { e.preventDefault(); distT = THREE.MathUtils.clamp(distT * (1 + e.deltaY * 0.0012), 2, 250); }, { passive: false });
+addEventListener('keydown', (e) => { if (e.key === 'r') rotate = !rotate; if (e.key === 'f') target.copy(home); });
 
 const post = createPost({ renderer, scene, camera, quality: QUALITY });
 function resize() {
@@ -110,6 +126,7 @@ renderer.setAnimationLoop(() => {
   const dt = Math.min(timer.getDelta(), 0.05);
   time += dt;
   if (rotate && !dragging) turntable.rotation.y += dt * 0.5;
+  if (animated) animated.userData.animate(dt);
   dist += (distT - dist) * (1 - Math.exp(-8 * dt));
   camera.position.set(
     target.x + Math.sin(yaw) * Math.cos(pitch) * dist,

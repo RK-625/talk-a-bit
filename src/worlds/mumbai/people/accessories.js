@@ -127,16 +127,14 @@ export function makeGamcha(o = {}) {
   const g = group('shoulderL');
   const bw = o.bw ?? 1, rad = 0.3 * bw;
   const c1 = o.color ?? PASTEL.red;
-  const gg = geo(`acc|gamcha|${bw}`, () => {
-    const panel = (w, h, d) => { const b = new THREE.BoxGeometry(w, h, d); const uv = b.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setY(i, uv.getY(i) * (h / w)); return b; };
-    return mergeColored([
-      { g: box(0.2, 0.045, rad * 1.7) },
-      { g: panel(0.12, 0.4, 0.03), pos: [0.0, -0.2, rad * 0.8 - 0.05], rot: [0.42, 0, 0.05] },
-      { g: panel(0.12, 0.34, 0.03), pos: [0.0, -0.17, -rad * 0.8 + 0.05], rot: [-0.42, 0, -0.05] },
-    ], { uv: true });
-  });
-  g.add(mk(gg, cloth('checks', c1, 0xfff6ea, null, { spacing: 0.03, strength: 0.5 }), { o: 1.5 }));
-  g.position.set(0.0, 0, 0);
+  // soft checked cloth: a puffy drape over the shoulder, a long hanging end in front, a short one behind
+  const gg = geo(`acc|gamcha|${bw}`, () => mergeColored([
+    { g: new THREE.SphereGeometry(0.11, 7, 5), pos: [0, 0.03, 0], scale: [1.3, 0.75, 2.4] },
+    { g: new THREE.CylinderGeometry(0.095, 0.13, 0.44, 7), pos: [0.03, -0.19, rad * 0.78 - 0.01], rot: [0.3, 0, 0.18], scale: [1, 1, 0.3] },
+    { g: new THREE.CylinderGeometry(0.07, 0.085, 0.3, 7), pos: [0.0, -0.12, -rad * 0.78 + 0.02], rot: [-0.32, 0, -0.05], scale: [1, 1, 0.38] },
+    { g: new THREE.SphereGeometry(0.13, 7, 4), pos: [0.09, -0.42, rad * 0.78 - 0.09], rot: [0.32, 0, 0], scale: [1, 0.35, 0.4] },
+  ], { uv: true }));
+  g.add(mk(gg, cloth('checks', c1, 0xfff6ea, null, { spacing: 0.06, strength: 0.35 }), { o: 1.5 }));
   return g;
 }
 
@@ -153,11 +151,11 @@ export function makeJhola(o = {}) {
       const z = Math.sqrt(Math.max(0, r(Math.max(0, y)) ** 2 - x * x)) + 0.012 - (i === 0 ? 0.2 : 0);
       pts.push(new THREE.Vector3(x, y, i === 0 ? -0.1 : z));
     }
-    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, 0.016, 4, false);
+    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 10, 0.016, 3, false);
   });
   const col = o.color ?? PASTEL.marigold;
   g.add(mk(strap, mat(col, { spacing: 0.03 }), { o: 1.4 }));
-  const bag = mk(geo('acc|jholaBag', () => new THREE.SphereGeometry(0.13, 8, 6)), cloth('dots', col, 0xfff3d2, null, { spacing: 0.04 }), { o: 1.8 });
+  const bag = mk(geo('acc|jholaBag', () => new THREE.SphereGeometry(0.13, 7, 5)), cloth('dots', col, 0xfff3d2, null, { spacing: 0.04 }), { o: 1.8 });
   bag.scale.set(0.5, 1.0, 0.95);
   bag.position.set(-0.3 * bw - 0.02, 0.0, -0.04);
   g.add(bag);
@@ -166,7 +164,7 @@ export function makeJhola(o = {}) {
 
 export function makeSabziBag() {
   const g = group('handL', { orient: 'hang', baseTilt: { x: 0, z: 0 }, tilt: { x: 0, z: 0 } });
-  const bag = mk(geo('acc|sabziBag', () => new THREE.SphereGeometry(0.17, 9, 7)), cloth('vstripes', PASTEL.pistachio, 0xfff6e0, null), { o: 1.8 });
+  const bag = mk(geo('acc|sabziBag', () => new THREE.SphereGeometry(0.17, 7, 5)), cloth('vstripes', PASTEL.pistachio, 0xfff6e0, null), { o: 1.8 });
   bag.scale.set(1, 1.15, 0.8); bag.position.y = -0.3;
   g.add(bag);
   g.add(vcMesh('sabziVeg', () => [
@@ -188,7 +186,7 @@ export function makeUmbrella(o = {}) {
     { g: torus(0.045, 0.013, Math.PI, 4, 8), pos: [0.045, -0.15, 0], rot: [0, 0, Math.PI], color: 0x6b5a52 },
     { g: cone(0.02, 0.1, 5), pos: [0, 1.4, 0], color: 0xd8b348 },
   ], 1.4));
-  const dome = mk(geo('acc|dome', () => new THREE.SphereGeometry(0.64, 8, 3, 0, Math.PI * 2, 0, Math.PI / 2)),
+  const dome = mk(geo('acc|dome', () => new THREE.SphereGeometry(0.64, 8, 2, 0, Math.PI * 2, 0, Math.PI / 2)),
     cloth('vstripes', c1, c2, null, { spacing: 0.05, double: true }), { o: 2 });
   dome.scale.y = 0.5; dome.position.y = 1.05;
   g.add(dome);
@@ -210,7 +208,7 @@ export function makeTiffinCrate() {
     const layer = [0xe3e9ec, 0xbfd3df, 0xe3e9ec, 0xf0d8a8];
     for (let i = 0; i < 4; i++) {
       const x = -0.31 + i * 0.205;
-      for (let j = 0; j < 2; j++) p.push({ g: cyl(0.085, 0.085, 0.15, 7), pos: [x, 0.13 + j * 0.155, 0], color: layer[(i + j) % 4] });
+      for (let j = 0; j < 2; j++) p.push({ g: cyl(0.085, 0.085, 0.15, 6), pos: [x, 0.13 + j * 0.155, 0], color: layer[(i + j) % 4] });
       p.push({ g: sph(0.03, 5, 4), pos: [x, 0.36, 0], color: STEEL_D });
       p.push({ g: box(0.012, 0.3, 0.012), pos: [x + 0.09, 0.26, 0], color: STEEL_D });
     }
@@ -224,7 +222,7 @@ export function makeFishBasket() {
   g.add(vcMesh('fishBasket', () => {
     const p = [
       { g: torus(0.13, 0.06, Math.PI * 2, 4, 8), pos: [0, 0.04, 0], rot: [Math.PI / 2, 0, 0], color: 0xe9776a }, // cloth ring (chumbal)
-      { g: lathe([[0, 0.08], [0.2, 0.08], [0.34, 0.14], [0.46, 0.26], [0.5, 0.33], [0.46, 0.34], [0.42, 0.28], [0.3, 0.19], [0, 0.16]], 10), color: 0xd9a96a },
+      { g: lathe([[0, 0.08], [0.2, 0.08], [0.34, 0.14], [0.46, 0.26], [0.5, 0.33], [0.46, 0.34], [0.42, 0.28], [0.3, 0.19], [0, 0.16]], 8), color: 0xd9a96a },
     ];
     const cols = [0xcfe2ee, 0xf4c6cf, 0xdfe9ee, 0xf1d6b6, 0xcfe2ee, 0xf4c6cf];
     for (let i = 0; i < 6; i++) {
@@ -241,7 +239,7 @@ export function makeBalloons() {
   const g = group('handL', { orient: 'up', baseTilt: { x: 0.1, z: 0 }, tilt: { x: 0, z: 0 } });
   const cols = [0xe9776a, 0xf6c453, 0x6cc3bd, 0xf0a3c3, 0xf29b4b, 0xc9b7e8, 0xa8d878];
   const spots = [[0, 1.45, 0], [-0.26, 1.28, 0.05], [0.27, 1.25, -0.04], [-0.12, 1.12, 0.2], [0.14, 1.08, -0.18], [-0.34, 1.02, -0.12], [0.34, 0.98, 0.14]];
-  g.add(vcMesh('balloons', () => spots.map((p, i) => ({ g: sph(0.17, 7, 5), pos: p, scale: [1, 1.18, 1], color: cols[i] })), 2, 0.05));
+  g.add(vcMesh('balloons', () => spots.map((p, i) => ({ g: sph(0.17, 6, 4), pos: p, scale: [1, 1.18, 1], color: cols[i] })), 2, 0.05));
   g.add(vcMesh('balloonStrings', () => spots.map((p) => seg([0, 0, 0], [p[0] * 0.98, p[1] - 0.2, p[2] * 0.98], 0.006, INK_COLOR)), 0, 0.2));
   g.userData.update = (dt, c) => { g.userData.tilt.z = Math.sin(c.t * 1.7) * 0.07; g.userData.tilt.x = 0.1 + Math.sin(c.t * 1.3 + 1) * 0.04; };
   return g;
@@ -313,15 +311,17 @@ export function makeJhara() {
 
 export function makeSunglasses() {
   const g = group('face');
-  g.add(vcMesh('sunglasses', () => {
-    const p = [{ g: box(0.09, 0.022, 0.02), pos: [0, 0.03, 0.3], color: 0x2b2440 }];
+  g.add(vcMesh('sunglasses2', () => {
+    const p = [{ g: box(0.09, 0.02, 0.02), pos: [0, 0.045, 0.3], color: 0xd9b348 }];
     for (const s of [-1, 1]) {
-      p.push({ g: cyl(0.105, 0.105, 0.022, 8), pos: [s * 0.145, 0.0, 0.272], rot: [Math.PI / 2, 0, 0], scale: [1, 1, 0.82], color: 0x3d3158 });
-      p.push({ g: box(0.02, 0.022, 0.3), pos: [s * 0.255, 0.02, 0.12], color: 0x2b2440 });
-      p.push({ g: box(0.03, 0.012, 0.012), pos: [s * 0.12, 0.05, 0.287], rot: [0, 0, -0.5], color: 0xf1e6ff });
+      // aviator teardrop lens: wide top ellipse + narrower lower one
+      p.push({ g: cyl(0.1, 0.1, 0.02, 8), pos: [s * 0.14, 0.02, 0.272], rot: [Math.PI / 2, 0, 0], scale: [1.1, 1, 0.8], color: 0x3d3158 });
+      p.push({ g: cyl(0.07, 0.07, 0.02, 7), pos: [s * 0.125, -0.05, 0.278], rot: [Math.PI / 2, 0, 0], scale: [1, 1, 0.9], color: 0x3d3158 });
+      p.push({ g: box(0.018, 0.018, 0.3), pos: [s * 0.255, 0.03, 0.12], color: 0xd9b348 });
+      p.push({ g: box(0.035, 0.012, 0.012), pos: [s * 0.12, 0.07, 0.287], rot: [0, 0, -0.5], color: 0xf1e6ff });
     }
     return p;
-  }, 1.5, 0.03));
+  }, 0, 0.03));
   return g;
 }
 
@@ -419,8 +419,8 @@ export function makeGolaStick() {
   const g = group('handL', { orient: 'up', baseTilt: { x: 0.2, z: 0 }, tilt: { x: 0, z: 0 } });
   g.add(vcMesh('golaStick', () => [
     { g: cyl(0.014, 0.014, 0.32, 5), pos: [0, 0.06, 0], color: 0xd9a46a },
-    { g: sph(0.085, 7, 5), pos: [0, 0.25, 0], scale: [1, 1.15, 1], color: 0xf4fafc },
-    { g: sph(0.088, 7, 4), pos: [0, 0.28, 0], scale: [1, 0.7, 1], color: 0xe9776a },
+    { g: sph(0.085, 6, 4), pos: [0, 0.25, 0], scale: [1, 1.15, 1], color: 0xf4fafc },
+    { g: sph(0.088, 6, 3), pos: [0, 0.28, 0], scale: [1, 0.7, 1], color: 0xe9776a },
     { g: cone(0.03, 0.06, 6), pos: [0, 0.34, 0], color: 0xf6c453 },
   ], 1.6, 0.03));
   return g;

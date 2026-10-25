@@ -56,7 +56,10 @@ export default createLineup;
 export function createPreview(spec = 'hero') {
   const s = typeof spec === 'string' ? { role: spec } : spec?.role ? spec : { role: 'hero' };
   const p = s.role === 'hero' ? createHero() : createNPC(s.role, undefined, s.seed ?? 1, { props: true, loop: s.loop });
-  autoAnimate(p, { walk: s.walk ?? 0, speed: (s.walk ?? 0) * 6 });
-  if (s.loop && p.userData.playLoop) p.userData.playLoop(s.loop);
+  const st = { walk: s.walk ?? 0, speed: (s.walk ?? 0) * 6 };
+  if (s.at) { // fast-forward to a moment of the loop (review mid-action); s.freeze keeps it still
+    for (let i = 0; i < s.at * 60; i++) p.userData.animate(1 / 60, { ...st, phase: i * 0.2 });
+  }
+  if (!s.freeze) autoAnimate(p, st);
   return p;
 }

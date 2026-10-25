@@ -71,11 +71,14 @@ export const LOOPS = {
   },
   leaning(c) {
     const { P, w, lt } = c;
-    to(P.armL, { x: 0.45, z: -0.15, e: 1.95, ez: -0.95 }, w);
-    to(P.armR, { x: 0.5, z: -0.15, e: 1.85, ez: -0.95 }, w);
-    P.spX += w * -0.12; P.hdZ += w * 0.07 + Math.sin(lt * 0.5) * 0.04 * w; P.hdY += w * Math.sin(lt * 0.35) * 0.35;
-    P.legL.s += w * -0.12; P.legL.h += w * 0.22; P.legR.a += w * Math.max(0, Math.sin(lt * 3)) * (Math.sin(lt * 0.4) > 0.3 ? 0.35 : 0);
-    P.hipRz += w * 0.04;
+    // arms folded across the chest, body leaning back, one foot propped up behind
+    to(P.armL, { x: 0.6, z: -0.1, e: 2.2, ez: -1.45 }, w);
+    to(P.armR, { x: 0.75, z: -0.1, e: 2.3, ez: -1.45 }, w);
+    P.spX += w * -0.2; P.hdX += w * 0.1; P.hdZ += w * 0.08 + Math.sin(lt * 0.5) * 0.04 * w; P.hdY += w * Math.sin(lt * 0.35) * 0.4;
+    P.hipRx += w * 0.12; P.hipRz += w * 0.06;
+    to(P.legL, { h: 0.12, s: -0.16 }, w);   // ankles crossed
+    to(P.legR, { h: 0.05, k: 0.1, s: -0.12 }, w);
+    P.legR.a += w * Math.max(0, Math.sin(lt * 3)) * (Math.sin(lt * 0.4) > 0.3 ? 0.35 : 0); // occasional toe tap
   },
   carry(c) { // tiffin crate on the head, both hands steady it
     const { P, w, lt } = c;

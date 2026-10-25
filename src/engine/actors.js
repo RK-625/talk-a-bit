@@ -12,7 +12,8 @@
  *            phase = starting fraction 0..1
  *   opts = { lift=0,            extra height above the ground (e.g. a bus wheel offset, or a train on an embankment)
  *            radiusFn(dir),     override the radius entirely, e.g. dir => planet.seaRadius for a boat
- *            collider: {radius, height} | null   registers a MOVING collider that follows the actor
+ *            collider: {radius, height, length?} | null   registers a MOVING collider that follows the actor;
+ *                       with `length` it is a segment (capsule) of that length centred on the actor, along its heading
  *            scale=1 }
  * actor = { group, dir (unit Vector3, live), forward (tangent, live), collider,
  *           speed (mutable), paused (mutable), update(dt) }
@@ -20,6 +21,7 @@
  * actors.remove(actor)
  */
 import * as THREE from 'three';
+import { setSegment } from './colliders.js';
 
 const toVec = (v) => (Array.isArray(v) ? new THREE.Vector3(...v) : v.clone());
 const _m = new THREE.Matrix4();
@@ -81,7 +83,22 @@ export function createActors({ planet, colliders = null }) {
         group.quaternion.setFromRotationMatrix(_m);
       },
     };
-    if (collider && colliders) actor.collider = colliders.addMoving({ dir, radius: collider.radius, height: collider.height });
+    if (collider && colliders) {
+      if (collider.length) {
+        const half = collider.length / 2;
+        const ca = new THREE.Vector3(), cb = new THREE.Vector3();
+        const c = { radius: collider.radius, height: collider.height };
+        c.update = () => {
+          // endpoints a distance `half` along the heading (tangent step on the sphere)
+          const ang = half / planet.radius, sn = Math.sin(ang), cs = Math.cos(ang);
+          ca.copy(dir).multiplyScalar(cs).addScaledVector(forward, sn);
+          cb.copy(dir).multiplyScalar(cs).addScaledVector(forward, -sn);
+          setSegment(c, ca, cb, planet.radius);
+        };
+        c.update();
+        actor.collider = colliders.addMoving(c);
+      } else actor.collider = colliders.addMoving({ dir, radius: collider.radius, height: collider.height });
+    }
     actor.update(0);
     list.push(actor);
     return actor;

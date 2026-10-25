@@ -38,7 +38,7 @@ const ROLE_DEFS = {
     make: (r) => ({
       height: 2.2, build: 'normal', skin: warm(r, [2, 3, 4]),
       outfit: 'shirtTrousers', sleeves: 'long', top: pick(r, [PASTEL.mint, PASTEL.sky, PASTEL.butter]), topPattern: 'checks', top2: 0xfffaf0,
-      bottom: pick(r, [PASTEL.sand, 0xc9c4d6]), hair: { style: 'short', color: HAIR.grey },
+      bottom: pick(r, [PASTEL.sand, 0xc9c4d6]), trim: 0xfffaf0, hair: { style: 'short', color: HAIR.grey },
       face: { eyes: 'dot', moustache: 'thin', brows: 'thin', specs: true, blush: true },
       accessories: ['kettle', 'chaiGlass', { name: 'gamcha', slot: 'shoulderR', color: PASTEL.sky }],
       footwear: 'chappal', footColor: PASTEL.brown,
@@ -59,7 +59,7 @@ const ROLE_DEFS = {
     loop: 'carry',
     make: (r) => ({
       height: 2.2, build: 'thin', skin: warm(r, [2, 3, 4]),
-      outfit: 'kurtaPyjama', top: 0xfbf7ea, bottom: 0xf3ecd9, trim: null,
+      outfit: 'kurtaPyjama', top: 0xfbf7ea, bottom: 0xf3ecd9, trim: 0xf2c46a,
       hair: { style: 'topi', color: HAIR.black, hat: 0xfffdf4 },
       face: { eyes: 'dot', moustache: r() > 0.4 ? 'thin' : false, brows: 'thin', blush: true },
       accessories: ['tiffinCrate'],
@@ -72,7 +72,7 @@ const ROLE_DEFS = {
       const [blouse, saree, pallu] = pick(r, [[PASTEL.teal, PASTEL.magenta, PASTEL.marigold], [PASTEL.marigold, PASTEL.teal, PASTEL.red], [PASTEL.pink, PASTEL.sky, PASTEL.saffron]]);
       return {
         height: 2.05, build: 'round', skin: warm(r, [3, 4]),
-        outfit: 'nauvari', top: blouse, bottom: saree, bottomPattern: 'stripes', bottom2: pallu, pallu, trim: 0xfffaf0,
+        outfit: 'nauvari', top: blouse, bottom: saree, bottomPattern: 'dots', bottom2: 0xfffaf0, pallu, top2: 0xfffaf0, trim: 0xfffaf0,
         hair: { style: 'bun', color: HAIR.black },
         face: { eyes: 'dot', bindi: true, lashes: true, blush: true, smile: 'big' },
         accessories: ['fishBasket'],
@@ -139,7 +139,7 @@ const ROLE_DEFS = {
   cricketKid: {
     loop: (o) => (o.variant === 'bowler' ? 'bowl' : 'bat'),
     make: (r, o) => ({
-      height: 1.5, build: 0.92, headScale: 1.14, legScale: 0.8, armScale: 0.84, torsoScale: 0.92, skin: warm(r, [2, 3, 4]),
+      height: 1.5, build: 0.92, headScale: 1.34, legScale: 0.76, armScale: 0.86, torsoScale: 0.88, trim: 0xfffaf0, skin: warm(r, [2, 3, 4]),
       outfit: 'shirtShorts', top: o.variant === 'bowler' ? PASTEL.marigold : 0x86a9e3, topPattern: 'stripes', top2: 0xfff6dc, bottom: o.variant === 'bowler' ? 0x6f7fb0 : 0xf3efe2,
       hair: { style: 'messy', color: HAIR.black },
       face: { eyes: 'dot', eyeScale: 1.2, blush: true, smile: 'big', smudge: r() > 0.5 },
@@ -162,7 +162,7 @@ const ROLE_DEFS = {
     loop: 'stir',
     make: (r) => ({
       height: 2.1, build: 'round', skin: warm(r, [2, 3, 4]),
-      outfit: 'shirtTrousers', top: pick(r, [PASTEL.sky, PASTEL.mint]), topPattern: 'stripes', top2: 0xfffaf0, bottom: PASTEL.khaki,
+      outfit: 'shirtTrousers', top: pick(r, [PASTEL.sky, PASTEL.mint]), topPattern: 'stripes', top2: 0xfffaf0, bottom: PASTEL.khaki, trim: 0xfffaf0,
       hair: { style: 'topi', color: HAIR.black, hat: pick(r, [PASTEL.sky, PASTEL.butter, PASTEL.pink]) },
       face: { eyes: 'dot', moustache: r() > 0.5 ? 'thin' : false, blush: true, smile: 'big' },
       accessories: ['bhelTub', 'jhara'],

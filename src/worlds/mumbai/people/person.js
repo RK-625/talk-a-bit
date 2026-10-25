@@ -55,7 +55,7 @@ function resolve(spec) {
   const s = { ...spec };
   s.height ??= 2.2;
   s.build ??= 'normal';
-  s.headScale ??= 1; s.legScale ??= 1; s.armScale ??= 1; s.torsoScale ??= 1;
+  s.headScale ??= 1.12; s.legScale ??= 1; s.armScale ??= 1; s.torsoScale ??= 1;
   s.skin = typeof s.skin === 'number' && s.skin < 16 ? SKIN[s.skin] : s.skin ?? SKIN[2];
   s.outfit ??= 'shirtTrousers';
   s.top ??= PASTEL.sky; s.topPattern ??= 'plain'; s.top2 ??= PASTEL.white;
@@ -168,7 +168,7 @@ function dirEuler(dir) {
   return [e.x, e.y, e.z];
 }
 function cap(r, L = 1.5, tilt = -0.5, scale = 1.045) {
-  const g = new THREE.SphereGeometry(r * scale, 12, 7, 0, Math.PI * 2, 0, L);
+  const g = new THREE.SphereGeometry(r * scale, 9, 5, 0, Math.PI * 2, 0, L);
   g.rotateX(tilt);
   return g;
 }
@@ -217,8 +217,8 @@ function buildHair(h, r, seed) {
       const hat = h.hat ?? PASTEL.white;
       out.push(part(geo(`hair|capHair|${rr}`, () => cap(r, 1.6, -0.35, 1.03))));
       out.push(mk(geo(`hat|peak|${rr}`, () => mergeColored([
-        { g: new THREE.SphereGeometry(r * 1.1, 12, 6, 0, Math.PI * 2, 0, 1.22), pos: [0, r * 0.1, 0], scale: [1, 0.85, 1.02] },
-        { g: new THREE.CylinderGeometry(r * 1.08, r * 1.08, r * 0.2, 12), pos: [0, r * 0.36, 0], scale: [1, 1, 1.02] },
+        { g: new THREE.SphereGeometry(r * 1.1, 9, 5, 0, Math.PI * 2, 0, 1.22), pos: [0, r * 0.1, 0], scale: [1, 0.85, 1.02] },
+        { g: new THREE.CylinderGeometry(r * 1.08, r * 1.08, r * 0.2, 9), pos: [0, r * 0.36, 0], scale: [1, 1, 1.02] },
         { g: new THREE.CylinderGeometry(r * 0.75, r * 0.75, 0.025, 12, 1, false, -Math.PI / 2, Math.PI), pos: [0, r * 0.3, r * 0.92], rot: [0.28, 0, 0] },
       ])), hatVC(hat), { o: 2 }));
       out.push(mk(geo('hat|badge', () => new THREE.SphereGeometry(0.035, 6, 5)), mat(0xe9b73d, { spacing: 0.03 }), { o: 0 }));
@@ -229,7 +229,7 @@ function buildHair(h, r, seed) {
       const hat = h.hat ?? PASTEL.white;
       out.push(part(geo(`hair|topiHair|${rr}`, () => cap(r, 1.6, -0.35, 1.03))));
       out.push(mk(geo(`hat|topi|${rr}`, () => mergeColored([
-        { g: new THREE.CylinderGeometry(r * 0.9, r * 0.97, r * 0.6, 12), pos: [0, r * 0.72, -r * 0.02], scale: [1, 1, 1.05] },
+        { g: new THREE.CylinderGeometry(r * 0.9, r * 0.97, r * 0.6, 9), pos: [0, r * 0.72, -r * 0.02], scale: [1, 1, 1.05] },
         { g: new THREE.SphereGeometry(r * 0.9, 10, 4, 0, Math.PI * 2, 0, 0.7), pos: [0, r * 0.9, -r * 0.02], scale: [1, 0.35, 1.05] },
       ])), hatVC(hat), { o: 2 }));
       break;
@@ -237,7 +237,7 @@ function buildHair(h, r, seed) {
     case 'turban': {
       const hat = h.hat ?? PASTEL.saffron;
       out.push(mk(geo(`hat|turban|${rr}`, () => mergeColored([
-        { g: new THREE.SphereGeometry(r * 1.1, 12, 6, 0, Math.PI * 2, 0, 1.55), pos: [0, r * 0.12, 0], scale: [1, 0.9, 1.05], rot: [-0.15, 0, 0] },
+        { g: new THREE.SphereGeometry(r * 1.1, 9, 5, 0, Math.PI * 2, 0, 1.55), pos: [0, r * 0.12, 0], scale: [1, 0.9, 1.05], rot: [-0.15, 0, 0] },
         { g: new THREE.TorusGeometry(r * 0.98, r * 0.2, 5, 12), pos: [0, r * 0.55, 0], rot: [Math.PI / 2 - 0.25, 0, 0.2] },
         { g: new THREE.TorusGeometry(r * 0.9, r * 0.17, 5, 12), pos: [0, r * 0.82, 0.02], rot: [Math.PI / 2 + 0.12, 0, -0.35] },
         { g: new THREE.SphereGeometry(r * 0.3, 7, 5), pos: [r * 0.42, r * 1.0, r * 0.45] },
@@ -252,15 +252,24 @@ function hatVC(col) { return mat(col, { spacing: 0.045, strength: 0.85 }); }
 const HAT_LIFT = { cap: 0.2, topi: 0.2, turban: 0.2, bun: 0.1, messy: 0.1 };
 
 // ---- limbs ------------------------------------------------------------------------------------------------
-function limb(rt, rb, len, seg = 6) {
-  return geo(`limb|${r3(rt)}|${r3(rb)}|${r3(len)}|${seg}`, () => {
-    // bottom-first lathe profile with a rounded "joint" dome on top (no flat blocky tops)
-    const pts = [new THREE.Vector2(0, -len), new THREE.Vector2(rb, -len), new THREE.Vector2(rt, 0)];
-    for (let i = 1; i <= 3; i++) {
-      const a = (i / 3) * (Math.PI / 2);
+function uvByHeight(g) {
+  g.computeBoundingBox();
+  const { min, max } = g.boundingBox, pos = g.attributes.position, uv = g.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setY(i, (pos.getY(i) - min.y) / (max.y - min.y));
+  return g;
+}
+function limb(rt, rb, len, seg = 6, round = true) {
+  return geo(`limb|${r3(rt)}|${r3(rb)}|${r3(len)}|${seg}|${round}`, () => {
+    // bottom-first lathe profile, soft rounded ends (no flat blocky tops)
+    const pts = round
+      ? [new THREE.Vector2(0, -len - rb * 0.7), new THREE.Vector2(rb * 0.75, -len - rb * 0.4), new THREE.Vector2(rb, -len)]
+      : [new THREE.Vector2(0, -len), new THREE.Vector2(rb, -len)];
+    pts.push(new THREE.Vector2(rt, 0));
+    for (let i = 1; i <= 2; i++) {
+      const a = (i / 2) * (Math.PI / 2);
       pts.push(new THREE.Vector2(rt * Math.cos(a), rt * 0.85 * Math.sin(a)));
     }
-    return new THREE.LatheGeometry(pts, seg);
+    return uvByHeight(new THREE.LatheGeometry(pts, seg));
   });
 }
 
@@ -288,21 +297,23 @@ export function createPerson(spec = {}, ink) {
   const hips = new THREE.Group(); hips.position.y = hipY; root.add(hips);
   const spine = new THREE.Group(); hips.add(spine);
 
-  const skinM = mat(S.skin, { spacing: 0.04, strength: 0.32 });
+  const skinM = mat(S.skin, { spacing: 0.07, strength: 0.1 });
   const topM = cloth(S.topPattern, S.top, S.top2, null, { spacing: 0.045 });
   const topBeltM = O.belt ? cloth('belt', S.top, 0x4a4060, null, { spacing: 0.045 }) : topM;
   const botM = cloth(S.bottomPattern, S.bottom, S.bottom2, null, { spacing: 0.045 });
+  const botT = S.trim !== null ? cloth(S.bottomPattern, S.bottom, S.bottom2, S.trim, { spacing: 0.045, trimH: 0.18 }) : botM;
 
   // ---- torso: inverted cone, pinched at the waist
   const torso = mk(geo(`torso|${r3(bw)}|${r3(torsoH)}`, () => {
-    const pts = [new THREE.Vector2(0, 0)];
-    const N = 5;
-    for (let i = 0; i <= N; i++) { // bottom (waist pinch) to top (shoulders), a touch of chest bulge
+    // soft teardrop: rounded waist, gently widening to rounded shoulders
+    const pts = [new THREE.Vector2(0, -0.04), new THREE.Vector2(0.07 * bw, -0.032), new THREE.Vector2(0.115 * bw, 0.0)];
+    const N = 4;
+    for (let i = 1; i <= N; i++) {
       const t = i / N;
-      pts.push(new THREE.Vector2((0.095 + 0.205 * t + Math.sin(t * Math.PI) * 0.018) * bw, torsoH * t));
+      pts.push(new THREE.Vector2((0.115 + 0.2 * Math.pow(t, 0.85) + Math.sin(t * Math.PI) * 0.03) * bw, torsoH * t));
     }
-    pts.push(new THREE.Vector2(0.27 * bw, torsoH + 0.035), new THREE.Vector2(0.17 * bw, torsoH + 0.06), new THREE.Vector2(0, torsoH + 0.065));
-    return new THREE.LatheGeometry(pts, 10);
+    pts.push(new THREE.Vector2(0.3 * bw, torsoH + 0.035), new THREE.Vector2(0.2 * bw, torsoH + 0.065), new THREE.Vector2(0, torsoH + 0.08));
+    return uvByHeight(new THREE.LatheGeometry(pts, 8));
   }), O.belt ? topBeltM : topM, { o: 2.2 });
   spine.add(torso);
 
@@ -316,23 +327,23 @@ export function createPerson(spec = {}, ink) {
     const ankle = new THREE.Group(); ankle.position.y = -shinLen; knee.add(ankle);
     let thigh, shin;
     if (O.legs === 'trousers') {
-      thigh = mk(limb(0.125 * bws, 0.098 * bws, thighLen, 7), botM, { o: 2 });
-      shin = mk(limb(0.098 * bws, 0.068 * bws, shinLen, 7), botM, { o: 2 });
+      thigh = mk(limb(0.13 * bws, 0.105 * bws, thighLen, 6, false), botM, { o: 2 });
+      shin = mk(limb(0.105 * bws, 0.075 * bws, shinLen, 6, false), botT, { o: 2 });
     } else if (O.legs === 'shorts') {
-      thigh = mk(limb(0.125 * bws, 0.115 * bws, thighLen * 0.95, 7), botM, { o: 2 });
-      shin = mk(limb(0.05 * bws, 0.036 * bws, shinLen, 6), skinM, { o: 2 });
+      thigh = mk(limb(0.13 * bws, 0.125 * bws, thighLen * 0.9, 6, false), botT, { o: 2 });
+      shin = mk(limb(0.06 * bws, 0.043 * bws, shinLen, 6), skinM, { o: 2 });
     } else {
-      thigh = mk(limb(0.06 * bws, 0.05 * bws, thighLen, 6), skinM, { o: 2 });
-      shin = mk(limb(0.05 * bws, 0.035 * bws, shinLen, 6), skinM, { o: 2 });
+      thigh = mk(limb(0.07 * bws, 0.06 * bws, thighLen, 6), skinM, { o: 2 });
+      shin = mk(limb(0.06 * bws, 0.043 * bws, shinLen, 6), skinM, { o: 2 });
     }
     hip.add(thigh); knee.add(shin);
     // foot
     const fr = S.footwear === 'shoes' ? 0.095 : 0.082;
-    const foot = mk(sph(fr, 8, 6), S.footwear === 'shoes' ? mat(S.footColor, { spacing: 0.035 }) : skinM, { o: 1.8 });
+    const foot = mk(sph(fr, 6, 4), S.footwear === 'shoes' ? mat(S.footColor, { spacing: 0.035 }) : skinM, { o: 1.8 });
     foot.scale.set(1, 0.62, 1.45); foot.position.set(0, -0.012, 0.04);
     ankle.add(foot);
     if (S.footwear === 'chappal') {
-      const sole = mk(geo('sole', () => { const g = new THREE.CylinderGeometry(0.095, 0.095, 0.022, 8); g.scale(1, 1, 1.75); return g; }), mat(S.footColor, { spacing: 0.03 }), { o: 1.4 });
+      const sole = mk(geo('sole', () => { const g = new THREE.CylinderGeometry(0.095, 0.095, 0.022, 8); g.scale(1, 1, 1.75); return g; }), mat(S.footColor, { spacing: 0.03 }), { o: 0 });
       sole.position.set(0, -0.05, 0.05);
       ankle.add(sole);
     }
@@ -353,11 +364,11 @@ export function createPerson(spec = {}, ink) {
       : cloth(S.bottomPattern, S.bottom, S.bottom2, S.trim, { spacing: 0.045 });
     const mesh = mk(geo(`skirt|${r3(len)}|${r3(rh)}|${r3(rt)}`, () => {
       const pts = [];
-      for (let i = 0; i <= 5; i++) {
-        const t = i / 5; // 0 hem .. 1 top
+      for (let i = 0; i <= 4; i++) {
+        const t = i / 4; // 0 hem .. 1 top
         pts.push(new THREE.Vector2(rt + (rh - rt) * Math.pow(1 - t, 1.2), -len * (1 - t) + 0.02 * t));
       }
-      return new THREE.LatheGeometry(pts, 12);
+      return new THREE.LatheGeometry(pts, 8);
     }), m, { o: 2.2 });
     skirt.add(mesh);
   }
@@ -377,13 +388,17 @@ export function createPerson(spec = {}, ink) {
   // ---- pallu (shoulder cloth)
   if (O.pallu) {
     const pc = S.pallu ?? S.bottom2 ?? S.bottom;
-    const y = torsoH * 0.52, rad = (0.095 + 0.205 * 0.52) * bw;
+    const rr = (y) => (0.115 + 0.2 * Math.pow(Math.max(0, y) / torsoH, 0.85) + Math.sin(Math.max(0, y) / torsoH * Math.PI) * 0.03) * bw;
     const band = mk(geo(`pallu|${r3(bw)}|${r3(torsoH)}`, () => {
-      const g = new THREE.BoxGeometry(0.15, torsoH * 1.1, 0.035, 1, 4, 1);
-      return g;
-    }), cloth('plain', pc, 0xffffff, S.trim, { spacing: 0.04, trimH: 0.14 }), { o: 1.6 });
-    band.position.set(0.0, y, rad + 0.012);
-    band.rotation.set(-0.08, 0, -0.62);
+      const pts = [new THREE.Vector3(0.2 * bw, torsoH + 0.03, -0.14 * bw)];
+      const N = 6;
+      for (let i = 0; i <= N; i++) {
+        const t = i / N, y = torsoH * (0.98 - 0.85 * t), x = (0.2 - 0.36 * t) * bw;
+        pts.push(new THREE.Vector3(x, y, Math.sqrt(Math.max(0, rr(y) ** 2 - x * x)) + 0.03));
+      }
+      pts.push(new THREE.Vector3(-0.2 * bw, torsoH * 0.04, rr(0.05) * 0.5 + 0.1));
+      return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 16, 0.058, 5, false);
+    }), cloth('stripes', pc, S.top2 === PASTEL.white ? 0xfffaf0 : S.top2, null, { spacing: 0.04 }), { o: 1.6 });
     spine.add(band);
   }
 
@@ -391,19 +406,19 @@ export function createPerson(spec = {}, ink) {
   const neck = new THREE.Group(); neck.position.y = torsoH; spine.add(neck);
   const headG = neck;
   const HI = S.detail === 'high';
-  const head = mk(geo(`head|${r3(hr)}|${HI}`, () => new THREE.SphereGeometry(hr, HI ? 18 : 14, HI ? 13 : 10)), skinM, { o: 2.4 });
-  head.position.y = headOff; head.scale.set(1.0, 0.97, 0.98);
+  const head = mk(geo(`head|${r3(hr)}|${HI}`, () => new THREE.SphereGeometry(hr, HI ? 16 : 10, HI ? 11 : 7)), skinM, { o: 2.4 });
+  head.position.y = headOff; head.scale.set(1.05, 0.95, 1.0);
   headG.add(head);
   for (const sd of [-1, 1]) { // little ball ears
-    const ear = mk(sph(hr * 0.2, 6, 4), skinM, { o: 0 });
+    const ear = mk(sph(hr * 0.2, 5, 3), skinM, { o: 0 });
     ear.scale.set(0.55, 1, 0.8); ear.position.set(sd * hr * 0.99, headOff - hr * 0.05, -hr * 0.05);
     headG.add(ear);
   }
   const faceGeo = geo(`face|${r3(hr)}|${HI}`, () =>
-    new THREE.SphereGeometry(hr * 1.02, HI ? 18 : 12, HI ? 10 : 7, Math.PI / 2 - FACE_PHI / 2, FACE_PHI, Math.PI / 2 - FACE_THETA / 2, FACE_THETA));
+    new THREE.SphereGeometry(hr * 1.02, HI ? 14 : 8, HI ? 8 : 5, Math.PI / 2 - FACE_PHI / 2, FACE_PHI, Math.PI / 2 - FACE_THETA / 2, FACE_THETA));
   const faceMat = new THREE.MeshBasicMaterial({ map: faceTexture(S.face, 'open'), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 });
   const faceMesh = new THREE.Mesh(faceGeo, faceMat);
-  faceMesh.position.y = headOff; faceMesh.scale.set(1.0, 0.97, 0.98);
+  faceMesh.position.y = headOff; faceMesh.scale.set(1.05, 0.95, 1.0);
   faceMesh.layers.set(OVERLAY_LAYER); faceMesh.name = 'face'; faceMesh.renderOrder = 2;
   headG.add(faceMesh);
   let faceState = 'open';
@@ -429,10 +444,10 @@ export function createPerson(spec = {}, ink) {
     const hand = new THREE.Group(); hand.position.y = -fa; el.add(hand);
     const upperM = sleeves === 'none' ? skinM : topM;
     const foreM = sleeves === 'long' ? topM : skinM;
-    const upper = mk(limb(sleeves === 'none' ? 0.048 : 0.062, sleeves === 'none' ? 0.038 : 0.052, ua, 7), upperM, { o: 1.9 });
-    const fore = mk(limb(sleeves === 'long' ? 0.054 : 0.04, sleeves === 'long' ? 0.045 : 0.032, fa, 7), foreM, { o: 1.9 });
+    const upper = mk(limb(sleeves === 'none' ? 0.058 : 0.075, sleeves === 'none' ? 0.046 : 0.062, ua, 5), upperM, { o: 1.9 });
+    const fore = mk(limb(sleeves === 'long' ? 0.064 : 0.048, sleeves === 'long' ? 0.054 : 0.04, fa, 5), foreM, { o: 1.9 });
     sh.add(upper); el.add(fore);
-    const ball = mk(sph(0.062 * Math.sqrt(S.armScale), 7, 5), skinM, { o: 1.7 });
+    const ball = mk(sph(0.076 * Math.sqrt(S.armScale), 5, 4), skinM, { o: 1.7 });
     hand.add(ball);
     arms.push({ sh, el, hand });
   }

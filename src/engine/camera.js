@@ -2,7 +2,7 @@
  * engine/camera.js: third-person follow camera for a spherical world.
  * createCameraRig(camera, player, planet) -> { heading, zoom01, update(dt, input) }
  *   heading: tangent unit vector the camera looks along (movement is relative to it); zoom01: 0 default .. 1 max zoom-out.
- *   Orbit with input.lookDX/DY, zoom with input.zoom (distance 7..125, default 14).
+ *   Orbit with input.lookDX/DY, zoom with input.zoom (distance 7..125, default 14). rig.setView({distance, pitch, snap}).
  */
 // Third-person follow camera for a spherical world.
 // The camera owns a tangent `heading` vector (where it looks along the ground). It is re-projected
@@ -44,6 +44,12 @@ export function createCameraRig(camera, player, planet) {
   const rig = {
     heading,
     zoom01: 0, // 0 at default distance, 1 at max zoom-out
+    /** set the orbit distance (7..125) and/or pitch (radians); snap = jump there instantly */
+    setView({ distance, pitch: p, snap = false } = {}) {
+      if (distance !== undefined) { distTarget = THREE.MathUtils.clamp(distance, MIN_DISTANCE, MAX_DISTANCE); if (snap) dist = distTarget; }
+      if (p !== undefined) pitch = THREE.MathUtils.clamp(p, MIN_PITCH, MAX_PITCH);
+      if (snap) { first = true; camUp.copy(player.up); heading.addScaledVector(player.up, -heading.dot(player.up)).normalize(); }
+    },
     update(dt, input) {
       const up = player.up;
 

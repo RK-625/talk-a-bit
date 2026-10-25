@@ -11,7 +11,7 @@ import { createPerson } from './person.js';
 import { PASTEL, HAIR } from './kit.js';
 
 export const HERO_SPEC = {
-  detail: 'high', height: 1.6, build: 0.92, headScale: 1.16, legScale: 0.78, armScale: 0.82, torsoScale: 0.9,
+  detail: 'high', height: 1.6, build: 0.92, headScale: 1.46, legScale: 0.72, armScale: 0.85, torsoScale: 0.85, trim: 0xfffaf0,
   skin: 0xe2a57b,
   outfit: 'shirtShorts', sleeves: 'short',
   top: PASTEL.marigold, topPattern: 'stripes', top2: 0xfff4d6,

@@ -19,10 +19,12 @@
  * planet.getSurfaceRadius(dir)          land radius in direction dir (any non-zero Vector3-like); analytic, no raycast
  * planet.getSurfaceNormal(dir, target?) outward normal (finite differences)
  * planet.isWalkable(dir) -> bool        false where land is below sea level, unless a walkable surface covers it
- * planet.addWalkableSurface({ contains(dir)->bool, heightAt(dir)->radius })
+ * planet.addWalkableSurface({ contains(dir)->bool, heightAt(dir)->radius, c?: Vector3, cosR?: number })
  *        register a bridge/causeway/pier. Where contains() is true the point is walkable and the player stands at
- *        heightAt(dir) (radius from planet centre; use the same value you build the deck at).
- *        Surfaces can overlap land: the HIGHER of land and heightAt wins as the floor.
+ *        heightAt(dir) (radius from planet centre; use the same value you build the deck at). `dir` is a UNIT vector.
+ *        Optional bounding cap (c = unit centre, cosR = cos of its angular radius) makes the lookup cheap.
+ *        Surfaces can overlap land: the HIGHER of land and heightAt wins as the floor. The player can only step UP onto
+ *        a floor at most 0.5 higher than where it stands (otherwise it is a wall: use ramps, or jump).
  * planet.getWalkRadius(dir)             floor radius used by the player: land, or the walkable surface if higher
  * planet.update(dt, t)                  animates the sea (called by the engine)
  * noise3(x,y,z), hash3(x,y,z)           deterministic gradient noise ([-0.7,0.7]) and integer hash, for worlds
@@ -104,7 +106,11 @@ export function createPlanet({
   }
 
   function surfaceAt(dir) {
-    for (let i = 0; i < surfaces.length; i++) if (surfaces[i].contains(dir)) return surfaces[i];
+    for (let i = 0; i < surfaces.length; i++) {
+      const s = surfaces[i];
+      if (s.c && dir.x * s.c.x + dir.y * s.c.y + dir.z * s.c.z < s.cosR) continue; // outside its bounding cap
+      if (s.contains(dir)) return s;
+    }
     return null;
   }
   function isWalkable(dir) {
@@ -124,11 +130,17 @@ export function createPlanet({
   geo.deleteAttribute('uv');
   const pos = geo.attributes.position;
   const v = new THREE.Vector3();
+  // the icosphere is non-indexed, so every vertex appears ~6 times: evaluate heightFn once per distinct position
+  const hCache = new Map();
   for (let i = 0; i < pos.count; i++) {
     v.fromBufferAttribute(pos, i).normalize();
-    v.multiplyScalar(getSurfaceRadius(v));
+    const key = ((Math.round(v.x * 2e4) + 20000) * 40001 + (Math.round(v.y * 2e4) + 20000)) * 40001 + (Math.round(v.z * 2e4) + 20000);
+    let rr = hCache.get(key);
+    if (rr === undefined) { rr = getSurfaceRadius(v); hCache.set(key, rr); }
+    v.multiplyScalar(rr);
     pos.setXYZ(i, v.x, v.y, v.z);
   }
+  hCache.clear();
   geo.computeVertexNormals(); // non-indexed => flat per-face normals
 
   // One colour + hatch info per face, from the face centroid.

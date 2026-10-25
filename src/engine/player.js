@@ -11,12 +11,14 @@
  * player.object   the hero Group (engine adds it to the scene)
  * player.up, player.face, player.vel   live unit/tangent Vector3s;  player.radius (distance from centre)
  * player.grounded
+ * player.teleport(dir, facing)   jump to a unit direction on the sphere, facing a tangent (dev tools, respawn)
  * player.update(dt, input, camHeading)   input = engine/input.js state; camHeading = camera tangent forward
  * Walkability: the player never enters planet.isWalkable(dir) === false; it slides along the shoreline.
  * Floor height is planet.getWalkRadius(dir) (land or a registered walkable surface such as a bridge).
  * Collisions: slides off every collider in colliders.list (static or moving) unless jumping over it.
  */
 import * as THREE from 'three';
+import { segmentPoint } from './colliders.js';
 
 // ---- tunables --------------------------------------------------------------
 const WALK_SPEED = 6;
@@ -28,13 +30,14 @@ const GRAVITY = 24;
 const COYOTE = 0.1; // s after leaving the ground in which a jump still works
 const JUMP_BUFFER = 0.12; // s a jump press is remembered before landing
 const SNAP_DISTANCE = 0.4; // stay glued to the ground when walking downhill within this
+const STEP_UP = 0.5; // the floor may rise at most this much per step (kerbs, ramps, platform edges); higher = a wall unless you jump
 
 const _q = new THREE.Quaternion();
 const _a = new THREE.Vector3();
 const _b = new THREE.Vector3();
 const _m = new THREE.Matrix4();
 const _up0 = new THREE.Vector3(), _face0 = new THREE.Vector3(), _vel0 = new THREE.Vector3();
-const _t1 = new THREE.Vector3(), _t2 = new THREE.Vector3(), _s = new THREE.Vector3(), _n = new THREE.Vector3();
+const _t1 = new THREE.Vector3(), _t2 = new THREE.Vector3(), _s = new THREE.Vector3(), _n = new THREE.Vector3(), _cq = new THREE.Vector3();
 
 export function createPlayer({ hero, planet, colliders, spawn = {}, radius: playerRadius = 0.55 }) {
   const object = hero;
@@ -63,19 +66,23 @@ export function createPlayer({ hero, planet, colliders, spawn = {}, radius: play
     _q.setFromAxisAngle(_a, (speed * dt) / r);
     rotateAll(_q);
   }
-  // remove the velocity component pointing toward lower ground (the water); the land gradient is the shore normal
-  function slideAlongShore() {
+  // remove the velocity component pointing into a "wall" of the radius field `f` (dir -> radius): the gradient points uphill,
+  // so this slides along a shoreline (f = land radius) or along a too-high step (f = walk radius)
+  function slideAlong(f) {
     tangent(vel);
     const t1 = _t1.copy(vel).normalize();
     const t2 = _t2.crossVectors(up, t1);
     const e = 0.02;
-    const h = (t, sgn) => planet.getSurfaceRadius(_s.copy(up).addScaledVector(t, sgn * e));
+    const h = (t, sgn) => f(_s.copy(up).addScaledVector(t, sgn * e).normalize());
     const n = _n.set(0, 0, 0).addScaledVector(t1, h(t1, 1) - h(t1, -1)).addScaledVector(t2, h(t2, 1) - h(t2, -1));
     if (n.lengthSq() < 1e-10) { vel.set(0, 0, 0); return; }
-    n.normalize(); // points uphill = toward land
+    n.normalize(); // points uphill = toward land / the higher floor
     const into = vel.dot(n);
     if (into < 0) vel.addScaledVector(n, -into);
   }
+  const landRadius = (d) => planet.getSurfaceRadius(d);
+  const walkRadius = (d) => planet.getWalkRadius(d);
+  const blocked = () => (planet.seaRadius !== null && !planet.isWalkable(up)) || planet.getWalkRadius(up) - r > STEP_UP;
   function rotateAll(q) {
     up.applyQuaternion(q).normalize();
     face.applyQuaternion(q);
@@ -104,18 +111,16 @@ export function createPlayer({ hero, planet, colliders, spawn = {}, radius: play
     // ---- move along the sphere: rotate about (up x vel) ----
     let speed = vel.length();
     if (speed > 1e-4) {
-      if (planet.seaRadius === null) step(dt, speed); // no sea: always walkable (fast path)
-      else {
-        _up0.copy(up); _face0.copy(face); _vel0.copy(vel);
-        step(dt, speed);
-        if (!planet.isWalkable(up)) { // would enter the water: undo, slide along the shore instead
-          up.copy(_up0); face.copy(_face0); vel.copy(_vel0);
-          slideAlongShore();
-          speed = vel.length();
-          if (speed > 1e-4) {
-            step(dt, speed);
-            if (!planet.isWalkable(up)) { up.copy(_up0); face.copy(_face0); vel.copy(_vel0).multiplyScalar(0); speed = 0; }
-          }
+      _up0.copy(up); _face0.copy(face); _vel0.copy(vel);
+      step(dt, speed);
+      if (blocked()) { // would enter the water, or walk into a wall of a too-high floor: undo, slide along it instead
+        const water = planet.seaRadius !== null && !planet.isWalkable(up);
+        up.copy(_up0); face.copy(_face0); vel.copy(_vel0);
+        slideAlong(water ? landRadius : walkRadius);
+        speed = vel.length();
+        if (speed > 1e-4) {
+          step(dt, speed);
+          if (blocked()) { up.copy(_up0); face.copy(_face0); vel.copy(_vel0).multiplyScalar(0); speed = 0; }
         }
       }
     }
@@ -179,13 +184,15 @@ export function createPlayer({ hero, planet, colliders, spawn = {}, radius: play
     for (let i = 0; i < list.length; i++) {
       const c = list[i];
       if (heightAbove > c.height) continue; // jumped over it
-      const dot = THREE.MathUtils.clamp(up.dot(c.dir), -1, 1);
-      if (dot < 0.9) continue; // far side of the planet (cheap early-out)
+      if (up.dot(c.dir) < (c.cullCos ?? 0.9)) continue; // far away (cheap early-out)
+      let cd = c.dir;
+      if (c.a) cd = segmentPoint(c, up, _cq);
+      const dot = THREE.MathUtils.clamp(up.dot(cd), -1, 1);
       const dist = Math.acos(dot) * PLANET_RADIUS;
       const minDist = c.radius + PLAYER_RADIUS;
       if (dist >= minDist || dist < 1e-4) continue;
       // away = tangent direction pointing from the collider to the player
-      _a.crossVectors(c.dir, up).normalize(); // rotation axis that moves `up` away from c.dir
+      _a.crossVectors(cd, up).normalize(); // rotation axis that moves `up` away from the collider
       _q.setFromAxisAngle(_a, (minDist - dist) / r);
       up.applyQuaternion(_q).normalize();
       face.applyQuaternion(_q);
@@ -244,6 +251,15 @@ export function createPlayer({ hero, planet, colliders, spawn = {}, radius: play
     const eyeY = blinkT > 0 ? 0.15 : 1;
     rig.eyes?.forEach((e) => (e.scale.y = eyeY));
   }
+
+  /** jump to a spot: teleport(dir (unit), facing (tangent)); keeps the player on the floor there */
+  state.teleport = function (dir, facing) {
+    up.copy(dir).normalize();
+    face.copy(facing).addScaledVector(up, -facing.dot(up)).normalize();
+    vel.set(0, 0, 0);
+    r = planet.getWalkRadius(up); vr = 0; grounded = true;
+    place();
+  };
 
   place();
   return state;

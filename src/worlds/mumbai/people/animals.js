@@ -28,8 +28,8 @@ function faceCap(r, paint, phi = 1.7, theta = 1.2, key = 'f') {
 // ---- dog -------------------------------------------------------------------------------------------------
 export function createDog(ink, seed = 1) {
   const r = rng(Math.floor(seed * 977) + 5);
-  const fur = [0xe8c48f, 0xdcb58a, 0xf0d2a4][Math.floor(r() * 3)];
-  const dark = 0xb98a5c;
+  const fur = [0xc08a58, 0xb07a4a, 0xcb9a66][Math.floor(r() * 3)];
+  const dark = 0x7e5232;
   const g = new THREE.Group();
   const root = new THREE.Group(); g.add(root);
   const furM = mat(fur, { spacing: 0.04, strength: 0.6 });
@@ -43,29 +43,29 @@ export function createDog(ink, seed = 1) {
   patch.scale.set(1, 0.55, 1.1); patch.position.set(0.12, 0.38, -0.3);
   root.add(patch);
   // head resting on front paws
-  const headG = new THREE.Group(); headG.position.set(0.05, 0.19, 0.42); root.add(headG);
-  const head = mk(sph(0.2, 14, 10), furM, { o: 2.2 }); head.scale.set(1, 0.92, 1); headG.add(head);
-  const snout = mk(sph(0.11, 10, 8), whiteM, { o: 1.8 }); snout.scale.set(1, 0.8, 1.1); snout.position.set(0, -0.04, 0.15); headG.add(snout);
-  const nose = mk(sph(0.04, 6, 5), basic(INK_COLOR), { o: 0 }); nose.position.set(0, -0.0, 0.255); headG.add(nose);
-  const face = faceCap(0.2, (ctx, w, h) => {
-    ctx.strokeStyle = INKC; ctx.lineWidth = 6; ctx.lineCap = 'round';
-    for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(w / 2 + s * 40, h * 0.42, 14, 0.12 * Math.PI, 0.88 * Math.PI); ctx.stroke(); }
+  const headG = new THREE.Group(); headG.position.set(0.05, 0.24, 0.42); root.add(headG);
+  const head = mk(sph(0.27, 11, 8), furM, { o: 2.2 }); head.scale.set(1.05, 0.92, 1); headG.add(head);
+  const snout = mk(sph(0.14, 8, 6), whiteM, { o: 1.8 }); snout.scale.set(1, 0.75, 1.0); snout.position.set(0, -0.08, 0.19); headG.add(snout);
+  const nose = mk(sph(0.05, 6, 5), basic(INK_COLOR), { o: 0 }); nose.position.set(0, -0.04, 0.32); headG.add(nose);
+  const face = faceCap(0.27, (ctx, w, h) => {
+    ctx.strokeStyle = INKC; ctx.lineWidth = 9; ctx.lineCap = 'round';
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(w / 2 + s * 42, h * 0.42, 20, 0.12 * Math.PI, 0.88 * Math.PI); ctx.stroke(); }
     ctx.fillStyle = 'rgba(244,120,155,0.5)';
-    for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(w / 2 + s * 66, h * 0.6, 14, 8, 0, 0, 7); ctx.fill(); }
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(w / 2 + s * 72, h * 0.62, 18, 11, 0, 0, 7); ctx.fill(); }
   }, 1.9, 1.2, 'dog');
   face.position.y = 0.0; headG.add(face);
   const ears = [];
   for (const s of [-1, 1]) {
-    const ear = mk(sph(0.1, 8, 6), darkM, { o: 1.8 });
-    ear.scale.set(0.5, 1.1, 0.8); ear.position.set(s * 0.17, 0.08, -0.04); ear.rotation.z = s * 0.5;
+    const ear = mk(sph(0.15, 7, 5), darkM, { o: 1.8 });
+    ear.scale.set(0.42, 1.35, 0.8); ear.position.set(s * 0.25, -0.02, -0.04); ear.rotation.z = s * 0.35;
     headG.add(ear); ears.push(ear);
   }
   // paws + tail
   for (const s of [-1, 1]) {
-    const paw = mk(sph(0.075, 8, 6), furM, { o: 1.6 }); paw.scale.set(1, 0.7, 1.5); paw.position.set(s * 0.12, 0.06, 0.52); root.add(paw);
+    const paw = mk(sph(0.085, 6, 5), whiteM, { o: 1.6 }); paw.scale.set(1, 0.7, 1.5); paw.position.set(s * 0.12, 0.06, 0.52); root.add(paw);
   }
-  const tail = mk(geo('dogTail', () => new THREE.TorusGeometry(0.2, 0.045, 6, 12, Math.PI * 1.2)), furM, { o: 1.8 });
-  tail.position.set(-0.26, 0.18, -0.75); tail.rotation.set(Math.PI / 2, 0, 0.4); root.add(tail);
+  const tail = mk(geo('dogTail2', () => new THREE.TorusGeometry(0.17, 0.055, 5, 9, Math.PI * 1.6)), furM, { o: 1.8 });
+  tail.position.set(-0.2, 0.34, -0.78); tail.rotation.set(0, 0.5, 0); root.add(tail);
   const hindLeg = mk(sph(0.14, 9, 7), furM, { o: 1.8 }); hindLeg.scale.set(0.8, 0.75, 1.2); hindLeg.position.set(0.28, 0.14, -0.2); root.add(hindLeg);
 
   // floating z's
@@ -88,10 +88,10 @@ export function createDog(ink, seed = 1) {
     if (loop === 'twitch') twitch = Math.max(0, Math.sin(lt * 14)) * (Math.sin(lt * 1.5) > 0.4 ? 1 : 0);
     hindLeg.rotation.z = twitch * 0.25; hindLeg.position.x = 0.28 + twitch * 0.02;
     // tail + ear flick
-    tail.rotation.z = 0.4 + Math.sin(t * 0.9) * 0.05 + (loop === 'twitch' ? Math.sin(lt * 8) * 0.15 * twitch : 0);
+    tail.rotation.z = Math.sin(t * 0.9) * 0.05 + (loop === 'twitch' ? Math.sin(lt * 8) * 0.15 * twitch : 0);
     const flick = Math.max(0, Math.sin(t * 0.7 + 2) - 0.85) * 6;
     perk = damp(perk, loop === 'perk' || look ? 1 : 0, 4, dt);
-    ears[0].rotation.z = -0.5 - flick * 0.4 - perk * 0.35; ears[1].rotation.z = 0.5 + perk * 0.35;
+    ears[0].rotation.z = -0.35 - flick * 0.4 - perk * 0.3; ears[1].rotation.z = 0.35 + perk * 0.3;
     let yawT = 0;
     if (look) { g.updateWorldMatrix(true, false); _v.copy(look); g.worldToLocal(_v); yawT = THREE.MathUtils.clamp(Math.atan2(_v.x - headG.position.x, _v.z - headG.position.z), -0.55, 0.55); }
     yaw = damp(yaw, yawT, 5, dt);
@@ -116,13 +116,13 @@ export function createDog(ink, seed = 1) {
 function createBird(kind, seed = 1) {
   const crow = kind === 'crow';
   const r = rng(Math.floor(seed * 733) + 3);
-  const S = crow ? 1.0 : 0.82;
-  const body = crow ? 0x4a4560 : 0xb9bbd0, head = crow ? 0x413c57 : 0xa3a6c2, wing = crow ? 0x3a3550 : 0x9fa3bf, beakC = crow ? 0x8d8aa0 : 0xf2b38a;
+  const S = crow ? 1.5 : 1.4;
+  const body = crow ? 0x2f2c3b : 0xa8b9d4, head = crow ? 0x2a2734 : 0x93a8c8, wing = crow ? 0x232030 : 0x8196b8, beakC = crow ? 0x6f6b7d : 0xf2b38a;
   const g = new THREE.Group();
   const root = new THREE.Group(); g.add(root);
   const bodyM = mat(body, { spacing: 0.03, strength: 0.7 }), headM = mat(head, { spacing: 0.03, strength: 0.7 }), wingM = mat(wing, { spacing: 0.03, strength: 0.7 });
   const torso = new THREE.Group(); torso.position.y = 0.32 * S; root.add(torso);
-  const b = mk(sph(0.2 * S, 12, 9), bodyM, { o: 2 }); b.scale.set(0.85, 0.8, 1.3); b.rotation.x = -0.25; torso.add(b);
+  const b = mk(sph(0.2 * S, 12, 9), bodyM, { o: 2 }); b.scale.set(crow ? 0.85 : 1.0, crow ? 0.8 : 0.95, crow ? 1.3 : 1.2); b.rotation.x = -0.25; torso.add(b);
   const neck = new THREE.Group(); neck.position.set(0, 0.1 * S, 0.17 * S); torso.add(neck);
   const h = mk(sph(0.11 * S, 10, 8), headM, { o: 1.8 }); h.position.set(0, 0.08 * S, 0.03 * S); neck.add(h);
   const beak = mk(geo(`beak|${kind}`, () => new THREE.ConeGeometry(0.035 * S, 0.12 * S, 6)), mat(beakC, { spacing: 0.02 }), { o: 1.4 });
@@ -133,10 +133,14 @@ function createBird(kind, seed = 1) {
     const pupil = new THREE.Mesh(sph(0.01 * S, 5, 4), basic(INK_COLOR)); pupil.position.set(s * 0.078 * S, 0.112 * S, 0.092 * S); neck.add(pupil);
     const cheek = new THREE.Mesh(sph(0.025 * S, 6, 5), basic(0xf4a0b5, { transparent: true, opacity: 0.6 })); cheek.scale.set(1, 0.6, 0.4); cheek.position.set(s * 0.085 * S, 0.06 * S, 0.075 * S); neck.add(cheek);
   }
-  if (!crow) { // iridescent neck ring
-    const ring = mk(geo('pigRing', () => new THREE.TorusGeometry(0.095, 0.03, 6, 12)), mat(0x72c3b4, { spacing: 0.02 }), { o: 1.2 });
-    ring.position.set(0, 0.0, 0.0); ring.rotation.x = Math.PI / 2 - 0.4; ring.scale.set(1, 1, 1); neck.add(ring);
-  }
+  // neck patch: crow = grey collar, pigeon = iridescent green/purple ring with dots
+  neck.add(mk(geo('neckPatch|' + kind, () => mergeColored(crow
+    ? [{ g: new THREE.TorusGeometry(0.1, 0.035, 4, 8), rot: [Math.PI / 2 - 0.4, 0, 0], color: 0x9a97aa }]
+    : [
+      { g: new THREE.TorusGeometry(0.105, 0.04, 4, 9), rot: [Math.PI / 2 - 0.4, 0, 0], color: 0x5fbf9f },
+      { g: new THREE.TorusGeometry(0.1, 0.025, 4, 9), pos: [0, -0.03, -0.02], rot: [Math.PI / 2 - 0.4, 0, 0], color: 0xa07fd0 },
+      ...[0, 1, 2, 3, 4].map((i) => ({ g: new THREE.SphereGeometry(0.018, 4, 3), pos: [Math.sin(i - 2) * 0.09, 0.02, 0.07 + Math.cos(i - 2) * 0.03], color: i % 2 ? 0xa07fd0 : 0x7fe0b8 })),
+    ])), mat(0xffffff, { vertexColors: true, spacing: 0.02 }), { o: 0 }));
   const wings = [];
   for (const s of [-1, 1]) {
     const piv = new THREE.Group(); piv.position.set(s * 0.15 * S, 0.06 * S, -0.02 * S); torso.add(piv);

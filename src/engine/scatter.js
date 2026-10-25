@@ -15,8 +15,9 @@
  *         Respects spacing between everything placed so far, the spawn clearing, and planet.isWalkable.
  *     placer.randDir() / placer.farFromSpawn(dir, r) / placer.instance(dir, scale, yaw) -> Matrix4 (surface-aligned)
  *     placer.accept = (dir) => bool            optional extra world filter (e.g. keep clear of roads)
- * buildInstanced(parent, parts, material, matrices, { thickness=2.2, castShadow=true, wobbleFreq=1.4 }) -> InstancedMesh
- *     builds the InstancedMesh + instanced outline from a Parts and adds it to `parent`.
+ * buildInstanced(parent, parts, material, matrices, { thickness=2.2, castShadow=true, wobbleFreq=1.4, cull=false }) -> InstancedMesh
+ *     builds the InstancedMesh + instanced outline from a Parts and adds it to `parent`. cull:true keeps three's frustum
+ *     culling on (the bounding sphere of the instances), so split big instance sets into spatial chunks.
  */
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -140,7 +141,7 @@ export function createPlacer({ planet, rng: rnd, spawnDir = new THREE.Vector3(0,
   return placer;
 }
 
-export function buildInstanced(parent, parts, material, matrices, { thickness = 2.2, castShadow = true, wobbleFreq = 1.4 } = {}) {
+export function buildInstanced(parent, parts, material, matrices, { thickness = 2.2, castShadow = true, wobbleFreq = 1.4, cull = false } = {}) {
   if (!matrices.length) return null;
   const { geometry, hull } = parts.build();
   const mesh = new THREE.InstancedMesh(geometry, material, matrices.length);
@@ -148,8 +149,9 @@ export function buildInstanced(parent, parts, material, matrices, { thickness = 
   mesh.instanceMatrix.needsUpdate = true;
   mesh.castShadow = castShadow;
   mesh.receiveShadow = true;
-  mesh.frustumCulled = false;
-  addOutline(mesh, { thickness, geometry: hull, wobbleFreq });
+  mesh.frustumCulled = cull; // cull: true = per-instanced-mesh frustum culling (use for spatial chunks)
+  const ol = addOutline(mesh, { thickness, geometry: hull, wobbleFreq });
+  ol.frustumCulled = cull;
   parent.add(mesh);
   return mesh;
 }

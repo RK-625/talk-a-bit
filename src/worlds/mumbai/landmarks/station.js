@@ -5,6 +5,7 @@ import { Kit, PAL, paintBoard, inkText, latin, polyShape, lineColliders } from '
 
 const PH = 0.45; // platform height
 const L = 18, PD = 5; // platform length x depth
+const RAMP_LEN = 3.4, RAMP_LOW = -1.0; // end ramps: length, and the height of their foot (ground level a few units out on the sphere)
 const TIN = 0x9fd3c9, POST = 0xf4ecd6, YEL = '#f6d34a';
 
 function board(names, sub, w = 6, h = 1.55) {
@@ -28,7 +29,8 @@ export function createStation(ink, opts = {}) {
   // tactile-ish dashes on the platform
   for (let i = 0; i < 12; i++) k.box(0xb9ae9a, 0.5, 0.02, 0.5, -L / 2 + 1 + i * 1.5, PH, PD / 2 - 0.95, { outline: false });
   // end ramps (so the hero can walk on)
-  for (const sx of [-1, 1]) k.add(new THREE.BoxGeometry(2.2, 0.2, 2.6), 0xd8d0c0, { pos: [sx * (L / 2 + 1.0), PH / 2 - 0.05, -0.2], rot: [0, 0, -sx * Math.atan2(PH, 2.2)] });
+  // (the planet curves away: 12 units from the centre the ground is ~1 unit below this flat asset's y=0, so the ramps run down to RAMP_LOW)
+  for (const sx of [-1, 1]) k.add(new THREE.BoxGeometry(Math.hypot(RAMP_LEN, PH - RAMP_LOW), 0.2, 2.6), 0xd8d0c0, { pos: [sx * (L / 2 + RAMP_LEN / 2), (PH + RAMP_LOW) / 2 - 0.05, -0.2], rot: [0, 0, -sx * Math.atan2(PH - RAMP_LOW, RAMP_LEN)] });
   // back fence
   for (let i = 0; i <= 12; i++) k.box(PAL.woodDark, 0.12, 1.0, 0.12, -L / 2 + 0.3 + i * ((L - 0.6) / 12), PH, -PD / 2 + 0.2);
   k.box(PAL.woodDark, L, 0.1, 0.1, 0, PH + 0.9, -PD / 2 + 0.2);
@@ -109,8 +111,8 @@ export function createStation(ink, opts = {}) {
     ],
     walkable: [
       { shape: 'rect', x: 0, z: 0, w: L, d: PD, y: PH },
-      { shape: 'ramp', x: L / 2 + 1.0, z: -0.2, w: 2.2, d: 2.6, y0: 0, y1: PH, rising: '-x' },
-      { shape: 'ramp', x: -L / 2 - 1.0, z: -0.2, w: 2.2, d: 2.6, y0: 0, y1: PH, rising: '+x' },
+      { shape: 'ramp', x: L / 2 + RAMP_LEN / 2, z: -0.2, w: RAMP_LEN, d: 2.6, y0: RAMP_LOW, y1: PH, rising: '-x' },
+      { shape: 'ramp', x: -L / 2 - RAMP_LEN / 2, z: -0.2, w: RAMP_LEN, d: 2.6, y0: RAMP_LOW, y1: PH, rising: '+x' },
     ],
   };
   return g;

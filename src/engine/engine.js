@@ -1,12 +1,15 @@
 /**
  * engine/engine.js: boots a world. The engine never imports a world; main.js hands it the world definition.
  *
- * createEngine(world) -> { scene, camera, renderer, planet, player, sky, colliders, actors, start() }
+ * createEngine(world) -> { scene, camera, renderer, planet, player, sky, colliders, actors, cameraRig, culler, step(dt, draw=true), start() }
+ *   step(dt, draw) advances the simulation by dt seconds without waiting for animation frames (scripted tests; dev: window.__game.step)
  *   world contract (see docs/ARCHITECTURE.md):
  *   { id, name, seed?, planet:{radius,detail,heightFn,colorFn,sea?, outlinePx?, hatchSpacing?}, 
  *     sky:{paper, doodles, extra(skyApi)}, spawn:{dir,facing}, createHero(ink)->Group,
  *     build(ctx)->{ colliders?:[], update?(dt,t) } }
- *   ctx = { scene, planet, ink, quality, rng, player, actors, colliders, placer, createPlacer }
+ *   ctx = { scene, camera, renderer, planet, ink, quality, rng, player, actors, colliders, placer, culler }
+ *     culler = engine/lod.js distance/horizon culler (the engine calls culler.update() each frame, after build.update)
+ *     helpers worlds import directly: engine/place.js (placeOnSphere, registerAsset, frameAt, localToDir)
  *     ink = the engine/ink.js namespace; placer = engine/scatter.js placer (world.scatter.groups configures its clusters)
  *   world.scatter = { groups:{name:count}, spawnClear?, extraSpacing? }  (optional)
  */
@@ -20,6 +23,7 @@ import { createInput } from './input.js';
 import { createColliders } from './colliders.js';
 import { createActors } from './actors.js';
 import { createPlacer, mulberry32 } from './scatter.js';
+import { createCuller } from './lod.js';
 import { createPost } from './post.js';
 import { QUALITY } from './quality.js';
 
@@ -42,14 +46,15 @@ export function createEngine(world) {
   scene.add(planet.object);
 
   const input = createInput(renderer.domElement);
-  const colliders = createColliders();
+  const colliders = createColliders({ planetRadius: planet.radius });
+  const culler = createCuller({ camera, planet });
   const actors = createActors({ planet, colliders });
   const spawnDir = new THREE.Vector3(...(world.spawn?.dir ?? [0, 1, 0])).normalize();
   const rng = mulberry32(world.seed ?? 1);
   const placer = createPlacer({ planet, rng, spawnDir, ...(world.scatter ?? {}) });
 
   const player = createPlayer({ hero: world.createHero(ink), planet, colliders, spawn: world.spawn });
-  const built = world.build({ scene, planet, ink, quality: QUALITY, rng, player, actors, colliders, placer }) ?? {};
+  const built = world.build({ scene, camera, renderer, planet, ink, quality: QUALITY, rng, player, actors, colliders, placer, culler }) ?? {};
   (built.colliders ?? []).forEach((c) => colliders.add(c));
   scene.add(player.object);
   const cameraRig = createCameraRig(camera, player, planet);
@@ -67,23 +72,30 @@ export function createEngine(world) {
 
   const timer = new THREE.Timer();
   let time = 0;
-  function frame() {
-    timer.update();
-    const dt = Math.min(timer.getDelta(), MAX_DT);
+  /** advance the simulation by dt seconds (and render unless draw=false) */
+  function advance(dt, draw = true) {
     time += dt;
     const state = input.read();
     player.update(dt, state, cameraRig.heading);
-    colliders.update(dt);
     actors.update(dt);
+    colliders.update(dt);
     built.update?.(dt, time);
     cameraRig.update(dt, state);
+    camera.updateMatrixWorld();
+    culler.update();
     planet.update(dt, time);
     sky.update(dt, player.object.position, player.up, cameraRig.zoom01);
-    ink.updateInk(renderer, camera, time);
-    post.render(dt);
+    if (draw) {
+      ink.updateInk(renderer, camera, time);
+      post.render(dt);
+    }
+  }
+  function frame() {
+    timer.update();
+    advance(Math.min(timer.getDelta(), MAX_DT));
   }
 
-  const engine = { scene, camera, renderer, planet, player, sky, colliders, actors, cameraRig, start() { renderer.setAnimationLoop(frame); } };
-  if (import.meta.env.DEV) window.__game = { renderer, composer: post.composer, player, camera, cameraRig, scene, colliders: colliders.list, planet };
+  const engine = { scene, camera, renderer, planet, player, sky, colliders, actors, cameraRig, culler, step: advance, start() { renderer.setAnimationLoop(frame); } };
+  if (import.meta.env.DEV) window.__game = { step: advance, renderer, composer: post.composer, post, player, camera, cameraRig, scene, colliders: colliders.list, planet, culler, actors, world, built, QUALITY };
   return engine;
 }

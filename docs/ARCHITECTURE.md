@@ -16,15 +16,21 @@ src/
     player.js             sphere movement, jump, collision vs colliders, walkability check; character-agnostic
     camera.js, input.js, quality.js
     scatter.js            generic seeded clustered placement on the sphere: place(spec, rng) -> instances
-    actors.js             moving things on great-circle or custom paths (vehicles, trains, NPC strolls)
+    actors.js             moving things on great-circle or custom paths (vehicles, trains, NPC strolls); moving segment colliders
+    colliders.js          circle + segment (wall/rail/train-car capsule) colliders on the sphere
+    place.js              placeOnSphere / registerAsset: assets -> sphere, local colliders (merged into segments) + walkable floors
+    lod.js                distance + behind-the-planet culler (visibility flags, outline LOD) for big worlds
   worlds/
     dozy-hollow/          world 1 (the stage-1 world, unchanged look)
       index.js            world definition (see contract)
       props.js            trees, rocks, pebbles, flowers, mushrooms, tufts
       character.js        pink blob hero
     mumbai/               world 2
-      index.js, layout.js, ground.js, landmarks/, people/, props/, ...
-lab/                      dev-only pages to inspect one asset kind on a turntable (people.html, landmarks.html)
+      index.js (definition), geo.js (coast, roads, rail as maths), layout.js (THE map: where everything goes),
+      ground.js (terrain + paint), world.js (assembly helpers + instance bank), scenery.js, roads.js, rail.js,
+      bridges.js, traffic.js, npcs.js, skyExtras.js, devtools.js (dev only), landmarks/, people/, props/
+lab/                      dev-only pages: turntables (people.html, landmarks.html; &dist= zoom 2..250, right/shift-drag pans) and
+                          map.html (top-down map of the Mumbai layout)
 ```
 
 ## World contract (`src/worlds/<id>/index.js`)
@@ -41,7 +47,7 @@ export default {
   sky: { paper: '#ece6d6', doodles: { sun: true, moon: true, clouds: 10, stars: 44, bunting: true }, extra(skyApi) {} },
   spawn: { dir: [0,1,0], facing: [0,0,1] },
   createHero(ink) -> THREE.Group,          // feet at y=0, facing +Z, userData.rig for animation
-  build(ctx) -> { colliders, update(dt, t) },  // ctx = { scene, planet, ink, quality, rng, player, actors, scatter }
+  build(ctx) -> { colliders, update(dt, t) },  // ctx = { scene, camera, renderer, planet, ink, quality, rng, player, actors, colliders, placer, culler }
 }
 ```
 Engine never imports from a world folder. Worlds import only from `src/engine/`.
@@ -51,3 +57,14 @@ Engine never imports from a world folder. Worlds import only from `src/engine/`.
 - No static image/model assets. Geometry from code, shaders, Canvas 2D textures at runtime.
 - Desktop keyboard/mouse + mobile touch. Quality flag gates heavy work on touch devices.
 - `npm run build` clean; no console errors.
+
+## Engine additions for big worlds (Mumbai)
+- `colliders`: `{dir,radius,height}` circles and `{a,b,radius,height}` segments (`setSegment`); the player slides off both.
+  `actors.add(..., { collider: { radius, height, length } })` makes a moving segment collider (vehicles, train cars).
+- `planet.addWalkableSurface({contains, heightAt, c?, cosR?})`: bridges, decks, platforms. The player steps up at most 0.5
+  (`STEP_UP` in player.js): higher floors are walls unless you jump or use a ramp.
+- `engine/place.js`: `placeOnSphere(group, dir, facing, {planet})`, `registerAsset(group, {planet, colliders})` (reads the
+  asset's `userData.colliders` / `walkable`), `frameAt`, `localToDir`.
+- `engine/lod.js`: `ctx.culler.add(obj, { maxDist, height, dynamic, outlineDist })`; `item.near` tells you whether to animate.
+- `QUALITY.density` / `cullScale` / `touch` (`?quality=low` forces the touch settings on desktop); `engine.step(dt, draw)` advances
+  the simulation without animation frames (scripted tests); dev only: `window.__game`, `window.__mumbai` (see worlds/mumbai/devtools.js).
