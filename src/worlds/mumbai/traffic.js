@@ -48,7 +48,7 @@ export function traffic(W) {
       const actor = W.actors.add(g, { type: 'spline', dirs: lane.dirs, speed: lane.sign * speed, closed: true, phase },
         { radiusFn: (d) => W.planet.getSurfaceRadius(d), collider: spec.collider });
       W.root.add(g);
-      const item = W.cull(g, { maxDist: 75, radius: 6, height: 6, dynamic: true, outlineDist: 36 });
+      const item = W.cull(g, { maxDist: 62, radius: 6, height: 6, dynamic: true, outlineDist: 30 });
       const v = { g, actor, spec, lane, item, speed, target: speed, sign: lane.sign };
       members.push(v);
       vehicles.push(v);

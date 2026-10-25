@@ -7,7 +7,7 @@
  * npcs(W, S) -> { npcs, update }
  */
 import * as THREE from 'three';
-import { createNPC, createDog, createCrow, createPigeon } from './people/index.js';
+import { createNPC, createDog, createCrow, createPigeon, createCitizen, createCouple, createCrowdLOD } from './people/index.js';
 import { createBalloonBunch } from './props/index.js';
 import { PATHS, MARINE, GEO, R, stepAlong, tangentTo, dist, shorePoint, polar, bayAngle, shoreToward } from './geo.js';
 import { resolveAt, placed, JUHU } from './layout.js';
@@ -34,16 +34,38 @@ export function npcs(W, S) {
     return { fr, g, at: (x, z) => localToDir(fr, x, z, R, new THREE.Vector3()), anchor: (name) => { const a = g.userData.anchors?.[name]; return a ? localToDir(fr, a[0], a[2], R, new THREE.Vector3()) : null; } };
   };
 
-  function person(role, o, dir, fwd) {
-    const g = createNPC(role, ink, o.seed ?? 1, { variant: o.variant, loop: o.loop, props: o.props });
-    g.name = role;
-    flagShadows(g);
-    W.add(g, { dir, fwd, collide: false, walkable: false, maxDist: NPC_DIST, noAnim: true, height: 3, cullR: 1.5, outlineDist: NPC_OUTLINE });
-    const item = W.culler.items[W.culler.items.length - 1];
-    if (o.collide !== false) W.colliders.add({ dir: dir.clone(), radius: g.userData.radius ?? 0.5, height: 2.4 });
-    const n = { g, item, dir: dir.clone(), role, wave: !!o.wave, waved: false, waveCool: 0, look: false, lookAt: o.lookAt !== false };
+  // every person goes through the crowd LOD (full / far merged / hidden by distance) and a static or moving collider
+  const crowd = createCrowdLOD([], { near: 24, hide: 62 });
+  let lodT = 0;
+  function register(g, n) {
     list.push(n);
+    crowd.add(g);
     return n;
+  }
+  /** put a ready-made person/group on the sphere (feet at `radius` or the ground) */
+  function addPerson(g, dir, fwd, o = {}) {
+    g.name = g.name || o.role;
+    flagShadows(g);
+    W.add(g, { dir, fwd, radius: o.radius ?? null, collide: false, walkable: false, noAnim: true, cull: false, occlude: false, height: 3 });
+    if (o.collide !== false) W.colliders.add({ dir: dir.clone(), radius: g.userData.radius ?? 0.5, height: 2.4 });
+    return register(g, { g, dir: dir.clone(), role: o.role ?? g.userData.role, wave: !!o.wave, waved: false, waveCool: 0, look: false, lookAt: o.lookAt !== false, sitting: !!o.sitting });
+  }
+  // touch devices: skip every second extra (the original cast, seeds < 40, always stays)
+  const skip = (o, seed) => W.dens < 0.7 && (seed ?? o.seed ?? 0) >= 40 && Math.floor(seed ?? o.seed ?? 0) % 2 === 0;
+  function person(role, o, dir, fwd, radius = null) {
+    if (skip(o)) return null;
+    const g = createNPC(role, ink, o.seed ?? 1, { variant: o.variant, loop: o.loop, props: o.props });
+    return addPerson(g, dir, fwd, { ...o, role, radius });
+  }
+  function citizen(seed, o, dir, fwd, radius = null) {
+    if (skip(o, seed)) return null;
+    const g = createCitizen(ink, seed, { kind: o.kind, loop: o.loop, seatHeight: o.seatHeight });
+    return addPerson(g, dir, fwd, { ...o, role: 'citizen', radius, sitting: o.loop === 'sit' });
+  }
+  function couple(seed, o, dir, fwd, radius = null) {
+    if (skip(o, seed)) return null;
+    const g = createCouple(ink, seed, { seatHeight: o.seatHeight });
+    return addPerson(g, dir, fwd, { ...o, role: 'couple', radius, collide: false, sitting: true });
   }
 
   // ---- stall people (anchors from the props) -----------------------------------------------------------------------
@@ -101,8 +123,8 @@ export function npcs(W, S) {
     // pigeon flock on the plaza in front of the arch
     const nP = Math.round(10 * Math.max(0.5, W.dens));
     for (let i = 0; i < nP; i++) {
-      const a = (i / nP) * 6.28 + 0.4, r = 3 + (i % 3) * 1.6;
-      const d = gw.at(Math.cos(a) * r - 3, Math.sin(a) * r - 7);
+      const a = (i / nP) * 6.28 + 0.4, r = 1.4 + (i % 3) * 1.1; // round the dana mat at the Gateway's pigeonFeeder anchor
+      const d = gw.at(-2.2 + Math.cos(a) * r, 7.0 + Math.sin(a) * r);
       bird('pigeon', i, d, 0, { flee: 6.5, home: d });
     }
   }
@@ -137,12 +159,11 @@ export function npcs(W, S) {
     return out;
   }
   function walker(role, o, dirs, speed, phase = 0) {
-    const g = createNPC(role, ink, o.seed ?? 1, { variant: o.variant, loop: false });
+    const g = role === 'citizen' ? createCitizen(ink, o.seed ?? 1, { kind: o.kind, loop: 'walk' }) : createNPC(role, ink, o.seed ?? 1, { variant: o.variant, loop: false });
     flagShadows(g);
     W.root.add(g);
-    const actor = W.actors.add(g, { type: 'spline', dirs, speed, closed: false, phase }, { radiusFn: (d) => planet.getSurfaceRadius(d), collider: { radius: g.userData.radius ?? 0.45, height: 2.4 } });
-    const item = W.cull(g, { maxDist: NPC_DIST, radius: 2, height: 3, dynamic: true, outlineDist: NPC_OUTLINE });
-    list.push({ g, item, dir: actor.dir, role, walker: true, actor, speed, lookAt: true });
+    const actor = W.actors.add(g, { type: 'spline', dirs, speed, closed: !!o.closed, phase }, { radiusFn: (d) => planet.getWalkRadius(d) + (o.lift ?? 0), collider: o.solid === false ? null : { radius: g.userData.radius ?? 0.45, height: 2.4 } });
+    return register(g, { g, dir: actor.dir, role, walker: true, solid: o.solid !== false, actor, speed, lookAt: o.lookAt !== false, wave: !!o.wave, waved: false, waveCool: 0, look: false });
   }
 
   // ---- birds: pigeons on the plaza, crows on wires and roofs -------------------------------------------------------------
@@ -196,12 +217,18 @@ export function npcs(W, S) {
     frustum.setFromProjectionMatrix(pv);
     const pu = player.up;
     head.copy(player.object.position).addScaledVector(pu, 1.15);
+    lodT -= dt;
+    if (lodT <= 0) { lodT = 0.25; crowd.update(W.camera.position); }
     for (let i = 0; i < list.length; i++) {
       const n = list[i];
-      if (!n.item.near) { if (n.walker) n.actor.speed = n.speed; continue; }
-      if (n.walker) { // wait for Chotu if he stands in the way
+      const lv = n.g.userData.lodLevel ? n.g.userData.lodLevel() : (n.g.userData.lod ? 0 : 0);
+      if (lv !== 0 && !(n.g.userData.people && n.g.visible)) { if (n.walker) n.actor.speed = n.speed; continue; }
+      if (n.walker && n.solid) { // wait for Chotu if he stands in the way
         const dw = Math.acos(THREE.MathUtils.clamp(pu.dot(n.actor.dir), -1, 1)) * R;
-        n.actor.speed = dw < 2.6 ? 0 : n.speed;
+        if (dw < 2.6) { // wait for Chotu; if he stays in the way for a moment, turn round (never deadlock a narrow causeway)
+          n.actor.speed = 0; n.blocked = (n.blocked ?? 0) + dt;
+          if (n.blocked > 1.3) { n.speed = -n.speed; n.blocked = 0; n.actor.speed = n.speed; }
+        } else { n.actor.speed = n.speed; n.blocked = 0; }
       }
       n.g.getWorldPosition(_v);
       _s.set(_v, 2.5);
@@ -262,6 +289,6 @@ export function npcs(W, S) {
     }
   }
 
-  return { npcs: list, birds, update };
+  return { npcs: list, birds, update, crowd, person, citizen, couple, walker, addPerson, bird, frustum };
 }
 void createBalloonBunch; void MARINE; void GEO; void polar; void dist; void placed;

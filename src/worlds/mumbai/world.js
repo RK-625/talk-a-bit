@@ -49,8 +49,9 @@ export function makeWorld(ctx) {
     if (collide || walkable) registerAsset(obj, { planet, colliders: collide ? colliders : null, surfaces: walkable });
     const fp = obj.userData.footprint;
     const fr = typeof fp === 'number' ? fp : fp ? Math.hypot(fp.w, fp.l) / 2 : 4;
-    const item = cull(obj, { maxDist, radius: o.cullR ?? Math.max(fr, 3), height: o.height ?? obj.userData.height ?? 6, outlineDist: o.outlineDist ?? Infinity });
-    if (o.occlude !== false && (o.height ?? obj.userData.height ?? 0) >= 4.5) ctx.occlusion?.add(obj, { shrink: 1.2 }); // fades when it blocks the camera's view of Chotu
+    const item = o.cull === false ? { near: true } : cull(obj, { maxDist, radius: o.cullR ?? Math.max(fr, 3), height: o.height ?? obj.userData.height ?? 6, outlineDist: o.outlineDist ?? Infinity });
+    // buildings fade when they block the camera's view of Chotu (never things flagged occluder:false, or things he stands on)
+    if (o.occlude !== false && obj.userData.occluder !== false && (o.height ?? obj.userData.height ?? 0) >= 4.5) ctx.occlusion?.add(obj, { shrink: 1.2 });
     if (typeof obj.userData.animate === 'function' && !o.noAnim) {
       const f = obj.userData.animate;
       updaters.push((dt, t) => { if (item.near) f(dt, t); });

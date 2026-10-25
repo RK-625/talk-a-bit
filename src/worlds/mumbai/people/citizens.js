@@ -56,6 +56,7 @@ export function createCouple(ink, seed = 1, opts = {}) {
     playLoop: (n) => people.forEach((p) => p.userData.playLoop(n)),
     playOnce: (n, d) => people.forEach((p) => p.userData.playOnce(n, d)),
     lod: (lv) => people.forEach((p) => p.userData.lod(lv)),
+    lodLevel: () => people[0].userData.lodLevel(),
   };
   return g;
 }

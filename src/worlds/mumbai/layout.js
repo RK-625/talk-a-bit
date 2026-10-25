@@ -23,7 +23,7 @@
  *   dev overlap check: scenery.js calls checkOverlaps() in dev and logs any footprint collisions.
  */
 import * as THREE from 'three';
-import { R, polar, stepAlong, tangentTo, PATHS, MARINE, bayAngle, BRIDGE, GEO, shorePoint, seaField, pathNearest, dist, shoreToward, RAIL_RADIUS, STATION_B, LAND_H } from './geo.js';
+import { R, polar, stepAlong, tangentTo, PATHS, MARINE, bayAngle, BRIDGE, GEO, shorePoint, seaField, beachness, pathNearest, dist, shoreToward, RAIL_RADIUS, STATION_B, LAND_H } from './geo.js';
 import { frameAt, localToDir } from '../../engine/place.js';
 import { mulberry32 } from '../../engine/scatter.js';
 
@@ -35,7 +35,7 @@ const NORTH = new THREE.Vector3(0, 0, 1);
 export const SIZE = {
   tapri: [5.6, 4.5], vada: [4.9, 4.0], paanS: [3.2, 2.3], news: [3.8, 2.9], fruit: [3.7, 3.3], marigold: [3.5, 3.0], bhel: [4, 4], gola: [3.8, 3.8],
   irani: [8.3, 9.9], poster: [9.9, 2.9], shrine: [4.8, 5.1], paanShop: [4.1, 4.1], chawl: [10.5, 8.4], banyan: [6, 6], busStop: [6.4, 2.4], balloons: [3.4, 3.7],
-  gateway: [14, 9], taj: [23.6, 8.9], cst: [29.6, 10.5], bse: [12.5, 10.1], rajabai: [7.6, 7.5], flora: [8.8, 8.8],
+  antilia: [21, 19], gateway: [14, 9], taj: [23.6, 8.9], cst: [29.6, 10.5], bse: [12.5, 10.1], rajabai: [7.6, 7.5], flora: [8.8, 8.8],
   deco0: [8.7, 8.3], deco1: [8.8, 6.2], deco2: [8.7, 6.1], haji: [13, 13], station: [22.2, 6.5], taxi: [2.9, 5.5], dabbaBike: [2, 4],
   palm: [3, 3], umbrella: [4, 4], sandcastle: [3.5, 3], boat: [2.2, 5.9], signal: [1.2, 2.4], tetra: [4.5, 4.1], streetlight: [1, 1], lamp: [1, 1],
 };
@@ -126,7 +126,7 @@ export function place(item) {
   const r = resolve(item);
   if (item.id) registry.set(item.id, r);
   const size = item.size ?? SIZE[item.kind] ?? [2, 2];
-  PLACED.push({ id: item.id ?? item.kind, kind: item.kind, dir: r.dir, fwd: r.fwd, size, radius: Math.hypot(size[0], size[1]) / 2, major: !!item.major, noOverlap: item.noOverlap });
+  PLACED.push({ id: item.id ?? item.kind, kind: item.kind, dir: r.dir, fwd: r.fwd, size, radius: Math.hypot(size[0], size[1]) / 2, major: !!item.major, noOverlap: item.noOverlap, inside: item.inside });
   return { ...item, dir: r.dir, fwd: r.fwd };
 }
 export const placed = (id) => registry.get(id);
@@ -192,6 +192,7 @@ export const ITEMS = [
   { id: 'eastChawl2', kind: 'chawl', opts: { seed: 16 }, at: { road: 'east', s: 60, lat: 12 } },
 
   // ---- the Gateway and the Taj (tip of the tongue, end of the Great Road) ----------------------------------------
+  { id: 'antilia', kind: 'antilia', at: { road: 'west', s: 62, lat: -22 }, face: 'road', major: true },
   { id: 'gateway', kind: 'gateway', at: { shore: { from: 'harbour', to: { road: 'great', s: 138, lat: 0 }, inland: 6.5 } }, major: true },
   { id: 'taj', kind: 'taj', at: { road: 'great', s: 112, lat: 15.5 }, face: -90, major: true },
   { id: 'balloons', kind: 'balloons', at: { road: 'great', s: 125, lat: -7 }, face: 0 },
@@ -224,7 +225,7 @@ function autoFill(density = 1) {
         if (rnd() > density) continue;
         const lat = side * (path.w / 2 + 8.2 + rnd() * 2);
         const cand = resolveAt({ road: id, s, lat });
-        if (seaField(cand.dir) > -7) continue;
+        if (seaField(cand.dir) > -7 || beachness(cand.dir) > 0.1) continue;
         if (pathNearest(cand.dir, ['rail']).d < 9.5) continue;
         const other = pathNearest(cand.dir, ['road', 'lane', 'promenade']);
         if (other.d < path.w / 2 + 7.5 && other.p !== path) continue;
@@ -279,6 +280,7 @@ export function checkOverlaps(log = console.warn) {
   for (let i = 0; i < rects.length; i++) for (let j = i + 1; j < rects.length; j++) {
     const A = rects[i], B = rects[j];
     if (A.p.dir.dot(B.p.dir) < Math.cos((A.p.radius + B.p.radius) / R)) continue;
+    if (A.p.inside === B.p.id || B.p.inside === A.p.id || (A.p.inside && A.p.inside === B.p.inside)) continue; // detail props that belong to a bigger site
     if (inRect(A, B, 1.0) || inRect(B, A, 1.0)) hits.push([A.p.id, B.p.id]);
   }
   if (hits.length) log('[mumbai layout] footprint overlaps:', hits.map((h) => h.join(' x ')).join(', '));

@@ -9,7 +9,7 @@
  *   __mumbai.view(distance, pitch)          set the camera orbit
  */
 import * as THREE from 'three';
-import { R, polar, stepAlong, tangentTo, dist, BRIDGE, GEO, MARINE, bayAngle, PATHS, shorePoint } from './geo.js';
+import { R, polar, polarOf, stepAlong, tangentTo, dist, BRIDGE, GEO, MARINE, bayAngle, PATHS, shorePoint } from './geo.js';
 import { JUHU } from './layout.js';
 import { frameAt } from '../../engine/place.js';
 import { segmentPoint } from '../../engine/colliders.js';
@@ -94,7 +94,7 @@ export function installDevTools(W, { S, R: RL, B, T, N }) {
       key(true);
       for (let i = 0; i < targets.length; i++) {
         const tgt = targets[i], td = tgt.dir ?? tgt;
-        let sec = 0, stuckT = 0, lastD = 1e9, minR = 1e9, maxMove = 0;
+        let sec = 0, stuckT = 0, lastD = 1e9, minR = 1e9, maxMove = 0, detour = 0, detourSign = 1, detours = 0;
         let outcome = null;
         while (!outcome) {
           const d = Math.acos(THREE.MathUtils.clamp(p.up.dot(td), -1, 1)) * R;
@@ -102,12 +102,13 @@ export function installDevTools(W, { S, R: RL, B, T, N }) {
           if (d < 2.2) outcome = 'reached';
           else if (sec > timeout) outcome = 'timeout';
           else if (p.radius < W.seaR - 0.35) outcome = 'fell';
-          else if (stuckT > 4) outcome = 'stuck';
+          else if (stuckT > 6) outcome = 'stuck';
           if (outcome) { results.push({ to: tgt.name ?? i, outcome, seconds: +sec.toFixed(1), remaining: +d.toFixed(1), minR: +minR.toFixed(2), at: p.up.toArray().map((v) => +v.toFixed(3)) }); break; }
           G_.cameraRig.heading.copy(tangentTo(p.up, td));
+          if (detour > 0) { G_.cameraRig.heading.applyAxisAngle(p.up, detourSign * 0.95); detour--; } // sidestep an obstacle (people, props)
           G_.step(dt, false);
           sec += dt;
-          if (lastD - d < 0.015) stuckT += dt; else stuckT = Math.max(0, stuckT - dt * 0.5);
+          if (lastD - d < 0.015) { stuckT += dt; if (stuckT > 0.9 && detour === 0) { detour = 22; detourSign = -detourSign; detours++; if (detours % 3 !== 0) stuckT = 0.3; } } else stuckT = Math.max(0, stuckT - dt * 0.5);
           lastD = d;
           if (p.up.dot(td) > 1) break;
         }
@@ -130,7 +131,8 @@ export function installDevTools(W, { S, R: RL, B, T, N }) {
         // onto the station platform from the road side (step-up rule + end ramp), along it
         station() { const st = spots.station; const fr = frameAt(st.dir, st.fwd, {});
           start(stepAlong(st.dir, fr.right, -16), tangentTo(stepAlong(st.dir, fr.right, -16), st.dir));
-          return walkWith([{ dir: stepAlong(st.dir, fr.right, 11), name: 'platformEndRamp' }, { dir: stepAlong(st.dir, fr.right, -6), name: 'platformMid' }, { dir: stepAlong(st.dir, st.fwd, -1.2), name: 'platformBack' }]); },
+          const at = (x, z) => stepAlong(stepAlong(st.dir, fr.right, x), st.fwd, z);
+          return walkWith([{ dir: at(11, 0), name: 'platformEndRamp' }, { dir: at(-1.2, 0.3), name: 'platformMid' }, { dir: at(-2.6, 0.2), name: 'platformBack' }]); },
         // Marine Drive promenade along the bay
         marineDrive() { const a = (ang) => MARINE.pt(ang, 2.6); start(a(-48), tangentTo(a(-48), a(-44)));
           const t = []; for (let ang = -44; ang <= 48; ang += 8) t.push({ dir: a(ang), name: 'prom' + ang }); return walkWith(t); },
@@ -199,6 +201,44 @@ export function installDevTools(W, { S, R: RL, B, T, N }) {
       if (!hits.length) return null;
       return +((p.radius - (origin.length() - hits[0].distance))).toFixed(3);
     },
+    /** coverage check: n random walkable land spots with the default camera; how many have NO person in view (frustum, not behind
+     *  the planet, within the crowd LOD's hide distance)? -> { n, zeroPct, avgInView, zero:[{polar}] } */
+    coverage(n = 200) {
+      const G_ = G(), p = G_.player, cam = G_.camera;
+      let a = 987; const rnd = () => ((a = (a * 16807) % 2147483647) / 2147483647);
+      const V3 = POLE.constructor;
+      const fr = new THREE.Frustum(), pv = new THREE.Matrix4(), sph = new THREE.Sphere(new V3(), 1.6), wp = new V3(), cd = new V3();
+      let zero = 0, total = 0, sum = 0; const zeros = [];
+      for (let i = 0; i < n; i++) {
+        let dir, tries = 0;
+        do { const z = rnd() * 2 - 1, th = rnd() * 6.2832, rr = Math.sqrt(1 - z * z); dir = new V3(rr * Math.cos(th), z, rr * Math.sin(th)); tries++; }
+        while (tries < 500 && (W.planet.getSurfaceRadius(dir) < W.seaR + 0.7 || !W.planet.isWalkable(dir)));
+        const heading = tangentTo(dir, POLE.clone().add(new V3(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5)).normalize());
+        p.teleport(dir, heading);
+        G_.cameraRig.heading.copy(heading);
+        G_.cameraRig.setView({ distance: 14, pitch: 0.44, snap: true });
+        for (let k = 0; k < 3; k++) G_.step(1 / 60, false);
+        N.crowd.update(cam.position);
+        cam.updateMatrixWorld();
+        pv.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse); fr.setFromProjectionMatrix(pv);
+        const cl = cam.position.length(); cd.copy(cam.position).divideScalar(cl);
+        const hz = Math.acos(Math.min(1, R / cl)) + 0.08;
+        let c = 0;
+        for (const e of N.npcs) {
+          if (e.role === 'dog') continue;
+          const g = e.g; if (!g.visible) continue;
+          const lv = g.userData.lodLevel ? g.userData.lodLevel() : 0; if (lv >= 2) continue;
+          g.getWorldPosition(wp);
+          if (Math.acos(THREE.MathUtils.clamp(wp.clone().normalize().dot(cd), -1, 1)) > hz) continue;
+          sph.center.copy(wp); sph.center.addScaledVector(p.up, 1);
+          if (fr.intersectsSphere(sph)) c++;
+        }
+        total++; sum += c;
+        if (c === 0) { zero++; const po = polarOf(dir); zeros.push({ d: Math.round(po.d), b: Math.round(po.b) }); }
+      }
+      return { n: total, zeroPct: +(100 * zero / total).toFixed(1), avgInView: +(sum / total).toFixed(2), zero: zeros.slice(0, 40) };
+    },
+    peopleBreakdown() { const c = {}; for (const n of N.npcs) { const k = n.walker ? 'walker:' + n.role : n.role; c[k] = (c[k] || 0) + 1; } return { total: N.npcs.length, c }; },
     traffic: T, npcs: N, rail: RL, bridges: B,
   };
   window.__mumbai = api;

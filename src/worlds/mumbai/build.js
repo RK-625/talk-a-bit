@@ -10,6 +10,8 @@ import { rail } from './rail.js';
 import { bridges } from './bridges.js';
 import { traffic } from './traffic.js';
 import { npcs } from './npcs.js';
+import { details } from './details.js';
+import { BRIDGE, stepAlong } from './geo.js';
 import { installDevTools } from './devtools.js';
 import { validateWorld } from './validate.js';
 
@@ -22,11 +24,14 @@ export function buildWorld(ctx) {
   const B = bridges(W);
   const T = traffic(W);
   const N = npcs(W, S);
+  const side = BRIDGE.center.clone().cross(BRIDGE.t).normalize();
+  const tb = stepAlong(stepAlong(BRIDGE.start, BRIDGE.t, -2), side, 9);
+  const D = details(W, S, N, { station: R.station, haji: B.haji, bridgeStart: { dir: tb, fwd: BRIDGE.t.clone().negate(), radius: null } });
   W.updaters.push(N.update);
   W.bank.build();
   if (import.meta.env.DEV) {
     console.log(`[mumbai] built in ${(performance.now() - t0).toFixed(0)} ms: ${ctx.culler.items.length} culled items, ${ctx.colliders.list.length} colliders, ${W.bank.count()} instances`);
-    installDevTools(W, { S, R, B, T, N });
+    installDevTools(W, { S, R, B, T, N, D });
     window.__mumbaiValidation = validateWorld(W, { T });
   }
   return {

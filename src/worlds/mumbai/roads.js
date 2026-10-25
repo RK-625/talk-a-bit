@@ -69,21 +69,7 @@ function skipRingNearJunction(path, s) {
 }
 
 // ---- dressing -----------------------------------------------------------------------------------------------------------
-const _bn = BRIDGE.center.clone().cross(BRIDGE.t).normalize();
-function onBridge(dir, m) { // the Sea Link corridor (the deck is not a PATH, so test the great circle directly)
-  if (dir.dot(BRIDGE.center) < 0.6) return false;
-  const lat = Math.abs(Math.asin(THREE.MathUtils.clamp(dir.dot(_bn), -1, 1))) * R;
-  return lat < m + 2.5 && Math.abs(Math.atan2(dir.dot(BRIDGE.t), dir.dot(BRIDGE.center))) * R < BRIDGE.half + 6;
-}
-function freeSpot(dir, r, kinds = null) {
-  if (onBridge(dir, r + 4)) return false;
-  for (const p of PLACED) {
-    if (p.noOverlap) continue;
-    if (dist(dir, p.dir) < p.radius * 0.8 + r) return false;
-  }
-  return true;
-}
-const clearOfRoads = (dir, m, kinds = ['road', 'rail', 'lane', 'promenade']) => pathNearest(dir, kinds).d > m;
+import { freeSpot, clearOfRoads } from './spots.js';
 
 function furniture(W, S) {
   const { bank, planet, rng } = W;

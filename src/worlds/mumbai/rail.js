@@ -17,7 +17,7 @@ import { flagShadows } from './world.js';
 
 const SINK = 0.36; // track sunk into the ground
 const RAIL_TOP = 0.44; // rail head above the ground (wheels sit here)
-const TRAIN = { vmax: 12.5, acc: 3.0, dec: 3.2, dwell: 3.5, cars: 5, spacing: 8.3 };
+const TRAIN = { vmax: 12.5, acc: 3.0, dec: 3.2, dwell: 3.5, cars: 5, spacing: 8.3, ladiesCar: 3 };
 
 export function rail(W) {
   const path = PATHS.rail;
@@ -40,7 +40,7 @@ export function rail(W) {
   const stationDir = STATION.dir, zObj = STATION.fwd;
   const station = createStation(W.ink, { names: ['चर्चगेट', 'CHURCHGATE'] });
   station.name = 'station';
-  W.add(station, { dir: stationDir, fwd: zObj, maxDist: Infinity, height: 8 });
+  W.add(station, { dir: stationDir, fwd: zObj, maxDist: Infinity, height: 8, occlude: false });
   out.station = station;
   out.stationS = sc;
 
@@ -63,7 +63,7 @@ export function rail(W) {
   const sStop = sc + 2 * TRAIN.spacing; // head position when the middle car is at the platform centre
   let sHead = sStop - 150; // start a little before the station
   for (let i = 0; i < TRAIN.cars; i++) {
-    const car = createTrainCar(W.ink, { isEngine: i === 0, livery: i % 2 ? 'maroon' : 'purple', seed: 40 + i });
+    const car = createTrainCar(W.ink, { isEngine: i === 0, ladies: i === TRAIN.ladiesCar, livery: i % 2 ? 'maroon' : 'purple', seed: 40 + i }); // exactly ONE ladies car
     flagShadows(car);
     const sCar = sHead - i * TRAIN.spacing;
     const actor = W.actors.add(car, { type: 'spline', dirs, speed: 0, closed: true, phase: (((sCar % L) + L) % L) / L },

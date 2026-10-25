@@ -109,7 +109,7 @@ function hajiAli(W, out) {
     const g = createCauseway(W.ink, segL + 0.1);
     W.add(g, { dir, fwd: t0, radius: seaR + 0.45, maxDist: 110, height: 3 });
   }
-  out.haji = { shrine, causewayLength: to - from, shoreDist: Lc };
+  out.haji = { shrine, causewayLength: to - from, shoreDist: Lc, t0 };
 }
 
 function boats(W) {

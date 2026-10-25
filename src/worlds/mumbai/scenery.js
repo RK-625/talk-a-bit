@@ -18,7 +18,7 @@ const KINDS = {
   paanShop: [(i) => L.createPaanShop(i), 70],
   chawl: [(i, o) => L.createChawl(i, o.seed ?? 1), 170],
   gateway: [(i) => L.createGateway(i), INF], taj: [(i) => L.createTaj(i), INF], cst: [(i) => L.createCST(i), INF],
-  bse: [(i) => L.createBSE(i), INF], rajabai: [(i) => L.createRajabai(i), INF], flora: [(i) => L.createFloraFountain(i), 140],
+  antilia: [(i) => L.createAntilia(i), 160], bse: [(i) => L.createBSE(i), INF], rajabai: [(i) => L.createRajabai(i), INF], flora: [(i) => L.createFloraFountain(i), 140],
   busStop: [(i) => P.createBusStop(i), 60], balloons: [(i) => P.createBalloonBunch(i), 55], taxi: [(i) => P.createTaxi(i, { seed: 3 }), 60],
   dabbaBike: [(i) => P.createDabbawalaBike(i), 55], laundry: [(i, o) => P.createLaundryLine(i, { length: o.length ?? 8 }), 60],
   pole: [(i) => P.createWirePole(i), 60], deco0: [(i) => L.createArtDeco(i, 0), 150], deco1: [(i) => L.createArtDeco(i, 1), 150], deco2: [(i) => L.createArtDeco(i, 2), 150],
@@ -38,13 +38,14 @@ export function scenery(W) {
     W.add(g, { dir: it.dir, fwd: it.fwd, maxDist: k[1] });
     if (it.id) items.set(it.id, g);
   }
-  marineDrive(W);
+  const promenade = [];
+  marineDrive(W, promenade);
   juhuStalls(W, items);
-  return { items };
+  return { items, promenade };
 }
 
 // ---- Marine Drive: promenade strip + wall, streetlights (Queen's Necklace), tetrapods ---------------------------------
-function marineDrive(W) {
+function marineDrive(W, promenade) {
   const { ink } = W;
   const segLen = 4;
   const a0 = -MARINE.span + 5, a1 = MARINE.span - 5;
@@ -63,6 +64,7 @@ function marineDrive(W) {
     const toSea = tangentTo(dir, MARINE.c);
     const g = L.createPromenadeSegment(ink, segLen + 0.12);
     W.add(g, { dir, fwd: toSea, maxDist: 75 });
+    promenade.push(g);
     if (i % 2 === 1) lights.push({ dir: MARINE.pt(a, 1.35), toSea }); // on the sea-wall line
     void aheadDir;
   }
