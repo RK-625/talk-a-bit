@@ -1,0 +1,356 @@
+// Darshini square (the spawn square) and the old pete-house lanes: chowk-* and chawl-* people.
+import { dialogue as D, step as S } from '../kit.js';
+
+export const bowler = D('chowk-cricket-bowler', {
+  name: 'Pintu', role: 'gully cricket bowler (kid)', site: 'Darshini square, cricket gully', diff: 2,
+  voice: { rate: 1.15, pitch: 1.25 },
+  persona: 'Kid bowler arguing with the batter about the last ball, wants a grown-up to settle it.',
+  goal: 'Give your verdict on the last ball and say who should bowl next.',
+  steps: [
+    S('verdict', ['ಅಣ್ಣ, ಆ ಬಾಲ್ ಔಟಾ? ನಾಟ್ ಔಟಾ?', 'Anna, aa ball outa? Not outa?', 'Brother, was that ball out? Not out?'],
+      'Say the ball was out.', ['Adu out, Pintu.', 'ಅದು ಔಟ್, ಪಿಂಟು.'],
+      ['adu out pintu', 'out annisutte', 'adu out thane', 'haudu out', 'ಅದು ಔಟ್ ಪಿಂಟು', 'ಔಟ್ ಅನ್ನಿಸುತ್ತೆ', 'adu out anna'],
+      'say_ball_was_out', ['Give a verdict.', '"Adu out" = that is out.', 'Say: "Adu out, Pintu."'],
+      ['ಹೇ! ನಾನು ಹೇಳಿದ್ದೆ ಔಟ್ ಅಂತ! ಅಣ್ಣ ಸರಿ ಹೇಳಿದ್ರು.', 'He! Naanu helidde out anta! Anna sari helidru.', 'Hey! I said it was out! Brother is right.'],
+      ['ಔಟಾ ನಾಟ್ ಔಟಾ? ಹೇಳಿ ಅಣ್ಣ!', 'Outa not outa? Heli anna!', 'Out or not out? Say it, brother!']),
+    S('next', ['ಮುಂದಿನ ಬಾಲ್ ಯಾರು ಹಾಕೋದು? ನೀವಾ?', 'Mundina ball yaaru haakodu? Neevaa?', 'Who bowls the next ball? You?'],
+      'Say no, he should bowl.', ['Illa, neene haaku.', 'ಇಲ್ಲ, ನೀನೇ ಹಾಕು.'],
+      ['illa neene haaku', 'neene haaku', 'nee haaku Pintu', 'illa nee haaku', 'ಇಲ್ಲ ನೀನೇ ಹಾಕು', 'ನೀನೇ ಹಾಕು', 'neene bowl maadu'],
+      'tell_him_to_bowl', ['Hand it back to him.', '"Neene" = you yourself.', 'Say: "Illa, neene haaku."'],
+      ['ಸರಿ! ಈ ಸಲ ಸ್ಟಂಪ್ ಹಾರಿಸ್ತೀನಿ ನೋಡಿ!', 'Sari! Ee sala stump haariseeni nodi!', 'Okay! This time I will knock the stumps, watch!'],
+      ['ನಾನಾ ನೀವಾ? ಬೇಗ ಹೇಳಿ.', 'Naana neevaa? Bega heli.', 'Me or you? Say quickly.']),
+  ],
+  outro: ['ಥ್ಯಾಂಕ್ಸ್ ಅಣ್ಣ, ನೀವು ಬೆಸ್ಟ್ ಅಂಪೈರ್!', 'Thanks anna, neevu best umpire!', 'Thanks brother, you are the best umpire!'],
+  learned: [['adu out', 'that is out'], ['neene haaku', 'you bowl']],
+  again: ['ಅಣ್ಣ, ಇನ್ನೊಂದು ಬಾಲ್ ನೋಡಿ ಅಂಪೈರ್ ಮಾಡ್ತೀರಾ?', 'Anna, innondu ball nodi umpire maadteera?', 'Brother, will you umpire one more ball?'],
+});
+
+export const newsVendor = D('chowk-newspaper-vendor', {
+  name: 'Ramaiah', role: 'newspaper vendor', site: 'Darshini square, news stand', diff: 2,
+  voice: { rate: 1.0, pitch: 0.85 },
+  persona: 'Thin old newspaper vendor in specs who calls the headlines and knows everyone\'s gossip.',
+  goal: 'Ask for today\'s Kannada paper and pay ten rupees.',
+  steps: [
+    S('paper', ['ಪೇಪರ್ ಪೇಪರ್! ಇವತ್ತಿನ ತಾಜಾ ಸುದ್ದಿ!', 'Paper paper! Ivattina taaja suddi!', 'Paper, paper! Today\'s fresh news!'],
+      'Ask for today\'s Kannada newspaper.', ['Ivattina Kannada paper kodi.', 'ಇವತ್ತಿನ ಕನ್ನಡ ಪೇಪರ್ ಕೊಡಿ.'],
+      ['ivattina kannada paper kodi', 'kannada paper kodi', 'ivattina paper kodi thatha', 'ondu kannada paper kodi', 'ಇವತ್ತಿನ ಕನ್ನಡ ಪೇಪರ್ ಕೊಡಿ', 'ಕನ್ನಡ ಪೇಪರ್ ಕೊಡಿ', 'ivattina paper beku'],
+      'ask_kannada_paper', ['Ask for today\'s paper.', '"Ivattina" = today\'s.', 'Say: "Ivattina Kannada paper kodi."'],
+      ['ತಗೊಳ್ಳಿ. ಮುಂದಿನ ಪುಟದಲ್ಲಿ ನಮ್ಮ ಬೆಂಗಳೂರು ಸುದ್ದಿ ಇದೆ.', 'Tagolli. Mundina putadalli namma Bengaluru suddi ide.', 'Here. Our Bengaluru news is on the next page.'],
+      ['ಯಾವ ಪೇಪರ್ ಬೇಕು ಸಾರ್? ಕನ್ನಡನಾ?', 'Yaava paper beku saar? Kannadana?', 'Which paper do you want, sir? Kannada?']),
+    S('pay', ['ಹತ್ತು ರೂಪಾಯಿ ಆಯ್ತು ಸಾರ್.', 'Hattu rupayi aytu saar.', 'That is ten rupees, sir.'],
+      'Pay ten rupees.', ['Idi, hattu rupayi.', 'ಇದೋ, ಹತ್ತು ರೂಪಾಯಿ.'],
+      ['idi hattu rupayi', 'hattu rupayi thatha', 'ido hattu rupayi', 'hattu kodteeni', 'ಇದೋ ಹತ್ತು ರೂಪಾಯಿ', 'ಹತ್ತು ರೂಪಾಯಿ', 'ido ten rupayi'],
+      'pay_ten_rupees', ['Hand over ten rupees.', '10 = "hattu".', 'Say: "Idi, hattu rupayi."'],
+      ['ಸರಿ ಸಾರ್. ಓದಿ ಓದಿ, ಕನ್ನಡ ಕಲಿಯೋಕೆ ಪೇಪರ್ ಒಳ್ಳೆದು.', 'Sari saar. Odi odi, Kannada kaliyoke paper olledu.', 'Right sir. Read it, a paper is good for learning Kannada.'],
+      ['ಹತ್ತು ರೂಪಾಯಿ ಕೊಡಿ ಸಾರ್.', 'Hattu rupayi kodi saar.', 'Give ten rupees, sir.']),
+  ],
+  outro: ['ದಿನಾ ಒಂದು ಪುಟ ಓದಿ, ಕನ್ನಡ ಬರುತ್ತೆ.', 'Dina ondu puta odi, Kannada barutte.', 'Read one page a day and you will pick up Kannada.'],
+  learned: [['Kannada paper kodi', 'give me a Kannada paper'], ['hattu rupayi', 'ten rupees']],
+  again: ['ಸಾರ್, ಇವತ್ತಿನ ಸುದ್ದಿ ಓದಿದ್ರಾ?', 'Saar, ivattina suddi odidra?', 'Sir, did you read today\'s news?'],
+});
+
+export const skipGirl = D('chowk-skip-girl', {
+  name: 'Anushree', role: 'skipping girl (kid)', site: 'Darshini square, open ground by the dosa cart', diff: 1,
+  voice: { rate: 1.1, pitch: 1.35 },
+  persona: 'Little girl skipping rope and counting in Kannada, proud of her count.',
+  goal: 'Count along: say "one, two, three" in Kannada.',
+  steps: [
+    S('count', ['ಒಂದು, ಎರಡು, ಮೂರು… ನೀವೂ ಎಣಿಸಿ!', 'Ondu, eradu, mooru… neevu enisi!', 'One, two, three… you count too!'],
+      'Count with her: one, two, three.', ['Ondu, eradu, mooru.', 'ಒಂದು, ಎರಡು, ಮೂರು.'],
+      ['ondu eradu mooru', 'ondu, eradu, mooru', 'ondu eradu mooru naalku', 'ondu eradu mooru anushree', 'ಒಂದು ಎರಡು ಮೂರು', 'ಒಂದು, ಎರಡು, ಮೂರು', 'ondu eradu moru'],
+      'count_one_two_three', ['Count to three in Kannada.', '1 = ondu, 2 = eradu, 3 = mooru.', 'Say: "Ondu, eradu, mooru."'],
+      ['ಹೂ! ನಾಲ್ಕು, ಐದು, ಆರು… ನಂಗೆ ಐವತ್ತು ಬರುತ್ತೆ!', 'Hoo! Naalku, aidu, aaru… nange aivattu barutte!', 'Yes! Four, five, six… I can count to fifty!'],
+      ['ಒಂದು, ಎರಡು… ನೀವೂ ಹೇಳಿ ಅಣ್ಣ!', 'Ondu, eradu… neevu heli anna!', 'One, two… you say it too, brother!']),
+  ],
+  outro: ['ಎಷ್ಟು ಚೆನ್ನಾಗಿ ಎಣಿಸಿದ್ರಿ ಅಣ್ಣ!', 'Eshtu chennagi enisidri anna!', 'How nicely you counted, brother!'],
+  learned: [['ondu, eradu, mooru', 'one, two, three']],
+  again: ['ಅಣ್ಣ, ನೋಡಿ ಇನ್ನೂ ಹೆಚ್ಚು ಜಂಪ್ ಮಾಡ್ತೀನಿ!', 'Anna, nodi innu heccu jump maadteeni!', 'Brother, watch, I will jump even more!'],
+});
+
+export const kiteBoy = D('chowk-kite-boy', {
+  name: 'Bhaskar', role: 'kite-flying boy (kid)', site: 'Darshini square, lane south of the darshini', diff: 2,
+  voice: { rate: 1.1, pitch: 1.2 },
+  persona: 'Boy flying a kite with his head tipped back, worried it will tangle in the wires.',
+  goal: 'Warn him about the electric wires.',
+  steps: [
+    S('wire', ['ಅಯ್ಯೋ, ಗಾಳಿಪಟ ತಂತಿಗೆ ಸಿಕ್ಕಿಕೊಳ್ಳುತ್ತೆ ಅನ್ಸುತ್ತೆ!', 'Ayyo, gaalipata tantige sikkikollutte ansutte!', 'Oh no, I think the kite will get caught in the wires!'],
+      'Tell him to be careful near the wires.', ['Tantiya hattira hogabedi, hushaaru.', 'ತಂತಿಯ ಹತ್ತಿರ ಹೋಗಬೇಡಿ, ಹುಷಾರು.'],
+      ['tantiya hattira hogabedi hushaaru', 'tantiya hattira hogabedi', 'hushaaru tanti ide', 'tantige hogabeda hushaaru', 'ತಂತಿಯ ಹತ್ತಿರ ಹೋಗಬೇಡಿ ಹುಷಾರು', 'ತಂತಿ ಹತ್ತಿರ ಹೋಗಬೇಡ', 'tanti hattira hogbeda'],
+      'warn_about_wires', ['Warn him to stay away from the wires.', '"Hogabedi" = do not go. "Tanti" = wire.', 'Say: "Tantiya hattira hogabedi, hushaaru."'],
+      ['ಸರಿ ಅಣ್ಣ, ಗ್ರೌಂಡ್ ಕಡೆ ಹಾರಿಸ್ತೀನಿ.', 'Sari anna, ground kade haariseeni.', 'Okay brother, I will fly it towards the ground.'],
+      ['ಏನು ಅಣ್ಣ? ಗಾಳಿಪಟ ನೋಡ್ತಿದ್ದೆ.', 'Enu anna? Gaalipata nodtidde.', 'What, brother? I was watching the kite.']),
+  ],
+  outro: ['ಥ್ಯಾಂಕ್ಸ್ ಅಣ್ಣ, ಹಾರು ಹಾರು ಪಟ!', 'Thanks anna, haaru haaru pata!', 'Thanks brother, fly, fly kite!'],
+  learned: [['hushaaru', 'be careful']],
+  again: ['ಅಣ್ಣ, ಗಾಳಿಪಟ ಹಾರಿಸ್ತೀರಾ? ತಗೊಳ್ಳಿ ದಾರ.', 'Anna, gaalipata haaristeera? Tagolli daara.', 'Brother, will you fly it? Take the string.'],
+});
+
+export const carromMan = D('chawl-carrom-man', {
+  name: 'Srinivas', role: 'carrom player', site: 'Old pete house ch1 balcony', diff: 2,
+  voice: { rate: 1.0, pitch: 0.9 },
+  persona: 'Man in a lungi playing carrom on the balcony, happy to teach a newcomer.',
+  goal: 'Say you do not know how to play and ask him to teach you.',
+  steps: [
+    S('invite', ['ಏನ್ ಸಾರ್, ಒಂದು ಗೇಮ್ ಕೇರಂ ಆಡ್ತೀರಾ?', 'En saar, ondu game carrom aadteera?', 'So sir, will you play a game of carrom?'],
+      'Say you do not know how to play.', ['Nange aadoke baralla.', 'ನನಗೆ ಆಡೋಕೆ ಬರಲ್ಲ.'],
+      ['nange aadoke baralla', 'nange carrom baralla', 'nange aadodu gottilla', 'aadoke baralla anna', 'ನನಗೆ ಆಡೋಕೆ ಬರಲ್ಲ', 'ನನಗೆ ಕೇರಂ ಬರಲ್ಲ', 'nange carrom gottilla'],
+      'say_cannot_play_carrom', ['Say you do not know how.', '"Nange" = to me. "Baralla" = I cannot.', 'Say: "Nange aadoke baralla."'],
+      ['ಪರವಾಗಿಲ್ಲ, ಕಲಿಸ್ತೀನಿ.', 'Paravagilla, kalisteeni.', 'No problem, I will teach you.'],
+      ['ಆಡ್ತೀರಾ ಇಲ್ವಾ ಸಾರ್? ಹೇಳಿ.', 'Aadteera ilva saar? Heli.', 'Will you play or not, sir? Tell me.']),
+    S('teach', ['ಸ್ಟ್ರೈಕರ್ ಹೀಗೆ ಹೊಡೆಯೋದು. ನೋಡಿದ್ರಾ?', 'Striker heege hodeyodu. Nodidra?', 'You flick the striker like this. See?'],
+      'Ask him to teach you.', ['Nange kalisi kodi.', 'ನನಗೆ ಕಲಿಸಿ ಕೊಡಿ.'],
+      ['nange kalisi kodi', 'kalisi kodi anna', 'dayavittu kalisi kodi', 'nange helikodi', 'ನನಗೆ ಕಲಿಸಿ ಕೊಡಿ', 'ಕಲಿಸಿ ಕೊಡಿ ಅಣ್ಣ', 'please nange kalisi kodi'],
+      'ask_to_be_taught_carrom', ['Ask him to teach you.', '"Kalisi" = teach.', 'Say: "Nange kalisi kodi."'],
+      ['ತಗೊಳ್ಳಿ ಸ್ಟ್ರೈಕರ್, ಬೆರಳಿನಿಂದ ಹೀಗೆ ಹೊಡೀರಿ.', 'Tagolli striker, beralininda heege hodiri.', 'Take the striker, flick it with your finger like this.'],
+      ['ಏನು ಬೇಕು ಸಾರ್? ಕಲಿಬೇಕಾ?', 'Enu beku saar? Kalibeka?', 'What do you want, sir? To learn?']),
+  ],
+  outro: ['ನಾಳೆ ಬನ್ನಿ ಸಾರ್, ಇನ್ನೊಂದು ಗೇಮ್ ಆಡೋಣ.', 'Naale banni saar, innondu game aadona.', 'Come tomorrow, sir, let us play another game.'],
+  learned: [['nange aadoke baralla', 'I do not know how to play'], ['nange kalisi kodi', 'please teach me']],
+  again: ['ಸಾರ್, ಸ್ಟ್ರೈಕರ್ ಹಿಡಿದ್ರೆ ಪ್ರಾಕ್ಟೀಸ್ ಆಗುತ್ತೆ!', 'Saar, striker hididre practice aagutte!', 'Sir, practice by holding the striker!'],
+});
+
+export const carromElder = D('chawl-carrom-elder', {
+  name: 'Seshadri Thatha', role: 'elder carrom player', site: 'Old pete house ch1 balcony', diff: 2,
+  voice: { rate: 0.9, pitch: 0.8 },
+  persona: 'Old man with round specs and vibhuti who teases his opponent while playing slowly.',
+  goal: 'Say you are supporting him.',
+  steps: [
+    S('support', ['ಈ ಆಟದಲ್ಲಿ ನಾನೇ ಗೆಲ್ತೀನಿ. ನೀವು ಯಾರ ಕಡೆ?', 'Ee aatadalli naane gelteeni. Neevu yaara kade?', 'I will win this game. Whose side are you on?'],
+      'Say you are on his side.', ['Naanu nimma kade, thatha.', 'ನಾನು ನಿಮ್ಮ ಕಡೆ, ತಾತ.'],
+      ['naanu nimma kade thatha', 'nimma kade thatha', 'naanu nimmanna support maadteeni', 'thatha nimma kade', 'ನಾನು ನಿಮ್ಮ ಕಡೆ ತಾತ', 'ನಿಮ್ಮ ಕಡೆ ತಾತ', 'naanu nimma side thatha'],
+      'say_on_his_side', ['Choose his side.', '"Nimma kade" = on your side.', 'Say: "Naanu nimma kade, thatha."'],
+      ['ನೋಡಿದ್ರಾ? ಹುಡುಗನಿಗೂ ಗೊತ್ತು ಯಾರು ಗೆಲ್ತಾರೆ ಅಂತ!', 'Nodidra? Huduganigoo gottu yaaru geltaare anta!', 'See? Even the young man knows who will win!'],
+      ['ಯಾರ ಕಡೆ ಅಂತ ಹೇಳು ಹುಡುಗ.', 'Yaara kade anta helu huduga.', 'Say whose side, young man.']),
+  ],
+  outro: ['ಒಳ್ಳೆ ಹುಡುಗ. ಮತ್ತೆ ಬಾ, ಕಾಫಿ ಕೊಡಿಸ್ತೀನಿ.', 'Olle huduga. Matte baa, coffee kodisteeni.', 'Good boy. Come again, I will treat you to coffee.'],
+  learned: [['naanu nimma kade', 'I am on your side']],
+  again: ['ಏನು ಹುಡುಗ, ಕೇರಂ ಬೋರ್ಡ್ ನೋಡೋಕೆ ಬಂದ್ಯಾ?', 'Enu huduga, carrom board nodoke bandya?', 'Well, young man, came to watch the board?'],
+});
+
+export const tapWoman = D('chawl-tap-woman', {
+  name: 'Saroja', role: 'woman at the common tap', site: 'Old pete house ch2, common tap', diff: 2,
+  voice: { rate: 1.0, pitch: 1.15 },
+  persona: 'Woman waiting in the water queue with her pots, gossiping about the water timing.',
+  goal: 'Ask when the water comes and say you are new to the area.',
+  steps: [
+    S('timing', ['ಈ ನೀರು ಯಾವಾಗ ಬರುತ್ತೋ ಗೊತ್ತಿಲ್ಲ, ಸಾರ್.', 'Ee neeru yaavaaga baruttho gottilla, saar.', 'Who knows when the water will come, sir.'],
+      'Ask when the water comes.', ['Neeru yaavaaga barutte?', 'ನೀರು ಯಾವಾಗ ಬರುತ್ತೆ?'],
+      ['neeru yaavaaga barutte', 'neeru yaavaaga baratte', 'neeru eshtu hottige barutte', 'nalli neeru yaavaaga', 'ನೀರು ಯಾವಾಗ ಬರುತ್ತೆ', 'ನೀರು ಎಷ್ಟು ಹೊತ್ತಿಗೆ ಬರುತ್ತೆ', 'water yaavaaga barutte'],
+      'ask_water_timing', ['Ask when the water arrives.', '"Neeru" = water. "Yaavaaga" = when.', 'Say: "Neeru yaavaaga barutte?"'],
+      ['ಬೆಳಿಗ್ಗೆ ಆರಕ್ಕೆ, ಸಂಜೆ ಆರಕ್ಕೆ. ಲೇಟ್ ಆದ್ರೆ ಕ್ಯೂ ಜಾಸ್ತಿ.', 'Beligge aarakke, sanje aarakke. Late aadre queue jaasti.', 'At six in the morning and six in the evening. If late, the queue is long.'],
+      ['ಏನಂದ್ರಿ ಸಾರ್? ಕೊಡ ಸದ್ದಾಯ್ತು.', 'Enandri saar? Koda saddaytu.', 'What did you say, sir? The pots clanged.']),
+    S('new', ['ನೀವು ಈ ಏರಿಯಾದವರಾ? ನೋಡಿಲ್ಲ.', 'Neevu ee areadavaraa? Nodilla.', 'Are you from this area? I have not seen you.'],
+      'Say you are new to the area.', ['Naanu ee areage hosabaru.', 'ನಾನು ಈ ಏರಿಯಾಗೆ ಹೊಸಬರು.'],
+      ['naanu ee areage hosabaru', 'naanu hosabaru', 'naanu ee oorige hosabaru', 'naanu hosabaru amma', 'ನಾನು ಈ ಏರಿಯಾಗೆ ಹೊಸಬರು', 'ನಾನು ಹೊಸಬರು', 'naanu new amma'],
+      'say_new_to_area', ['Say you are a newcomer.', '"Hosabaru" = newcomer.', 'Say: "Naanu ee areage hosabaru."'],
+      ['ಹೌದಾ, ಏನಾದ್ರೂ ಬೇಕಾದ್ರೆ ಕೇಳಿ.', 'Haudaa, enaadru bekadre keli.', 'Is that so? Ask if you need anything.'],
+      ['ಈ ಏರಿಯಾ ಗೊತ್ತಾ ಅಂತ ಕೇಳ್ದೆ.', 'Ee area gottaa anta kelde.', 'I asked whether you know this area.']),
+  ],
+  outro: ['ಒಳ್ಳೇದಾಗ್ಲಿ ಸಾರ್. ನೀರು ಬಂತು, ನಾನು ಕೊಡ ತುಂಬಿಸ್ತೀನಿ.', 'Olledaagli saar. Neeru bantu, naanu koda tumbisteeni.', 'All the best, sir. The water is here, I will fill my pots.'],
+  learned: [['neeru yaavaaga barutte?', 'when does the water come?'], ['naanu hosabaru', 'I am new']],
+  again: ['ಸಾರ್, ನೀರು ತಗೊಳ್ಳೋಕೆ ಬಂದ್ರಾ?', 'Saar, neeru tagollokke bandra?', 'Sir, did you come to fetch water?'],
+});
+
+export const vadaCustomer = D('chowk-vada-customer', {
+  name: 'Arjun', role: 'school boy (teen)', site: 'Darshini square, customer side of the dosa cart', diff: 2,
+  voice: { rate: 1.1, pitch: 1.1 },
+  persona: 'Round teen in school uniform waiting for his masala dosa with pocket money, curious about the tall newcomer.',
+  goal: 'Say your favourite is masala dosa and that your office is in the tech park.',
+  steps: [
+    S('fav', ['ಅಣ್ಣ, ನಿಮ್ಮ ಫೇವರಿಟ್ ತಿಂಡಿ ಏನು?', 'Anna, nimma favourite tindi enu?', 'Brother, what is your favourite snack?'],
+      'Say your favourite is masala dosa.', ['Nanna favourite masale dose.', 'ನನ್ನ ಫೇವರಿಟ್ ಮಸಾಲೆ ದೋಸೆ.'],
+      ['nanna favourite masale dose', 'masale dose nanna favourite', 'nange masale dose ishta', 'nanage masale dose tumba ishta', 'ನನ್ನ ಫೇವರಿಟ್ ಮಸಾಲೆ ದೋಸೆ', 'ನನಗೆ ಮಸಾಲೆ ದೋಸೆ ಇಷ್ಟ', 'masala dose favourite'],
+      'say_favourite_dosa', ['Name your favourite food.', '"Nange ishta" = I like.', 'Say: "Nanna favourite masale dose."'],
+      ['ಸೇಮ್ ಪಿಂಚ್! ನಂದೂ ಅದೇ!', 'Same pinch! Nandoo ade!', 'Same pinch! Mine too!'],
+      ['ಯಾವ ತಿಂಡಿ ಇಷ್ಟ ಅಂತ ಹೇಳಿ ಅಣ್ಣ.', 'Yaava tindi ishta anta heli anna.', 'Tell me which snack you like, brother.']),
+    S('office', ['ನೀವು ಎಲ್ಲಿ ಕೆಲಸ ಮಾಡ್ತೀರಿ ಅಣ್ಣ?', 'Neevu elli kelasa maadteeri anna?', 'Where do you work, brother?'],
+      'Say your office is in the tech park.', ['Nanna office tech park alli ide.', 'ನನ್ನ ಆಫೀಸ್ ಟೆಕ್ ಪಾರ್ಕ್‌ನಲ್ಲಿ ಇದೆ.'],
+      ['nanna office tech park alli ide', 'office tech park alli ide', 'naanu tech park alli kelasa maadteeni', 'tech park alli office', 'ನನ್ನ ಆಫೀಸ್ ಟೆಕ್ ಪಾರ್ಕ್‌ನಲ್ಲಿ ಇದೆ', 'ಟೆಕ್ ಪಾರ್ಕ್‌ನಲ್ಲಿ ಕೆಲಸ ಮಾಡ್ತೀನಿ', 'office tech park nalli ide'],
+      'say_office_in_tech_park', ['Say where you work.', '"Office" is used in Kannada too.', 'Say: "Nanna office tech park alli ide."'],
+      ['ವಾವ್! ನಾನೂ ದೊಡ್ಡವನಾದ ಮೇಲೆ ಅಲ್ಲೇ ಕೆಲಸ ಮಾಡ್ತೀನಿ!', 'Wow! Naanu doddavanaada mele alle kelasa maadteeni!', 'Wow! When I grow up I will work there too!'],
+      ['ಎಲ್ಲಿ ಅಂತ ಕೇಳ್ದೆ ಅಣ್ಣ.', 'Elli anta kelde anna.', 'I asked where, brother.']),
+  ],
+  outro: ['ನನ್ನ ದೋಸೆ ಬಂತು! ಬೈ ಅಣ್ಣ!', 'Nanna dose bantu! Bye anna!', 'My dosa is here! Bye brother!'],
+  learned: [['nanna favourite masale dose', 'my favourite is masala dosa'], ['nanna office tech park alli ide', 'my office is in the tech park']],
+  again: ['ಅಣ್ಣ, ಇನ್ನೊಂದು ದೋಸೆ ಕೊಡಿಸ್ತೀರಾ? ತಮಾಷೆ!', 'Anna, innondu dose kodisteera? Tamashe!', 'Brother, will you buy me another dosa? Joking!'],
+});
+
+export const fruitSeller = D('chowk-fruit-seller', {
+  name: 'Kamalamma', role: 'fruit seller (woman)', site: 'Darshini square, behind the fruit cart', diff: 2,
+  voice: { rate: 1.1, pitch: 1.1 },
+  persona: 'Woman fruit seller with arms outstretched, calling out "sapota, mosambi, banana!", generous with samples.',
+  goal: 'Ask the price of bananas and buy half a kilo of sapota.',
+  steps: [
+    S('banana', ['ಸಪೋಟ, ಮೋಸಂಬಿ, ಬಾಳೆಹಣ್ಣು! ಬನ್ನಿ ಸಾರ್!', 'Sapota, mosambi, baalehannu! Banni saar!', 'Sapota, mosambi, bananas! Come sir!'],
+      'Ask the price of bananas.', ['Baalehannu eshtu, amma?', 'ಬಾಳೆಹಣ್ಣು ಎಷ್ಟು, ಅಮ್ಮ?'],
+      ['baalehannu eshtu amma', 'baalehannu eshtu', 'baale hannu eshtu amma', 'banana eshtu amma', 'ಬಾಳೆಹಣ್ಣು ಎಷ್ಟು ಅಮ್ಮ', 'ಬಾಳೆಹಣ್ಣು ಎಷ್ಟು', 'banana eshtu rupayi'],
+      'ask_banana_price', ['Ask how much the bananas are.', '"Baalehannu" = banana.', 'Say: "Baalehannu eshtu, amma?"'],
+      ['ಡಜನ್‌ಗೆ ಅರವತ್ತು ರೂಪಾಯಿ ಸಾರ್.', 'Dozen ge aravattu rupayi saar.', 'Sixty rupees a dozen, sir.'],
+      ['ಹಣ್ಣಿನ ರೇಟ್ ಕೇಳ್ತೀರಾ ಸಾರ್?', 'Hannina rate kelteera saar?', 'Asking the fruit rate, sir?']),
+    S('sapota', ['ಸಪೋಟ ಸಿಹಿ ಇದೆ, ಸ್ವಲ್ಪ ತಗೊಳ್ಳಿ ಸಾರ್.', 'Sapota sihi ide, swalpa tagolli saar.', 'The sapota is sweet, take some, sir.'],
+      'Buy half a kilo of sapota.', ['Ardha kg sapota kodi.', 'ಅರ್ಧ ಕೆಜಿ ಸಪೋಟ ಕೊಡಿ.'],
+      ['ardha kg sapota kodi', 'ardha kilo sapota kodi', 'sapota ardha kg beku', 'amma ardha kg sapota', 'ಅರ್ಧ ಕೆಜಿ ಸಪೋಟ ಕೊಡಿ', 'ಅರ್ಧ ಕೆಜಿ ಸಪೋಟ ಬೇಕು', 'half kg sapota kodi'],
+      'buy_half_kilo_sapota', ['Ask for half a kilo.', 'Half = "ardha".', 'Say: "Ardha kg sapota kodi."'],
+      ['ತಗೊಳ್ಳಿ, ಒಂದು ಬಿಟ್ಟು ತಿಂದು ನೋಡಿ.', 'Tagolli, ondu bittu tindu nodi.', 'Here, taste one and see.'],
+      ['ಎಷ್ಟು ಬೇಕು ಸಾರ್? ಅರ್ಧನಾ, ಒಂದಾ?', 'Eshtu beku saar? Ardhana, ondaa?', 'How much do you want, sir? Half or one?']),
+  ],
+  outro: ['ಹಣ್ಣು ತಿಂದ್ರೆ ಆರೋಗ್ಯ ಚೆನ್ನಾಗಿರುತ್ತೆ ಸಾರ್.', 'Hannu tindre aarogya chennagirutte saar.', 'Eating fruit keeps you healthy, sir.'],
+  learned: [['baalehannu eshtu?', 'how much are the bananas?'], ['ardha kg sapota kodi', 'give me half a kilo of sapota']],
+  again: ['ಸಾರ್, ಇನ್ನೊಂದು ಹಣ್ಣು ತಗೊಳ್ಳಿ!', 'Saar, innondu hannu tagolli!', 'Sir, take one more fruit!'],
+});
+
+export const flowerSeller = D('chowk-marigold-seller', {
+  name: 'Parvathamma', role: 'mallige and garland seller', site: 'Darshini square, jasmine (mallige) stall', diff: 2,
+  voice: { rate: 1.0, pitch: 1.1 },
+  persona: 'Thin woman selling jasmine strings and garlands for the temple and festivals.',
+  goal: 'Ask for a flower garland and say it is for God.',
+  steps: [
+    S('garland', ['ಹೂವು ಹೂವು! ದೇವರಿಗೆ ಹೂವು ಬೇಕಾ?', 'Hoovu hoovu! Devarige hoovu beka?', 'Flowers, flowers! Do you want flowers for God?'],
+      'Ask for a flower garland.', ['Ondu hoovina haara kodi.', 'ಒಂದು ಹೂವಿನ ಹಾರ ಕೊಡಿ.'],
+      ['ondu hoovina haara kodi', 'hoovina haara kodi', 'haara beku amma', 'ondu haara kodi', 'ಒಂದು ಹೂವಿನ ಹಾರ ಕೊಡಿ', 'ಹೂವಿನ ಹಾರ ಕೊಡಿ', 'ondu haara beku'],
+      'ask_flower_garland', ['Ask for one garland.', '"Haara" = garland.', 'Say: "Ondu hoovina haara kodi."'],
+      ['ಬಣ್ಣ ಬಣ್ಣದ ಹಾರ ಇದೆ. ಇಲ್ಕೊಳ್ಳಿ.', 'Banna banna-da haara ide. Ilkolli.', 'I have colourful garlands. Here you are.'],
+      ['ಏನು ಬೇಕು ಸಾರ್? ಹೂವಾ, ಹಾರಾನಾ?', 'Enu beku saar? Hoova, haarana?', 'What do you want, sir? Flowers or a garland?']),
+    S('for', ['ಯಾರಿಗೆ ಹಾರ ಸಾರ್? ಮನೆಯಲ್ಲಿ ಪೂಜೆಗಾ?', 'Yaarige haara saar? Maneyalli poojegaa?', 'Who is the garland for, sir? For puja at home?'],
+      'Say it is for God.', ['Devarige, amma.', 'ದೇವರಿಗೆ, ಅಮ್ಮ.'],
+      ['devarige amma', 'devarige', 'devarige haara', 'devara pooje ge', 'ದೇವರಿಗೆ ಅಮ್ಮ', 'ದೇವರಿಗೆ', 'for devaru amma'],
+      'say_garland_for_god', ['Say who it is for.', '"Devarige" = for God.', 'Say: "Devarige, amma."'],
+      ['ಒಳ್ಳೇದು. ಭಕ್ತಿಯಿಂದ ಹಾಕಿ, ಒಳ್ಳೆದಾಗುತ್ತೆ.', 'Olledu. Bhaktiyinda haaki, olledaagutte.', 'Good. Offer it with devotion, good will come.'],
+      ['ಯಾರಿಗೆ ಹಾರ ಅಂತ ಹೇಳಿ ಸಾರ್.', 'Yaarige haara anta heli saar.', 'Tell me who the garland is for, sir.']),
+  ],
+  outro: ['ಹಾರ ಹುಷಾರು, ಬಾಡೋದಕ್ಕೆ ಮುಂಚೆ ಹಾಕಿ.', 'Haara hushaaru, baadodakke munche haaki.', 'Careful with the garland, offer it before it wilts.'],
+  learned: [['ondu hoovina haara kodi', 'give me a flower garland'], ['devarige', 'for God']],
+  again: ['ಸಾರ್, ಮಲ್ಲಿಗೆ ಬೇಕಾ ಇವತ್ತು?', 'Saar, mallige beka ivattu?', 'Sir, want jasmine today?'],
+});
+
+export const newsReader = D('chowk-news-reader', {
+  name: 'Shamanna Ajja', role: 'elderly newspaper reader', site: 'Darshini square, customer side of the news stand', diff: 2,
+  voice: { rate: 0.9, pitch: 0.8 },
+  persona: 'Old man reading a Kannada paper and commenting on prices and politics with every headline.',
+  goal: 'Agree with him that prices are high.',
+  steps: [
+    S('prices', ['ಈ ನ್ಯೂಸ್ ನೋಡಿ, ಎಲ್ಲಾ ಬೆಲೆ ಏರ್ತಿದೆ!', 'Ee news nodi, ella bele ertide!', 'Look at this news, all the prices are rising!'],
+      'Agree that prices are high.', ['Haudu ajja, bele tumba jaasti.', 'ಹೌದು ಅಜ್ಜ, ಬೆಲೆ ತುಂಬಾ ಜಾಸ್ತಿ.'],
+      ['haudu ajja bele tumba jaasti', 'bele tumba jaasti ajja', 'haudu ajja jaasti ide', 'bele jaasti aagide', 'ಹೌದು ಅಜ್ಜ ಬೆಲೆ ತುಂಬಾ ಜಾಸ್ತಿ', 'ಬೆಲೆ ತುಂಬಾ ಜಾಸ್ತಿ ಅಜ್ಜ', 'haudu ajja bele jaasti'],
+      'agree_prices_high', ['Agree with him.', '"Bele" = price. "Jaasti" = a lot.', 'Say: "Haudu ajja, bele tumba jaasti."'],
+      ['ನೋಡಿದ್ರಾ, ಹುಡುಗನಿಗೂ ಗೊತ್ತು! ನಮ್ಮ ಕಾಲದಲ್ಲಿ ಕಾಫಿ ಹತ್ತು ಪೈಸೆ.', 'Nodidra, huduganigoo gottu! Namma kaaladalli coffee hattu paise.', 'See, even the boy knows! In our days coffee was ten paise.'],
+      ['ಏನು ಅಂತೀರಿ? ಜೋರಾಗಿ ಹೇಳಿ, ಕಿವಿ ಕೇಳಲ್ಲ.', 'Enu anteeri? Joragi heli, kivi kelalla.', 'What do you say? Louder, my ears are weak.']),
+  ],
+  outro: ['ಒಳ್ಳೆ ಹುಡುಗ. ಪೇಪರ್ ಓದ್ತಾ ಇರು.', 'Olle huduga. Paper odta iru.', 'Good boy. Keep reading the paper.'],
+  learned: [['bele tumba jaasti', 'prices are very high']],
+  again: ['ಬಾ ಹುಡುಗ, ಈ ಹೆಡ್‌ಲೈನ್ ಕೇಳು!', 'Baa huduga, ee headline kelu!', 'Come boy, hear this headline!'],
+});
+
+export const rangoliGirl = D('chowk-rangoli-girl', {
+  name: 'Meghana', role: 'little girl drawing kolam', site: 'Darshini square, beside the rangoli (kolam)', diff: 1,
+  voice: { rate: 1.05, pitch: 1.4 },
+  persona: 'Small girl crouched over a kolam with white powder, tongue out in concentration, proud of her pattern.',
+  goal: 'Praise her rangoli.',
+  steps: [
+    S('rangoli', ['ಅಣ್ಣ, ನನ್ನ ರಂಗೋಲಿ ಹೇಗಿದೆ? ಚೆನ್ನಾಗಿದೆಯಾ?', 'Anna, nanna rangoli hegide? Chennagideya?', 'Brother, how is my rangoli? Is it nice?'],
+      'Say her rangoli is very nice.', ['Rangoli tumba chennagide!', 'ರಂಗೋಲಿ ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ!'],
+      ['rangoli tumba chennagide', 'tumba chennagide', 'nimma rangoli chennagide', 'rangoli super ide', 'ರಂಗೋಲಿ ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ', 'ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ', 'rangoli super chikku'],
+      'praise_rangoli', ['Say something nice about it.', '"Tumba chennagide" = very nice.', 'Say: "Rangoli tumba chennagide!"'],
+      ['ಹೀ ಹೀ! ಇನ್ನೂ ದೊಡ್ಡ ರಂಗೋಲಿ ಬಿಡಿಸ್ತೀನಿ!', 'Hee hee! Innu dodda rangoli bidisteeni!', 'Hee hee! I will draw an even bigger one!'],
+      ['ಹೇಗಿದೆ ಅಂತ ಹೇಳಿ ಅಣ್ಣ!', 'Hegide anta heli anna!', 'Tell me how it is, brother!']),
+  ],
+  outro: ['ಥ್ಯಾಂಕ್ಯು ಅಣ್ಣ! ನನ್ನ ಕೈ ಬಿಳಿ ಆಯ್ತು!', 'Thank you anna! Nanna kai bili aytu!', 'Thank you brother! My hands turned white!'],
+  learned: [['tumba chennagide', 'it is very nice']],
+  again: ['ಅಣ್ಣ, ಇನ್ನೊಂದು ಬಣ್ಣ ಹಾಕ್ಲಾ?', 'Anna, innondu banna haakla?', 'Brother, shall I add another colour?'],
+});
+
+export const flagDevotee = D('chowk-ganpati-devotee', {
+  name: 'Sumitra', role: 'woman at the Rajyotsava flag poster', site: 'Darshini square, red-and-yellow Kannada flag poster', diff: 2,
+  voice: { rate: 0.95, pitch: 1.1 },
+  persona: 'Woman in a red saree with joined hands before the red-and-yellow flag poster on Kannada Rajyotsava, offering flowers.',
+  goal: 'Wish her a happy Rajyotsava.',
+  steps: [
+    S('wish', ['ಇವತ್ತು ಕನ್ನಡ ರಾಜ್ಯೋತ್ಸವ, ಗೊತ್ತಾ ಸಾರ್?', 'Ivattu Kannada Rajyotsava, gottaa saar?', 'Today is Kannada Rajyotsava, did you know, sir?'],
+      'Wish her a happy Rajyotsava.', ['Rajyotsavada shubhaashayagalu!', 'ರಾಜ್ಯೋತ್ಸವದ ಶುಭಾಶಯಗಳು!'],
+      ['rajyotsavada shubhaashayagalu', 'rajyotsava shubhaashayagalu', 'happy rajyotsava amma', 'rajyotsavada habbada shubhaashaya', 'ರಾಜ್ಯೋತ್ಸವದ ಶುಭಾಶಯಗಳು', 'ರಾಜ್ಯೋತ್ಸವದ ಶುಭಾಶಯ', 'rajyotsava shubhaashaya amma'],
+      'wish_happy_rajyotsava', ['Wish her for the festival.', '"Shubhaashayagalu" = good wishes.', 'Say: "Rajyotsavada shubhaashayagalu!"'],
+      ['ನಿಮಗೂ ಶುಭಾಶಯಗಳು! ನೀವು ಕನ್ನಡ ಕಲಿತಿರೋದು ಖುಷಿ.', 'Nimagoo shubhaashayagalu! Neevu Kannada kalitirodu khushi.', 'Wishes to you too! I am happy that you are learning Kannada.'],
+      ['ಹಬ್ಬದ ಶುಭಾಶಯ ಹೇಳಿ ಸಾರ್.', 'Habbada shubhaashaya heli saar.', 'Say your festival wishes, sir.']),
+  ],
+  outro: ['ಕನ್ನಡ ಉಳಿಸಿ, ಕನ್ನಡ ಬೆಳೆಸಿ! ಹೋಗಿ ಬನ್ನಿ.', 'Kannada ulisi, Kannada belesi! Hogi banni.', 'Save Kannada, grow Kannada! Go and come again.'],
+  learned: [['Rajyotsavada shubhaashayagalu', 'happy Rajyotsava']],
+  again: ['ಸಾರ್, ಹೂವು ಹಾಕ್ತೀರಾ ಧ್ವಜಕ್ಕೆ?', 'Saar, hoovu haakteera dhwajakke?', 'Sir, will you offer a flower to the flag?'],
+});
+
+export const tagKid1 = D('chowk-tag-kid-1', {
+  name: 'Vikki', role: 'playing kid (boy)', site: 'Darshini square, open ground east of the darshini', diff: 2,
+  voice: { rate: 1.2, pitch: 1.2 },
+  persona: 'Boy playing tag, dodging and running in bursts, out of breath but boasting he cannot be caught.',
+  goal: 'Say you will catch him.',
+  steps: [
+    S('catch', ['ನನ್ನ ಹಿಡೀಲಿಕ್ಕೆ ಆಗಲ್ಲ! ಹಿಡಿದು ತೋರಿಸಿ ಅಣ್ಣ!', 'Nanna hidilikke aagalla! Hididu torisi anna!', 'You cannot catch me! Catch me and show, brother!'],
+      'Say you will catch him.', ['Nillu, naanu hiditeeni!', 'ನಿಲ್ಲು, ನಾನು ಹಿಡೀತೀನಿ!'],
+      ['nillu naanu hiditeeni', 'naanu hiditeeni', 'nillu hiditeeni nodu', 'ninnanna hiditeeni', 'ನಿಲ್ಲು ನಾನು ಹಿಡೀತೀನಿ', 'ನಾನು ಹಿಡೀತೀನಿ', 'nillu naanu hididu bidteeni'],
+      'say_will_catch_him', ['Challenge him playfully.', '"Nillu" = stop. "Hiditeeni" = I will catch.', 'Say: "Nillu, naanu hiditeeni!"'],
+      ['ಹೇ! ಅಣ್ಣ ಓಡೋಕೆ ಶುರು ಮಾಡಿದ್ರು!', 'He! Anna odoke shuru maadidru!', 'Hey! Brother has started running!'],
+      ['ಹಿಡೀತೀರಾ ಇಲ್ವಾ ಅಣ್ಣ?', 'Hiditeera ilva anna?', 'Will you catch me or not, brother?']),
+  ],
+  outro: ['ಹ್ಹಾ! ನಾನೇ ಗೆದ್ದೆ! ಬೈ ಅಣ್ಣ!', 'Haa! Naane gedde! Bye anna!', 'Ha! I won! Bye brother!'],
+  learned: [['naanu hiditeeni', 'I will catch you']],
+  again: ['ಅಣ್ಣ, ಇನ್ನೊಂದು ರೌಂಡ್?', 'Anna, innondu round?', 'Brother, one more round?'],
+});
+
+export const tagKid2 = D('chowk-tag-kid-2', {
+  name: 'Divya', role: 'playing kid (girl)', site: 'Darshini square, open ground east of the darshini', diff: 1,
+  voice: { rate: 1.15, pitch: 1.4 },
+  persona: 'Girl chasing the other kid with a ball in hand, shouting "nan-ge bandhu!" and happy to meet a tall grown-up.',
+  goal: 'Introduce yourself as Rohan.',
+  steps: [
+    S('name', ['ನನ್ನ ಹೆಸರು ದಿವ್ಯಾ! ನಿಮ್ಮ ಹೆಸರೇನು ಅಣ್ಣ?', 'Nanna hesaru Divya! Nimma hesarenu anna?', 'My name is Divya! What is your name, brother?'],
+      'Tell her you are Rohan.', ['Hai Divya, naanu Rohan.', 'ಹಾಯ್ ದಿವ್ಯಾ, ನಾನು ರೋಹನ್.'],
+      ['hai divya naanu rohan', 'naanu rohan divya', 'hai naanu rohan', 'divya, naanu Rohan', 'ಹಾಯ್ ದಿವ್ಯಾ ನಾನು ರೋಹನ್', 'ನಾನು ರೋಹನ್ ದಿವ್ಯಾ', 'hi Divya naanu Rohan'],
+      'introduce_as_rohan', ['Say hi and your name.', '"Naanu" = I am.', 'Say: "Hai Divya, naanu Rohan."'],
+      ['ರೋಹನ್ ಅಣ್ಣ! ಬನ್ನಿ, ನನ್ನ ಜೊತೆ ಆಡಿ!', 'Rohan anna! Banni, nanna jote aadi!', 'Rohan brother! Come, play with me!'],
+      ['ನಿಮ್ಮ ಹೆಸರು ಹೇಳಿ ಅಣ್ಣ!', 'Nimma hesaru heli anna!', 'Tell me your name, brother!']),
+  ],
+  outro: ['ನಂಗೆ ಬಾಲ್ ಕೊಡಿ! ನಂಗೆ ಬಂತು!', 'Nange ball kodi! Nange bantu!', 'Give me the ball! I got it!'],
+  learned: [['naanu Rohan', 'I am Rohan']],
+  again: ['ರೋಹನ್ ಅಣ್ಣ! ನನ್ನ ಜೊತೆ ಬಾಲ್ ಆಡಿ!', 'Rohan anna! Nanna jote ball aadi!', 'Rohan brother! Play ball with me!'],
+});
+
+export const grandma = D('chawl-grandma-doorstep', {
+  name: 'Kamalaajji', role: 'old pete-house grandmother (ajji)', site: 'Old pete house ch3, on the doorstep', diff: 2,
+  voice: { rate: 0.85, pitch: 1.0 },
+  persona: 'Round old woman on the doorstep, loves feeding everyone and calls Rohan "appa".',
+  goal: 'Tell her you have not eaten yet and say the holige is tasty.',
+  steps: [
+    S('meal', ['ಬಾರಪ್ಪ, ಕೂತ್ಕೋ. ಊಟ ಆಯ್ತಾ?', 'Baarappa, kutko. Oota aytha?', 'Come child, sit. Have you eaten?'],
+      'Say you have not eaten yet.', ['Innu aagilla, ajji.', 'ಇನ್ನೂ ಆಗಿಲ್ಲ, ಅಜ್ಜಿ.'],
+      ['innu aagilla ajji', 'innu oota aagilla', 'oota aagilla ajji', 'illa ajji innu aagilla', 'ಇನ್ನೂ ಆಗಿಲ್ಲ ಅಜ್ಜಿ', 'ಊಟ ಆಗಿಲ್ಲ ಅಜ್ಜಿ', 'illa ajji'],
+      'say_not_eaten_yet', ['Say you have not eaten.', '"Innu aagilla" = not yet.', 'Say: "Innu aagilla, ajji."'],
+      ['ಅಯ್ಯೋ, ಹಾಗಾದ್ರೆ ಇರು, ಏನಾದ್ರೂ ತರ್ತೀನಿ.', 'Ayyo, haagaadre iru, enaadru barteeni.', 'Oh dear, wait then, I will bring something.'],
+      ['ಊಟ ಆಯ್ತಾ ಇಲ್ವಾ ಅಂತ ಹೇಳಪ್ಪ.', 'Oota aytha ilva anta helappa.', 'Tell me whether you have eaten, child.']),
+    S('holige', ['ತಗೋ, ಹೋಳಿಗೆ. ಬಿಸಿ ಇದೆ.', 'Tago, holige. Bisi ide.', 'Take this holige. It is warm.'],
+      'Say it is delicious.', ['Tumba ruchiyaagide, ajji.', 'ತುಂಬಾ ರುಚಿಯಾಗಿದೆ, ಅಜ್ಜಿ.'],
+      ['tumba ruchiyaagide ajji', 'tumba ruchiyaagide', 'holige ruchiyaagide', 'ajji tumba ruchi', 'ತುಂಬಾ ರುಚಿಯಾಗಿದೆ ಅಜ್ಜಿ', 'ತುಂಬಾ ರುಚಿಯಾಗಿದೆ', 'holige tumba tasty ajji'],
+      'say_holige_tasty', ['Say the sweet is tasty.', '"Ruchiyaagide" = it is tasty.', 'Say: "Tumba ruchiyaagide, ajji."'],
+      ['ಇನ್ನೊಂದು ತಗೋ! ಹೊಟ್ಟೆ ತುಂಬ ತಿನ್ನು.', 'Innondu tago! Hotte tumba tinnu.', 'Take another! Eat to your heart\'s content.'],
+      ['ರುಚಿ ಹೇಗಿದೆ ಅಂತ ಹೇಳಪ್ಪ.', 'Ruchi hegide anta helappa.', 'Tell me how the taste is, child.']),
+  ],
+  outro: ['ಆಯುಷ್ಯವಂತನಾಗಿ ಇರು ಅಪ್ಪ. ಮತ್ತೆ ಬಾ.', 'Aayushyavantanaagi iru appa. Matte baa.', 'Live long, child. Come again.'],
+  learned: [['innu aagilla', 'not yet'], ['tumba ruchiyaagide', 'it is very tasty']],
+  again: ['ಅಪ್ಪ, ಇನ್ನೊಂದು ಹೋಳಿಗೆ ತಿನ್ನು!', 'Appa, innondu holige tinnu!', 'Child, eat one more holige!'],
+});
+
+export const laneSweeper = D('chawl-lane-sweeper', {
+  name: 'Yellamma', role: 'lane sweeper (woman)', site: 'Old pete house lanes, under the laundry line', diff: 1,
+  voice: { rate: 1.0, pitch: 1.05 },
+  persona: 'Woman sweeping the lane early in the day, brisk and busy.',
+  goal: 'Excuse yourself and say you will step aside.',
+  steps: [
+    S('side', ['ಸ್ವಲ್ಪ ಸೈಡ್ ಬನ್ನಿ ಸಾರ್, ಕಸ ಗುಡಿಸ್ತಿದ್ದೀನಿ.', 'Swalpa side banni saar, kasa gudisthiddini.', 'Step aside a little, sir, I am sweeping.'],
+      'Say sorry and that you will step aside.', ['Kshamisi amma, side ge barteeni.', 'ಕ್ಷಮಿಸಿ ಅಮ್ಮ, ಸೈಡ್‌ಗೆ ಬರ್ತೀನಿ.'],
+      ['kshamisi amma side ge barteeni', 'kshamisi amma', 'sorry amma side ge barteeni', 'side ge barteeni amma', 'ಕ್ಷಮಿಸಿ ಅಮ್ಮ ಸೈಡ್‌ಗೆ ಬರ್ತೀನಿ', 'ಕ್ಷಮಿಸಿ ಅಮ್ಮ', 'sorry amma side barteeni'],
+      'apologise_and_step_aside', ['Say sorry and step aside.', '"Kshamisi" = excuse me / sorry.', 'Say: "Kshamisi amma, side ge barteeni."'],
+      ['ಧನ್ಯವಾದ ಸಾರ್. ಇಲ್ಲಿ ಇನ್ನೂ ಒದ್ದೆ ಇದೆ, ಹುಷಾರು.', 'Dhanyavaada saar. Illi innu odde ide, hushaaru.', 'Thank you sir. It is still wet here, careful.'],
+      ['ಏನು ಅಂದ್ರಿ ಸಾರ್? ಪೊರಕೆ ಸದ್ದಾಯ್ತು.', 'Enu andri saar? Porake saddaytu.', 'What did you say, sir? The broom was noisy.']),
+  ],
+  outro: ['ಈ ಗಲ್ಲಿ ಈಗ ಸ್ವಚ್ಛ ಆಯ್ತು, ನೋಡಿ.', 'Ee galli iga swachcha aytu, nodi.', 'This lane is clean now, see.'],
+  learned: [['kshamisi', 'excuse me / sorry']],
+  again: ['ಸಾರ್, ಹುಷಾರು, ಇನ್ನೂ ಗುಡಿಸ್ತಿದ್ದೀನಿ!', 'Saar, hushaaru, innu gudisthiddini!', 'Sir, careful, I am still sweeping!'],
+});

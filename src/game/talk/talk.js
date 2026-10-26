@@ -4,16 +4,16 @@
  * createTalk({ camera, player, cameraRig, input, worldId }) -> talk   (the engine makes one and passes it to world.build as ctx.talk)
  *
  *   World API:
- *     talk.register({ id, role, object, convo?, explicitId?, name?, lang = 'hi', canTurn = true, active?(), hold?(on) }) -> handle
+ *     talk.register({ id, role, object, convo?, explicitId?, name?, lang = 'hi' | 'kn' | 'en', canTurn = true, active?(), hold?(on) }) -> handle
  *         convo:true marks the ONE NPC that gets the full conversation for its role (others of that role only greet);
  *         explicitId: a placement id that has its own dialogue (checked first). object: the NPC's Object3D (userData.setLookTarget(v) is used when present); id/role pick the dialogue (id first, then role);
  *         canTurn:false for things that steer their own body (walkers); hold(true|false) pauses/resumes the NPC while you talk.
  *     talk.unregister(handle)
  *     talk.setDialogues({ [idOrRole]: dialogue })   merge dialogues (schema in docs/DIALOGUE.md); later calls override earlier ones
  *     talk.setGreetings([line, ...])                short lines (same { text, roman, en } shape) for NPCs that have no dialogue
- *     A dialogue with tutorial:true gets a first-load hint (note + arrow) until the player has talked to that NPC once.
+ *     A dialogue with tutorial:true gets a first-load hint (note + arrow: "New here? Talk to <name> at the <place>", dialogue.place default 'tapri') until the player has talked to that NPC once.
  *     talk.state -> 'idle' | 'ambient' | 'npc' | 'await' | 'checking' | 'react' | 'reward'
- *   Player: walk near an NPC (about 3 units, roughly in front) -> "बात करो / Talk [E]"; E starts; Esc leaves; P opens the phrasebook.
+ *   Player: walk near an NPC (about 3 units, roughly in front) -> "बात करो / Talk [E]" (Kannada NPCs / the bengaluru world: "ಮಾತಾಡಿ / Talk [E]"); E starts; Esc leaves; P opens the phrasebook.
  *   NPCs without a dialogue just say a short greeting (spoken) when you press E.
  */
 import * as THREE from 'three';
@@ -30,6 +30,7 @@ const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3
 const wp = (o, out) => out.set(o.matrixWorld.elements[12], o.matrixWorld.elements[13], o.matrixWorld.elements[14]);
 const tangentOf = (v, up) => v.addScaledVector(up, -v.dot(up));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const speechLang = (l) => (l === 'en' ? 'en' : l === 'kn' ? 'kn' : 'hi');
 const hash = (s) => { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
 
 function defaultHints(step) {
@@ -75,11 +76,11 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     if (e.code === 'Escape') { if (ui.bookOpen()) ui.toggleBook([], false); else if (conv || amb) end(); return; }
     if (e.code === 'Enter' && conv && state === 'reward') { e.preventDefault(); end(); return; }
     if (typing()) return;
-    if (e.code === 'KeyP') { ui.toggleBook(phrasebook.list()); return; }
-    if (e.code === 'KeyE') { if (conv && state === 'reward') end(); else pressE = true; return; }
+    if (e.code === 'KeyP') { ui.toggleBook(phrasebook.list(worldId)); return; }
+    if (e.code === 'KeyE') { e.preventDefault(); if (conv && state === 'reward') end(); else pressE = true; return; } // no stray "e" in the reply box it focuses
     if (e.code === 'KeyH' && conv) ui.toggleSuggest();
   });
-  ui.onToggleBook(() => ui.toggleBook(phrasebook.list()));
+  ui.onToggleBook(() => ui.toggleBook(phrasebook.list(worldId)));
   ui.onSubmit((v) => submit(v));
 
   // ---------------- per frame ----------------
@@ -162,7 +163,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
       wp(cand.object, _a);
       const s = project(_a, 2.55, _b);
       const dd = dialogueFor(cand);
-      if (s) ui.showBubble(s.x, s.y, dd ? { difficulty: dd.difficulty, tutorial: !!dd.tutorial } : {}); else ui.hideBubble();
+      if (s) ui.showBubble(s.x, s.y, { ...(dd ? { difficulty: dd.difficulty, tutorial: !!dd.tutorial } : {}), lang: (dd?.lang ?? cand.lang) === 'kn' || worldId === 'bengaluru' ? 'kn' : 'hi' }); else ui.hideBubble();
       state = 'idle';
       if (pressE) { pressE = false; start(cand); }
     } else ui.hideBubble();
@@ -190,7 +191,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     if (near || conv || amb) { ui.hideGuide(); return; }
     _b.copy(_a).addScaledVector(_up.copy(_a).normalize(), 2.9).project(camera);
     const W = window.innerWidth, H = window.innerHeight;
-    const text = `New here? Talk to ${d.name ?? 'the chai uncle'} at the tapri`;
+    const text = `New here? Talk to ${d.name ?? 'the chai uncle'} at the ${d.place ?? 'tapri'}`;
     const behind = _b.z > 1;
     let x = (_b.x * 0.5 + 0.5) * W, y = (-_b.y * 0.5 + 0.5) * H;
     const on = !behind && x > 60 && x < W - 60 && y > 80 && y < H - 120;
@@ -226,13 +227,13 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
       const pool = t.lang === 'en' ? GREETINGS_EN : greetings;
       const line = pool[(hash(t.id ?? t.role) + Math.floor(Math.random() * 7)) % pool.length];
       amb = { t, until: performance.now() + 3200, line, q0 }; state = 'ambient';
-      speak(line.text, { lang: t.lang === 'en' ? 'en' : 'hi', voice: { rate: 1, pitch: 1 } });
+      speak(line.text, { lang: speechLang(t.lang), voice: { rate: 1, pitch: 1 } });
       return;
     }
     finishGuide(t);
     conv = { t, dlg, i: 0, attempt: 0, assisted: 0, token: Math.random(), q0, abort: null };
     input.clearKeys(); input.setLocked(true);
-    ui.openCard({ name: dlg.name ?? t.name ?? 'Mumbaikar' });
+    ui.openCard({ name: dlg.name ?? t.name ?? (worldId === 'bengaluru' ? 'Bengalurian' : 'Mumbaikar') });
     window.dispatchEvent(new CustomEvent('talkabit:conversation', { detail: { on: true } })); // music ducks
     // two-shot: camera behind Chotu, looking at the pair
     wp(t.object, _a); _b.copy(_a).sub(player.object.position); tangentOf(_b, player.up).normalize();
@@ -246,7 +247,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     ui.setNpc(line, { react });
     ui.setSpeaking(true);
     const tok = conv?.token;
-    const p = speak(dlg?.lang === 'en' || conv?.t.lang === 'en' ? (line.text || line.roman) : (line.text || line.roman), { lang: (dlg?.lang ?? conv?.t.lang) === 'en' ? 'en' : 'hi', voice: dlg?.voice ?? {} })
+    const p = speak(dlg?.lang === 'en' || conv?.t.lang === 'en' ? (line.text || line.roman) : (line.text || line.roman), { lang: speechLang(dlg?.lang ?? conv?.t.lang), voice: dlg?.voice ?? {} })
       .then(() => { if (conv && conv.token === tok) ui.setSpeaking(false); });
     return wait ? p : Promise.resolve();
   }
@@ -278,22 +279,22 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     const hint = hints[Math.min(c.attempt, hints.length) - 1];
     if (c.attempt >= MAX_TRIES) { // the NPC helps: show the full phrase and accept the step as assisted
       state = 'react'; ui.flashRetry();
-      ui.setHint(hints[hints.length - 1] ?? `Say: "${step.suggest?.roman}"`, MAX_TRIES); ui.setReason(reasonLine(res.reason));
+      ui.setHint(hints[hints.length - 1] ?? `Say: "${step.suggest?.roman}"`, MAX_TRIES); ui.setReason(reasonLine(res.reason, c.dlg.lang));
       c.assisted++;
       await sleep(2300); if (!conv || conv.token !== tok) return;
       return advance(step, true);
     }
     state = 'react'; ui.flashRetry();
-    ui.setHint(hint, c.attempt); ui.setReason(reasonLine(res.reason));
+    ui.setHint(hint, c.attempt); ui.setReason(reasonLine(res.reason, c.dlg.lang));
     ui.setBusy(false); ui.focusInput(); state = 'await';
-    await say(step.onRetry ?? { text: 'क्या? फिर से बोल।', roman: 'Kya? Phir se bol.', en: 'What? Say it again.' }, { react: true, wait: false });
+    await say(step.onRetry ?? (c.dlg.lang === 'kn' ? { text: 'ಏನು? ಇನ್ನೊಮ್ಮೆ ಹೇಳಿ.', roman: 'Enu? Innomme heli.', en: 'What? Say it again.' } : { text: 'क्या? फिर से बोल।', roman: 'Kya? Phir se bol.', en: 'What? Say it again.' }), { react: true, wait: false });
   }
 
   async function advance(step, assisted) {
     const c = conv, tok = c.token; state = 'react';
     if (!assisted) ui.flashValid();
     ui.setHint(null, 0);
-    await Promise.all([say(step.onValid ?? { text: 'ठीक है।', roman: 'Theek hai.', en: 'Okay.' }, { wait: true }), sleep(1300)]);
+    await Promise.all([say(step.onValid ?? (c.dlg.lang === 'kn' ? { text: 'ಸರಿ.', roman: 'Sari.', en: 'Okay.' } : { text: 'ठीक है।', roman: 'Theek hai.', en: 'Okay.' }), { wait: true }), sleep(1300)]);
     if (!conv || conv.token !== tok) return;
     if (++c.i < c.dlg.steps.length) return runStep();
     outro();
@@ -304,7 +305,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     ui.setBusy(true);
     const learned = (c.dlg.learned ?? []).length ? c.dlg.learned : c.dlg.steps.filter((s) => s.suggest).map((s) => ({ roman: s.suggest.roman, en: s.instruction, text: s.suggest.text }));
     if (c.dlg.id && !doneIds.has(c.dlg.id)) { doneIds.add(c.dlg.id); try { localStorage.setItem('talkabit.done.v1', JSON.stringify([...doneIds])); } catch { /* storage blocked */ } }
-    phrasebook.add(c.dlg.name ?? c.t.name ?? 'Mumbaikar', worldId, learned);
+    phrasebook.add(c.dlg.name ?? c.t.name ?? (worldId === 'bengaluru' ? 'Bengalurian' : 'Mumbaikar'), worldId, learned);
     const p = c.dlg.outro ? say(c.dlg.outro, { wait: true }) : Promise.resolve();
     ui.showReward({ learned });
     state = 'reward';

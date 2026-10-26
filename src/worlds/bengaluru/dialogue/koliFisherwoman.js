@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('koliFisherwoman', {
+  name: 'Lakshmamma', role: 'mallige (jasmine) flower seller', site: 'Ulsoor Lake jetty, beside the pedal boats', diff: 3,
+  voice: { rate: 1.0, pitch: 1.1 },
+  persona: 'Round, smiling jasmine seller threading strings of mallige by the boats. Bargains playfully and loves a polite newcomer.',
+  goal: 'Ask the price of mallige per molam, bargain a little, and buy two molam.',
+  steps: [
+    S('price', ['ಮಲ್ಲಿಗೆ ಹೂವು! ತಾಜಾ ಮಲ್ಲಿಗೆ, ಬನ್ನಿ ಸಾರ್!', 'Mallige hoovu! Taaja mallige, banni saar!', 'Jasmine flowers! Fresh jasmine, come sir!'],
+      'Ask the price of one molam of mallige.', ['Ondu mola eshtu, amma?', 'ಒಂದು ಮೊಳ ಎಷ್ಟು, ಅಮ್ಮ?'],
+      ['ondu mola eshtu amma', 'ondu mola eshtu', 'mallige eshtu amma', 'mola ge eshtu', 'ಒಂದು ಮೊಳ ಎಷ್ಟು ಅಮ್ಮ', 'ಮಲ್ಲಿಗೆ ಎಷ್ಟು', 'mallige ondu mola eshtu'],
+      'ask_mallige_price', ['Ask how much one molam costs.', '"Mola" = a length of flowers. "Eshtu" = how much.', 'Say: "Ondu mola eshtu, amma?"'],
+      ['ಒಂದು ಮೊಳ ಇಪ್ಪತ್ತು ರೂಪಾಯಿ ಸಾರ್.', 'Ondu mola ippattu rupayi saar.', 'One molam is twenty rupees, sir.'],
+      ['ಹೂವು ಬೇಕಾ ಸಾರ್? ರೇಟ್ ಕೇಳ್ತೀರಾ?', 'Hoovu beka saar? Rate kelteera?', 'Want flowers, sir? Asking the rate?']),
+    S('bargain', ['ಇಪ್ಪತ್ತೇ ಸಾರ್, ಇವತ್ತು ತುಂಬಾ ಫ್ರೆಶ್.', 'Ippatte saar, ivattu tumba fresh.', 'Only twenty, sir, super fresh today.'],
+      'Bargain a little: ask her to reduce the price.', ['Swalpa kadime maadi, amma.', 'ಸ್ವಲ್ಪ ಕಡಿಮೆ ಮಾಡಿ, ಅಮ್ಮ.'],
+      ['swalpa kadime maadi amma', 'swalpa kadime maadi', 'kadime maadi amma', 'hadinaidu rupayi ge kodi', 'ಸ್ವಲ್ಪ ಕಡಿಮೆ ಮಾಡಿ ಅಮ್ಮ', 'ಕಡಿಮೆ ಮಾಡಿ', 'amma kadime maadi please'],
+      'bargain_mallige', ['Ask for a lower price.', 'A little = "swalpa". Reduce = "kadime maadi".', 'Say: "Swalpa kadime maadi, amma."'],
+      ['ಸರಿ ಸಾರ್, ನಿಮಗೆ ಹದಿನೈದಕ್ಕೆ ಕೊಡ್ತೀನಿ.', 'Sari saar, nimage hadinaidakke kodteeni.', 'Okay sir, I will give it to you for fifteen.'],
+      ['ಕಡಿಮೆ ಮಾಡಬೇಕಾ ಸಾರ್? ಹೇಳಿ.', 'Kadime maadbeka saar? Heli.', 'You want me to reduce it, sir? Tell me.']),
+    S('buy', ['ಎಷ್ಟು ಮೊಳ ಕೊಡ್ಲಿ ಸಾರ್?', 'Eshtu mola kodli saar?', 'How many molams shall I give, sir?'],
+      'Buy two molam.', ['Eradu mola kodi.', 'ಎರಡು ಮೊಳ ಕೊಡಿ.'],
+      ['eradu mola kodi', 'eradu mola beku', 'amma eradu mola kodi', 'eradu mola mallige kodi', 'ಎರಡು ಮೊಳ ಕೊಡಿ', 'ಎರಡು ಮೊಳ ಬೇಕು', 'two mola kodi'],
+      'buy_two_molam', ['Say how many molam you want.', 'Two = "eradu".', 'Say: "Eradu mola kodi."'],
+      ['ತಗೊಳ್ಳಿ ಸಾರ್, ಮೂವತ್ತು ರೂಪಾಯಿ. ಒಳ್ಳೆ ಪರಿಮಳ!', 'Tagolli saar, moovattu rupayi. Olle parimala!', 'Here sir, thirty rupees. Lovely fragrance!'],
+      ['ಎಷ್ಟು ಮೊಳ ಅಂದ್ರಿ? ಎರಡಾ, ಮೂರಾ?', 'Eshtu mola andri? Eradaa, mooraa?', 'How many molams did you say? Two or three?']),
+  ],
+  outro: ['ಹೂವು ಮುಡಿಸೋಕೆ ಯಾರಾದ್ರೂ ಇದ್ರೆ ಕರ್ಕೊಂಡು ಬನ್ನಿ.', 'Hoovu mudisoke yaaraadru idre karkondu banni.', 'If there is someone to wear the flowers, bring her along.'],
+  learned: [['ondu mola eshtu?', 'how much for one molam?'], ['swalpa kadime maadi', 'reduce a little'], ['eradu mola kodi', 'give me two molam']],
+  again: ['ಸಾರ್, ಮತ್ತೆ ಹೂವು ಬೇಕಾ?', 'Saar, matte hoovu beka?', 'Sir, want flowers again?'],
+});

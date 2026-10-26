@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('balloonSeller', {
+  name: 'Mahesh', role: 'balloon seller', site: 'Vidhana Soudha steps', diff: 3,
+  voice: { rate: 1.05, pitch: 1.05 },
+  persona: 'Cheerful balloon seller on the Vidhana Soudha steps who haggles for ten rupees and loves children.',
+  goal: 'Ask the price, buy a red balloon, and say it is for a child.',
+  steps: [
+    S('price', ['ಬಲೂನ್ ಬಲೂನ್! ಬಣ್ಣ ಬಣ್ಣದ ಬಲೂನ್ ಬೇಕಾ?', 'Balloon balloon! Banna banna-da balloon beka?', 'Balloons, balloons! Want colourful balloons?'],
+      'Ask the price of a balloon.', ['Ondu balloon eshtu?', 'ಒಂದು ಬಲೂನ್ ಎಷ್ಟು?'],
+      ['ondu balloon eshtu', 'balloon eshtu anna', 'ee balloon eshtu', 'ondu balloon ge eshtu', 'ಒಂದು ಬಲೂನ್ ಎಷ್ಟು', 'ಬಲೂನ್ ಎಷ್ಟು ಅಣ್ಣ', 'balloon eshtu rupayi'],
+      'ask_balloon_price', ['Ask how much one balloon costs.', '"Ondu" = one. "Eshtu" = how much.', 'Say: "Ondu balloon eshtu?"'],
+      ['ಒಂದಕ್ಕೆ ಇಪ್ಪತ್ತು ರೂಪಾಯಿ, ಸಾರ್.', 'Ondakke ippattu rupayi, saar.', 'Twenty rupees each, sir.'],
+      ['ಬಲೂನ್ ರೇಟ್ ಕೇಳ್ತಿದ್ದೀರಾ ಸಾರ್?', 'Balloon rate keltiddira saar?', 'Are you asking the balloon rate, sir?']),
+    S('colour', ['ಯಾವ ಬಣ್ಣ ಬೇಕು? ಕೆಂಪು, ಹಳದಿ, ನೀಲಿ?', 'Yaava banna beku? Kempu, haladi, neeli?', 'Which colour? Red, yellow, blue?'],
+      'Buy a red balloon.', ['Ondu kempu balloon kodi.', 'ಒಂದು ಕೆಂಪು ಬಲೂನ್ ಕೊಡಿ.'],
+      ['ondu kempu balloon kodi', 'kempu balloon kodi', 'kempu balloon beku', 'kempu banna kodi', 'ಒಂದು ಕೆಂಪು ಬಲೂನ್ ಕೊಡಿ', 'ಕೆಂಪು ಬಲೂನ್ ಬೇಕು', 'red balloon kodi anna'],
+      'buy_red_balloon', ['Pick the red one.', 'Red = "kempu".', 'Say: "Ondu kempu balloon kodi."'],
+      ['ಕೆಂಪು ಚೆನ್ನಾಗಿ ಕಾಣುತ್ತೆ! ತಗೊಳ್ಳಿ.', 'Kempu chennagi kaanutte! Tagolli.', 'Red looks lovely! Here you go.'],
+      ['ಯಾವ ಕಲರ್ ಅಂತ ಹೇಳಿ ಸಾರ್.', 'Yaava color anta heli saar.', 'Tell me which colour, sir.']),
+    S('child', ['ಯಾರಿಗೆ ಬಲೂನ್ ಸಾರ್? ನಿಮಗಾ?', 'Yaarige balloon saar? Nimagaa?', 'Who is the balloon for, sir? For you?'],
+      'Say it is for a child.', ['Idu ondu maguvige.', 'ಇದು ಒಂದು ಮಗುವಿಗೆ.'],
+      ['idu maguvige', 'ondu maguvige', 'maguvige anna', 'chikka maguvige', 'ಇದು ಮಗುವಿಗೆ', 'ಒಂದು ಮಗುವಿಗೆ', 'idu child ge'],
+      'say_balloon_for_child', ['Say the balloon is for a small child.', '"Magu" = child. "-ige" = for.', 'Say: "Idu ondu maguvige."'],
+      ['ಓಹೋ, ಮಗು ಖುಷಿಯಾಗುತ್ತೆ! ಒಳ್ಳೇದಾಗ್ಲಿ.', 'Oho, magu khushiyaagutte! Olledaagli.', 'Oh, the child will be so happy! God bless.'],
+      ['ಯಾರಿಗೆ ಅಂತ ಹೇಳಿ ಸಾರ್.', 'Yaarige anta heli saar.', 'Tell me who it is for, sir.']),
+  ],
+  outro: ['ಬಲೂನ್ ಗಟ್ಟಿಯಾಗಿ ಹಿಡ್ಕೊಳ್ಳಿ, ಗಾಳಿಗೆ ಹಾರಿ ಹೋಗುತ್ತೆ!', 'Balloon gattiyaagi hidkolli, gaalige haari hogutte!', 'Hold the balloon tight, the wind will carry it off!'],
+  learned: [['ondu balloon eshtu?', 'how much is one balloon?'], ['kempu balloon kodi', 'give me a red balloon'], ['idu maguvige', 'this is for a child']],
+  again: ['ಸಾರ್, ಇನ್ನೊಂದು ಬಲೂನ್ ಬೇಕಾ?', 'Saar, innondu balloon beka?', 'Sir, want another balloon?'],
+});

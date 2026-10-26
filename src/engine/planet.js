@@ -12,7 +12,7 @@
  *        called once per triangle at its centroid. `hatch` = how strongly the ground is pencil-hatched even
  *        in light (0 = plain fill, 1 = strong), `angle` = stroke direction offset (0 = diagonal).
  *        Paint roads/sand/stone by returning different colour + hatch + angle.
- *   sea: null | { level, color=0x9fd0e6, hatchColor=0x3f78b0, detail=24 }
+ *   sea: null | { level, color=0x9fd0e6, hatchColor=0x3f78b0, detail=24, curls=true (false: no wave-curl doodles), swell=0.0012 }
  *        `level` is radial height of the water surface above `radius` (e.g. -0.2). Land lower than that is under water.
  *
  * planet.object            THREE.Group to add to the scene (land mesh + sea meshes)
@@ -209,6 +209,7 @@ export function createPlanet({
     seaMesh.name = 'sea';
     object.add(seaMesh);
 
+    if (sea.curls !== false) { // sea.curls:false = calm water (lakes): no scrolling wave-curl doodles
     curlTex = waveCurlTexture();
     const curls = new THREE.Mesh(
       new THREE.IcosahedronGeometry(seaRadius + 0.04, sea.detail ?? 24),
@@ -216,6 +217,7 @@ export function createPlanet({
     );
     curls.name = 'sea-curls';
     object.add(curls);
+    }
   }
 
   return {
@@ -224,7 +226,7 @@ export function createPlanet({
     addWalkableSurface(s) { surfaces.push(s); },
     update(dt, t) {
       if (curlTex) { curlTex.offset.x = (t * 0.004) % 1; curlTex.offset.y = Math.sin(t * 0.3) * 0.004; }
-      if (sea) object.getObjectByName('sea').scale.setScalar(1 + Math.sin(t * 0.9) * 0.0012); // gentle swell
+      if (sea) object.getObjectByName('sea').scale.setScalar(1 + Math.sin(t * 0.9) * (sea.swell ?? 0.0012)); // gentle swell
     },
   };
 }

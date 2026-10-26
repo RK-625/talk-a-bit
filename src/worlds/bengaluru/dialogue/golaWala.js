@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('golaWala', {
+  name: 'Basavaraj', role: 'tender coconut (elaneeru) seller', site: 'Lakeside park, tender-coconut stall', diff: 3,
+  voice: { rate: 1.0, pitch: 0.9 },
+  persona: 'Proud tender-coconut seller who chops a coconut with a machete and boasts about the sweet water.',
+  goal: 'Order a tender coconut, ask for the malai inside, and pay 50 rupees.',
+  steps: [
+    S('order', ['ಎಳನೀರು ಎಳನೀರು! ತುಂಬಾ ಸಿಹಿ, ಬನ್ನಿ!', 'Elaneeru elaneeru! Tumba sihi, banni!', 'Tender coconut! Very sweet, come!'],
+      'Order one tender coconut.', ['Ondu elaneeru kodi.', 'ಒಂದು ಎಳನೀರು ಕೊಡಿ.'],
+      ['ondu elaneeru kodi', 'anna ondu elaneeru kodi', 'ondu elaneeru beku', 'elaneeru kodi anna', 'ಒಂದು ಎಳನೀರು ಕೊಡಿ', 'ಒಂದು ಎಳನೀರು ಬೇಕು', 'one elaneeru kodi'],
+      'order_tender_coconut', ['Ask for one tender coconut.', 'Tender coconut = "elaneeru".', 'Say: "Ondu elaneeru kodi."'],
+      ['ಒಂದು ಏಟು, ಮೇಲೆ ಕಟ್! ಸ್ಟ್ರಾ ತಗೊಳ್ಳಿ.', 'Ondu etu, mele cut! Straw tagolli.', 'One chop, the top is cut! Take a straw.'],
+      ['ಏನು ಬೇಕು ಅಂದ್ರಿ? ಕತ್ತಿ ಸದ್ದಾಯ್ತು.', 'Enu beku andri? Katti saddaytu.', 'What did you say you want? The knife was noisy.']),
+    S('malai', ['ನೀರು ಕುಡಿದ ಮೇಲೆ ಏನು ಮಾಡ್ಲಿ?', 'Neeru kudida mele enu maadli?', 'What shall I do once you finish the water?'],
+      'Ask him to scoop out the malai inside.', ['Olagina malai kodi.', 'ಒಳಗಿನ ಮಲೈ ಕೊಡಿ.'],
+      ['olagina malai kodi', 'malai kodi anna', 'malai tegedu kodi', 'olage malai beku', 'ಒಳಗಿನ ಮಲೈ ಕೊಡಿ', 'ಮಲೈ ತೆಗೆದು ಕೊಡಿ', 'anna malai kodi'],
+      'ask_for_malai', ['Ask for the soft coconut inside.', '"Olagina" = of the inside. "Malai" = soft coconut.', 'Say: "Olagina malai kodi."'],
+      ['ಸರಿ, ಚಮಚದಲ್ಲಿ ಕೆರೆದು ಕೊಡ್ತೀನಿ.', 'Sari, chamachadalli keredu kodteeni.', 'Okay, I will scoop it out with a spoon.'],
+      ['ಮಲೈ ಬೇಕಾ ಬೇಡವಾ ಹೇಳಿ.', 'Malai beka bedava heli.', 'Tell me, do you want malai or not.']),
+    S('pay', ['ನಲವತ್ತು ರೂಪಾಯಿ ಸಾರ್. ಚೇಂಜ್ ಇದೆ.', 'Nalavattu rupayi saar. Change ide.', 'Forty rupees sir. I have change.'],
+      'Pay with 50 rupees.', ['Tagolli, aivattu rupayi.', 'ತಗೊಳ್ಳಿ, ಐವತ್ತು ರೂಪಾಯಿ.'],
+      ['tagolli aivattu rupayi', 'aivattu rupayi', 'idi aivattu rupayi anna', 'aivattu kodteeni', 'ತಗೊಳ್ಳಿ ಐವತ್ತು ರೂಪಾಯಿ', 'ಐವತ್ತು ರೂಪಾಯಿ', 'here aivattu rupayi'],
+      'pay_fifty_rupees', ['Hand him a 50-rupee note.', '50 = "aivattu".', 'Say: "Tagolli, aivattu rupayi."'],
+      ['ಇಲ್ಕೊಳ್ಳಿ ಹತ್ತು ರೂಪಾಯಿ ಚಿಲ್ಲರೆ. ಧನ್ಯವಾದ!', 'Ilkolli hattu rupayi chillare. Dhanyavaada!', 'Here is ten rupees change. Thank you!'],
+      ['ದುಡ್ಡು ಕೊಡ್ತೀರಾ ಸಾರ್? ಎಷ್ಟು ಕೊಡ್ತೀರಿ?', 'Duddu kodteera saar? Eshtu kodteeri?', 'Will you pay, sir? How much are you giving?']),
+  ],
+  outro: ['ಎಳನೀರು ಕುಡಿದು ಹೋದ್ರೆ ದಿನ ಪೂರ್ತಿ ಫ್ರೆಶ್!', 'Elaneeru kudidu hodre dina poorti fresh!', 'Drink tender coconut and stay fresh all day!'],
+  learned: [['ondu elaneeru kodi', 'give me one tender coconut'], ['malai kodi', 'give me the malai'], ['aivattu rupayi', 'fifty rupees']],
+  again: ['ಸಾರ್, ಇನ್ನೊಂದು ಎಳನೀರು ಕಟ್ ಮಾಡ್ಲಾ?', 'Saar, innondu elaneeru cut maadla?', 'Sir, shall I chop another tender coconut?'],
+});

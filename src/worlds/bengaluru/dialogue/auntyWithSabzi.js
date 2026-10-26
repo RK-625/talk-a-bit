@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('auntyWithSabzi', {
+  name: 'Lakshmi Aunty', role: 'aunty with a vegetable bag', site: 'Vidhana Soudha Road footpath (walker)', diff: 2,
+  voice: { rate: 0.95, pitch: 1.15 },
+  persona: 'Warm, chatty aunty walking to the market, humming. Loves giving advice to a newcomer and calls Rohan "maga".',
+  goal: 'Offer to carry her bag, tell her your name, and say where you are from.',
+  steps: [
+    S('bag', ['ಅಯ್ಯೋ, ಈ ಚೀಲ ತುಂಬಾ ಭಾರ ಆಯ್ತು.', 'Ayyo, ee cheela tumba bhaara aytu.', 'Oh, this bag has become so heavy.'],
+      'Offer to carry her bag.', ['Aunty, naanu hidkollala?', 'ಆಂಟಿ, ನಾನು ಹಿಡ್ಕೊಳ್ಳಲಾ?'],
+      ['aunty naanu hidkollala', 'naanu hidkollala aunty', 'naanu hidiyala', 'cheela kodi aunty', 'ಆಂಟಿ ನಾನು ಹಿಡ್ಕೊಳ್ಳಲಾ', 'ಚೀಲ ಕೊಡಿ ಆಂಟಿ', 'aunty bag kodi naanu hidkotini'],
+      'offer_to_carry_bag', ['Offer to hold the bag for her.', '"Naanu" = I. "hidkollala" = shall I hold?', 'Say: "Aunty, naanu hidkollala?"'],
+      ['ಅಯ್ಯೋ ಮಗ, ಎಷ್ಟು ಒಳ್ಳೆಯವನು ನೀನು!', 'Ayyo maga, eshtu olleyavanu neenu!', 'Oh child, how kind you are!'],
+      ['ಏನಂದೆ ಮಗ? ನನಗೆ ಸರಿಯಾಗಿ ಕೇಳಿಸಲಿಲ್ಲ.', 'Enande maga? Nanage sariyagi kelisalilla.', 'What did you say, child? I could not hear well.']),
+    S('name', ['ನಿನ್ನ ಹೆಸರೇನು ಮಗ?', 'Ninna hesarenu maga?', 'What is your name, child?'],
+      'Tell her your name is Rohan.', ['Nanna hesaru Rohan.', 'ನನ್ನ ಹೆಸರು ರೋಹನ್.'],
+      ['nanna hesaru rohan', 'hesaru rohan', 'naanu rohan', 'nanna hesaru Rohan aunty', 'ನನ್ನ ಹೆಸರು ರೋಹನ್', 'ನಾನು ರೋಹನ್', 'my hesaru Rohan'],
+      'tell_name', ['Say your name.', '"Nanna hesaru" = my name is.', 'Say: "Nanna hesaru Rohan."'],
+      ['ರೋಹನ್! ಒಳ್ಳೆ ಹೆಸರು. ಬಾ, ನಡಿ.', 'Rohan! Olle hesaru. Baa, nadi.', 'Rohan! A nice name. Come, walk.'],
+      ['ಹೆಸರು ಹೇಳು ಮಗ, ನಾಚಿಕೆ ಯಾಕೆ?', 'Hesaru helu maga, naachike yaake?', 'Tell me your name, child, why shy?']),
+    S('from', ['ಎಲ್ಲಿಂದ ಬಂದಿದ್ದೀಯ? ನಮ್ಮೂರಿನವನಲ್ಲ ಅನ್ನಿಸುತ್ತೆ.', 'Elliinda bandiddiya? Nammoorinavanalla annisutte.', 'Where are you from? You do not seem local.'],
+      'Say you are from Delhi.', ['Naanu Delhi inda bande.', 'ನಾನು ದೆಹಲಿಯಿಂದ ಬಂದೆ.'],
+      ['naanu delhi inda bande', 'delhi inda bande', 'naanu delhi inda bandidini', 'delhi inda aunty', 'ನಾನು ದೆಹಲಿಯಿಂದ ಬಂದೆ', 'ದೆಹಲಿಯಿಂದ ಬಂದೆ', 'naanu Delhi inda bandiddini'],
+      'say_from_delhi', ['Say which city you came from.', '"Inda" = from. Delhi = "Delhi".', 'Say: "Naanu Delhi inda bande."'],
+      ['ದೆಹಲಿ! ತುಂಬಾ ದೂರ. ಕನ್ನಡ ಕಲಿತಿದ್ದೀಯಾ ಚೆನ್ನಾಗಿದೆ.', 'Delhi! Tumba doora. Kannada kalitiddiya chennagide.', 'Delhi! So far. It is lovely that you are learning Kannada.'],
+      ['ಯಾವ ಊರು ಮಗ? ಇನ್ನೊಮ್ಮೆ ಹೇಳು.', 'Yava ooru maga? Innomme helu.', 'Which town, child? Tell me again.']),
+  ],
+  outro: ['ದೇವರು ಒಳ್ಳೇದು ಮಾಡ್ಲಿ ಮಗ. ಇನ್ನು ನಾನು ಹೋಗ್ತೀನಿ.', 'Devaru olledu maadli maga. Innu naanu hogteeni.', 'God bless you, child. I will go now.'],
+  learned: [['naanu hidkollala?', 'shall I hold it?'], ['nanna hesaru Rohan', 'my name is Rohan'], ['naanu Delhi inda bande', 'I came from Delhi']],
+  again: ['ಅರೆ ಮಗ, ಮತ್ತೆ ಸಿಕ್ಕಿದ್ಯಾ! ಊಟ ಆಯ್ತಾ?', 'Are maga, matte sikkidya! Oota aytha?', 'Oh child, we meet again! Had your meal?'],
+});

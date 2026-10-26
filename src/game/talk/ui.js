@@ -1,7 +1,7 @@
 /**
  * game/talk/ui.js: the conversation overlay (HTML/CSS, ballpoint-on-paper style, no image files).
  *   createTalkUI() -> {
- *     showBubble(x, y, label) / hideBubble()            the "बात करो / Talk [E]" prompt over an NPC (screen px)
+ *     showBubble(x, y, { difficulty, tutorial, lang }) / hideBubble()   the "बात करो / Talk [E]" prompt (lang 'kn': "ಮಾತಾಡಿ / Talk [E]") over an NPC (screen px)
  *     showSpeech(x, y, line) / hideSpeech()             a short spoken greeting bubble
  *     openCard({ name, lang }) / closeCard()            the dialogue card
  *     setNpc(line, { react }) , setStep({ instruction, suggest, attempt, max }) , setHint(text, n) , setBusy(b)
@@ -11,8 +11,9 @@
  *   }
  *   Lines are { text (Devanagari or English), roman, en }.
  */
-const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&display=swap';
+const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&display=swap';
 const INK = '#2b2a33';
+const KN_RE = /[\u0C80-\u0CFF]/;
 
 const CSS = `
 #talk-ui{position:fixed;inset:0;pointer-events:none;z-index:20;font-family:'Patrick Hand','Bradley Hand','Segoe Print','Comic Sans MS',cursive;color:${INK}}
@@ -22,6 +23,11 @@ const CSS = `
 .t-paper>.in{position:relative}
 .t-bubble{transform:translate(-50%,-100%);padding:7px 14px 8px;white-space:nowrap;font-size:20px;display:none;animation:t-bob 1.6s ease-in-out infinite}
 .t-bubble .dv{font-family:'Tiro Devanagari Hindi','Kalam',serif;font-size:19px}
+#talk-ui .kn{font-family:'Baloo Tamma 2','Noto Sans Kannada','Nirmala UI',sans-serif !important}
+.t-npc .dv.kn{font-size:26px;line-height:1.5}
+.t-speech .dv.kn{font-size:19px;line-height:1.45}
+.t-sug .dv.kn{font-size:17px}
+.t-bubble .dv.kn{font-size:18px}
 .t-bubble kbd{font-family:inherit;border:2px solid ${INK};border-radius:6px;padding:0 6px;background:#fff7dd;margin-left:2px}
 @keyframes t-bob{0%,100%{margin-top:0}50%{margin-top:-4px}}
 .t-speech{transform:translate(-50%,-100%);padding:8px 14px;display:none;max-width:260px;text-align:center}
@@ -53,7 +59,7 @@ const CSS = `
 .t-btn{font-family:inherit;font-size:15px;background:#fff7dd;border:2px solid ${INK};border-radius:8px;padding:1px 9px;cursor:pointer;color:${INK}}
 .t-btn:hover{background:#ffe9a8}
 .t-row{display:flex;align-items:center;gap:10px;margin-top:10px}
-.t-input{flex:1;font-family:'Patrick Hand','Kalam',cursive;font-size:24px;color:${INK};border:none;outline:none;padding:5px 8px 3px;background:repeating-linear-gradient(transparent 0 30px,rgba(80,120,190,.55) 30px 32px),#fffdf3;border-bottom:3px solid ${INK};border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px rgba(43,42,51,.1)}
+.t-input{flex:1;font-family:'Patrick Hand','Kalam','Baloo Tamma 2','Noto Sans Kannada',cursive;font-size:24px;color:${INK};border:none;outline:none;padding:5px 8px 3px;background:repeating-linear-gradient(transparent 0 30px,rgba(80,120,190,.55) 30px 32px),#fffdf3;border-bottom:3px solid ${INK};border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px rgba(43,42,51,.1)}
 .t-input:disabled{opacity:.55}
 .t-input::placeholder{opacity:.45}
 .t-go{font-size:20px;padding:3px 14px}
@@ -109,6 +115,9 @@ function wobblyRect(w, h, seed, amp = 2.4, step = 34) {
   return d + ' Z';
 }
 
+/** escaped text, wrapped so Kannada script gets the Kannada font */
+const sp = (s) => (KN_RE.test(s ?? '') ? `<span class="kn">${esc(s)}</span>` : esc(s));
+const setText = (el, s) => { el.textContent = s ?? ''; el.classList.toggle('kn', KN_RE.test(s ?? '')); };
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 export function createTalkUI() {
@@ -159,10 +168,11 @@ export function createTalkUI() {
   let suggestShown = true, hasSuggest = false;
 
   function setLine(el, line, extraCls) {
-    if (!line) { el.querySelector('.dv').textContent = ''; el.querySelector('.ro').textContent = ''; el.querySelector('.en').textContent = ''; return; }
-    el.querySelector('.dv').textContent = line.text ?? '';
-    el.querySelector('.ro').textContent = line.roman ?? '';
-    el.querySelector('.en').textContent = line.en ?? '';
+    if (!line) { setText(el.querySelector('.dv'), ''); el.querySelector('.ro').textContent = ''; el.querySelector('.en').textContent = ''; return; }
+    setText(el.querySelector('.dv'), line.text);
+    // English NPCs: text, roman and en are the same sentence, show it once
+    el.querySelector('.ro').textContent = line.roman && line.roman !== line.text ? line.roman : '';
+    el.querySelector('.en').textContent = line.en && line.en !== line.text ? line.en : '';
   }
   const position = (el, x, y) => { el.style.left = x + 'px'; el.style.top = y + 'px'; };
   const syncSuggest = () => { sug.classList.toggle('hidden', !suggestShown); tog.textContent = suggestShown ? 'hide' : 'show'; };
@@ -178,11 +188,11 @@ export function createTalkUI() {
     /** { difficulty?: 1..5, tutorial?: bool } adds the difficulty dots (and a "start here" star) to the prompt */
     showBubble(x, y, o = {}) {
       position(bubble, x, y);
-      const key = (o.difficulty ?? 0) + '|' + (o.tutorial ? 1 : 0);
+      const key = (o.difficulty ?? 0) + '|' + (o.tutorial ? 1 : 0) + '|' + (o.lang ?? '');
       if (bubble._key !== key) {
         bubble._key = key;
         const dots = o.difficulty ? `<span class="dots" title="difficulty ${o.difficulty}/5">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= o.difficulty ? 'on' : ''}"></i>`).join('')}</span>` : '';
-        bubble.querySelector('.in').innerHTML = `${o.tutorial ? '<span class="star">★ start here</span>' : ''}<span class="dv">बात करो</span> / Talk <kbd>E</kbd>${dots}`;
+        bubble.querySelector('.in').innerHTML = `${o.tutorial ? '<span class="star">★ start here</span>' : ''}${o.lang === 'kn' ? '<span class="dv kn">ಮಾತಾಡಿ</span>' : '<span class="dv">बात करो</span>'} / Talk <kbd>E</kbd>${dots}`;
       }
       bubble.style.display = 'block'; draw(bubble);
     },
@@ -199,7 +209,7 @@ export function createTalkUI() {
       setTimeout(() => { guide.style.display = 'none'; }, 1300);
     },
     hideBubble() { bubble.style.display = 'none'; },
-    showSpeech(x, y, line) { speech.querySelector('.dv').textContent = line.text ?? ''; speech.querySelector('.ro').textContent = line.roman ?? ''; position(speech, x, y); speech.style.display = 'block'; draw(speech); },
+    showSpeech(x, y, line) { setText(speech.querySelector('.dv'), line.text); speech.querySelector('.ro').textContent = line.roman ?? ''; position(speech, x, y); speech.style.display = 'block'; draw(speech); },
     hideSpeech() { speech.style.display = 'none'; },
     openCard({ name }) { q('.nm').textContent = name; card.classList.add('show'); card.classList.remove('ok', 'shake', 'speaking', 'thinking'); q('.t-reason').textContent = ''; q('.t-reward-slot').innerHTML = ''; hot.classList.add('up'); requestAnimationFrame(() => draw(card)); },
     closeCard() { card.classList.remove('show', 'ok', 'speaking', 'thinking'); input.blur(); input.value = ''; q('.t-reward-slot').innerHTML = ''; hot.classList.remove('up'); },
@@ -209,14 +219,14 @@ export function createTalkUI() {
     setStep({ instruction, suggest }) {
       q('.t-instr').innerHTML = instruction ? `<b>Your turn:</b> ${esc(instruction)}` : '';
       hasSuggest = !!suggest; sug.style.display = hasSuggest ? '' : 'none';
-      if (suggest) { q('.ro', sug).textContent = suggest.roman ?? ''; q('.dv', sug).textContent = suggest.text ?? ''; }
+      if (suggest) { q('.ro', sug).textContent = suggest.roman ?? ''; setText(q('.dv', sug), suggest.text); }
       card.classList.remove('ok', 'thinking'); api.setReason(null); api.setHint(null, 0, 3); input.value = ''; syncSuggest();
       requestAnimationFrame(() => draw(card));
     },
     /** hint text (or null) and how many of `max` tries were used */
     setHint(text, used = 0, max = 3) {
       const pips = Array.from({ length: max }, (_, i) => `<span class="pip${i < used ? ' on' : ''}"></span>`).join('');
-      q('.t-hint').innerHTML = text ? `<span class="lv">${pips}</span>💡 ${esc(text)}` : (used ? `<span class="lv">${pips}</span>` : '');
+      q('.t-hint').innerHTML = text ? `<span class="lv">${pips}</span>💡 ${sp(text)}` : (used ? `<span class="lv">${pips}</span>` : '');
       requestAnimationFrame(() => draw(card));
     },
     /** the "…" scribble while the classifier thinks (input disabled via setBusy) */
@@ -226,7 +236,7 @@ export function createTalkUI() {
     flashValid() { card.classList.add('ok'); },
     flashRetry() { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); },
     showReward({ learned = [], title = 'Learned' }) {
-      q('.t-reward-slot').innerHTML = `<div class="t-reward"><h4>${esc(title)} ✎ saved to your phrasebook</h4><ul style="margin:0;padding:0">${learned.map((l) => `<li><b>${esc(l.roman)}</b> = ${esc(l.en)}${l.text ? ` <small>${esc(l.text)}</small>` : ''}</li>`).join('')}</ul></div>`;
+      q('.t-reward-slot').innerHTML = `<div class="t-reward"><h4>${esc(title)} ✎ saved to your phrasebook</h4><ul style="margin:0;padding:0">${learned.map((l) => `<li><b>${esc(l.roman)}</b> = ${esc(l.en)}${l.text ? ` <small>${sp(l.text)}</small>` : ''}</li>`).join('')}</ul></div>`;
       q('.t-instr').innerHTML = 'Press <b>Enter</b> or <b>E</b> to finish.'; sug.style.display = 'none'; q('.t-row').style.display = 'none';
       requestAnimationFrame(() => draw(card));
     },
@@ -244,7 +254,7 @@ export function createTalkUI() {
       if (open) {
         const groups = new Map();
         for (const e of entries) { if (!groups.has(e.npc)) groups.set(e.npc, []); groups.get(e.npc).push(e); }
-        book.querySelector('.body').innerHTML = entries.length ? [...groups].map(([n, es]) => `<div class="grp">${esc(n)}</div><ul style="margin:0;padding:0">${es.map((e) => `<li><b>${esc(e.roman)}</b><small>${esc(e.en)}${e.text ? ' · ' + esc(e.text) : ''}</small></li>`).join('')}</ul>`).join('') : `<div class="empty">Nothing yet. Finish a conversation to collect phrases.</div>`;
+        book.querySelector('.body').innerHTML = entries.length ? [...groups].map(([n, es]) => `<div class="grp">${esc(n)}</div><ul style="margin:0;padding:0">${es.map((e) => `<li><b>${esc(e.roman)}</b><small>${esc(e.en)}${e.text ? ' · ' + sp(e.text) : ''}</small></li>`).join('')}</ul>`).join('') : `<div class="empty">Nothing yet. Finish a conversation to collect phrases.</div>`;
         requestAnimationFrame(() => draw(book));
       }
       return open;

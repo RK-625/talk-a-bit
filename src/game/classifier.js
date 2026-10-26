@@ -8,7 +8,7 @@
  *   Modes (?classifier=mock|jev). Default: jev when the dev server reports an API key, otherwise mock.
  *   'jev' POSTs to /api/classify (Vite dev middleware -> server/jev.js: the key stays server side). Timeout 8 s, any error:
  *   console warning and fall back to the mock, so the player is never blocked. One dev-console line per verdict ([jev] ...).
- *   reasonLine(reason) -> short kind English line for the UI ('language' | 'extra' | 'rude' | 'partial').
+ *   reasonLine(reason, lang?) -> short kind English line for the UI ('language' | 'extra' | 'rude' | 'partial').
  *   'mock': normalised fuzzy matching against accept + suggest (tolerant of romanised/Devanagari spelling, punctuation,
  *   Whisper-style casing and filler).
  */
@@ -18,13 +18,13 @@ const TIMEOUT_MS = 8000;
 const THRESHOLD = 0.55; // Dice score on fuzzy-matched tokens
 
 /** local classifier */
-export function mockClassify({ step, reply }) {
-  const r = tokens(reply);
+export function mockClassify({ step, reply, lang }) {
+  const r = tokens(reply, lang);
   if (!r.length) return { verdict: 'retry', confidence: 0, reason: 'empty', source: 'mock' };
   const cands = [...(step.accept ?? []), step.suggest?.roman, step.suggest?.text].filter(Boolean);
   let best = 0, bestC = null;
   for (const c of cands) {
-    const t = tokens(c);
+    const t = tokens(c, lang);
     if (!t.length) continue;
     const used = new Set(); let m = 0;
     for (const w of r) { const j = t.findIndex((x, i) => !used.has(i) && tokenMatch(w, x)); if (j >= 0) { used.add(j); m++; } }
@@ -68,7 +68,8 @@ function logVerdict(j) {
 }
 
 const REASON_LINES = { language: 'Try it in Hindi.', extra: 'Just the answer, nothing extra.', rude: 'Arre, tameez se!', partial: 'Almost! Say the whole thing.' };
-export const reasonLine = (reason) => REASON_LINES[reason] ?? null;
+const REASON_LINES_KN = { ...REASON_LINES, language: 'Try it in Kannada.', rude: 'Please be polite!' };
+export const reasonLine = (reason, lang) => (lang === 'kn' ? REASON_LINES_KN : REASON_LINES)[reason] ?? null;
 
 const requested = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('classifier') : null;
 const abortErr = () => { const e = new Error('aborted'); e.name = 'AbortError'; return e; };

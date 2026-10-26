@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('bollywoodHopeful', {
+  name: 'Sandeep', role: 'Sandalwood (Kannada film) fan', site: 'Darshini square, Kannada film poster wall', diff: 3,
+  voice: { rate: 1.1, pitch: 1.1 },
+  persona: 'Dramatic young man who strikes hero poses before the film posters, quotes made-up movie dialogues and dreams of acting.',
+  goal: 'Compliment his pose, ask which film he wants to act in, and wish him luck.',
+  steps: [
+    S('pose', ['ಹೇ! ಹೀರೋ ಪೋಸ್ ಹೇಗಿದೆ? ಫಸ್ಟ್ ಕ್ಲಾಸ್ ಅಲ್ವಾ?', 'He! Hero pose hegide? First class alva?', 'Hey! How is my hero pose? First class, right?'],
+      'Compliment his pose.', ['Nimma pose super ide!', 'ನಿಮ್ಮ ಪೋಸ್ ಸೂಪರ್ ಇದೆ!'],
+      ['nimma pose super ide', 'pose tumba chennagide', 'super pose anna', 'hero thara ide', 'ನಿಮ್ಮ ಪೋಸ್ ಸೂಪರ್ ಇದೆ', 'ಪೋಸ್ ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ', 'nimma pose chennagide'],
+      'compliment_pose', ['Say something nice about his pose.', '"Super ide" = it is super.', 'Say: "Nimma pose super ide!"'],
+      ['ಥ್ಯಾಂಕ್ಸ್! ಮುಂದಿನ ಪೋಸ್ ಇನ್ನೂ ಜೋರು ನೋಡಿ!', 'Thanks! Mundina pose innu joru nodi!', 'Thanks! The next pose is even louder, see!'],
+      ['ಪೋಸ್ ಹೇಗಿದೆ ಅಂತ ಹೇಳಿ ಬೇಗ!', 'Pose hegide anta heli bega!', 'Tell me quickly how the pose is!']),
+    S('film', ['ನಾನು ಒಂದು ಸಿನಿಮಾದಲ್ಲಿ ನಟಿಸಬೇಕು ಅಂತ ಕನಸು.', 'Naanu ondu cinema-dalli natisabeku anta kanasu.', 'I dream of acting in a film.'],
+      'Ask which film he wants to act in.', ['Yaava cinema alli?', 'ಯಾವ ಸಿನಿಮಾದಲ್ಲಿ?'],
+      ['yaava cinema alli', 'yaava cinema alli natisabeku', 'yaava picture alli', 'yaava film anna', 'ಯಾವ ಸಿನಿಮಾದಲ್ಲಿ', 'ಯಾವ ಸಿನಿಮಾ ಅಣ್ಣ', 'which cinema alli anna'],
+      'ask_which_film', ['Ask which film he means.', '"Yaava" = which. "Cinema" = film.', 'Say: "Yaava cinema alli?"'],
+      ['ಮೊದಲ ದಿನ ಮೊದಲ ಶೋ ನೋಡಬೇಕು, ಆಮೇಲೆ ನಾನೇ ಹೀರೋ!', 'Modala dina modala show nodabeku, aamele naane hero!', 'First day first show, and then I am the hero!'],
+      ['ಯಾವ ಸಿನಿಮಾ ಅಂತ ಕೇಳಿ ನೋಡಿ.', 'Yaava cinema anta keli nodi.', 'Try asking which film.']),
+    S('luck', ['ನನ್ನ ಡೈಲಾಗ್ ಕೇಳಿ: "ಬಂದೆ, ನೋಡಿದೆ, ಗೆದ್ದೆ!"', 'Nanna dialogue keli: "Bande, nodide, gedde!"', 'Hear my dialogue: "I came, I saw, I won!"'],
+      'Wish him good luck.', ['Shubhaashayagalu, all the best!', 'ಶುಭಾಶಯಗಳು, ಆಲ್ ದ ಬೆಸ್ಟ್!'],
+      ['shubhaashayagalu all the best', 'all the best anna', 'olleyadaagli anna', 'olleyadaagali', 'ಶುಭಾಶಯಗಳು', 'ಒಳ್ಳೆಯದಾಗಲಿ ಅಣ್ಣ', 'ಆಲ್ ದ ಬೆಸ್ಟ್ ಅಣ್ಣ'],
+      'wish_luck', ['Wish him good luck.', '"Olleyadaagali" = may good happen.', 'Say: "Olleyadaagali anna!"'],
+      ['ಸೂಪರ್! ನಿಮ್ಮ ಹೆಸರು ನನ್ನ ಮೊದಲ ಪೋಸ್ಟರ್‌ನಲ್ಲಿ ಹಾಕ್ತೀನಿ!', 'Super! Nimma hesaru nanna modala poster-nalli haakteeni!', 'Super! I will put your name on my first poster!'],
+      ['ಏನೂ ಹೇಳಲ್ವಾ? ಒಂದು ವಿಶ್ ಮಾಡಿ ಅಣ್ಣ.', 'Enu helalva? Ondu wish maadi anna.', 'Nothing to say? Make a wish for me, brother.']),
+  ],
+  outro: ['ಕ್ಯಾಮೆರಾ, ಆಕ್ಷನ್! ಬೈ ರೋಹನ್ ಅಣ್ಣ!', 'Camera, action! Bye Rohan anna!', 'Camera, action! Bye Rohan brother!'],
+  learned: [['nimma pose super ide', 'your pose is super'], ['yaava cinema alli?', 'in which film?'], ['olleyadaagali', 'good luck']],
+  again: ['ಅಣ್ಣ, ನನ್ನ ಫೋಟೋಶೂಟ್ ನೋಡ್ತೀರಾ?', 'Anna, nanna photoshoot nodteera?', 'Brother, will you see my photoshoot?'],
+});

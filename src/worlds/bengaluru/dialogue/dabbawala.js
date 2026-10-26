@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('dabbawala', {
+  name: 'Karthik', role: 'food-delivery rider', site: 'Vidhana Soudha auto stand, delivery scooter', diff: 3,
+  voice: { rate: 1.1, pitch: 0.95 },
+  persona: 'Always-late food-delivery rider in an orange T-shirt who talks about traffic and addresses, glad that someone asks about his work.',
+  goal: 'Ask permission to ask a question, ask how he finds addresses in traffic, and praise his work.',
+  steps: [
+    S('permission', ['ಸಾರ್, ಆರ್ಡರ್ ಲೇಟ್ ಆಯ್ತು, ಬೇಗ ಹೇಳಿ.', 'Saar, order late aaytu, bega heli.', 'Sir, the order is late, tell me quickly.'],
+      'Politely ask if you can ask a question.', ['Ondu prashne kella?', 'ಒಂದು ಪ್ರಶ್ನೆ ಕೇಳ್ಲಾ?'],
+      ['ondu prashne kella', 'ondu prashne kelbahuda', 'swalpa kelbeku', 'ondu question kella', 'ಒಂದು ಪ್ರಶ್ನೆ ಕೇಳ್ಲಾ', 'ಒಂದು ಪ್ರಶ್ನೆ ಕೇಳಬಹುದಾ', 'anna ondu question kella'],
+      'ask_permission_question', ['Ask if you may ask something.', '"Prashne" = question. "Kella" = may I ask?', 'Say: "Ondu prashne kella?"'],
+      ['ಹೂಂ ಕೇಳಿ, ಎರಡೇ ನಿಮಿಷ ಟೈಮ್ ಇದೆ.', 'Hoon keli, erade nimisha time ide.', 'Yes ask, I only have two minutes.'],
+      ['ಏನಾದ್ರೂ ಕೇಳ್ಬೇಕಾ ಸಾರ್? ಬೇಗ ಹೇಳಿ.', 'Enaadru kelbeka saar? Bega heli.', 'Do you want to ask something, sir? Tell me quickly.']),
+    S('how', ['ಏನು ಕೇಳ್ಬೇಕು? ಲೊಕೇಶನ್ ಬೇಕಾ?', 'Enu kelbeku? Location beka?', 'What do you want to ask? Do you need a location?'],
+      'Ask how he reaches addresses quickly in traffic.', ['Traffic alli hege bega talupteera?', 'ಟ್ರಾಫಿಕ್‌ನಲ್ಲಿ ಹೇಗೆ ಬೇಗ ತಲುಪ್ತೀರಾ?'],
+      ['traffic alli hege bega talupteera', 'hege bega talupteera', 'traffic alli hege hogteera', 'address hege hudukteera', 'ಟ್ರಾಫಿಕ್‌ನಲ್ಲಿ ಹೇಗೆ ಬೇಗ ತಲುಪ್ತೀರಾ', 'ಹೇಗೆ ಬೇಗ ತಲುಪ್ತೀರಾ', 'traffic alli hege bega reach aagteera'],
+      'ask_how_he_delivers_fast', ['Ask how he gets there so fast.', '"Hege" = how. "Bega" = fast. "Talupteera" = do you reach.', 'Say: "Traffic alli hege bega talupteera?"'],
+      ['ಗಲ್ಲಿ ಗಲ್ಲಿ ಗೊತ್ತು ಸಾರ್, ಗೂಗಲ್ ಮ್ಯಾಪ್ ಸಹಾಯ ಮಾಡುತ್ತೆ.', 'Galli galli gottu saar, Google map sahaya maaduthe.', 'I know every lane, sir, and the map helps.'],
+      ['ಹೇಗೆ ಅಂತ ಕೇಳಿದ್ರಾ ಸಾರ್? ಇನ್ನೊಮ್ಮೆ ಕೇಳಿ.', 'Hege anta kelidra saar? Innomme keli.', 'Did you ask how, sir? Ask once more.']),
+    S('praise', ['ದಿನಕ್ಕೆ ಮೂವತ್ತು ಡೆಲಿವರಿ ಮಾಡ್ತೀನಿ ಸಾರ್.', 'Dinakke moovattu delivery maadteeni saar.', 'I do thirty deliveries a day, sir.'],
+      'Praise his work.', ['Nimma kelasa tumba chennagide.', 'ನಿಮ್ಮ ಕೆಲಸ ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ.'],
+      ['nimma kelasa tumba chennagide', 'tumba chennagide nimma kelasa', 'nimma kelasa super', 'tumba olle kelasa', 'ನಿಮ್ಮ ಕೆಲಸ ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ', 'ತುಂಬಾ ಒಳ್ಳೆ ಕೆಲಸ', 'nimma work tumba chennagide'],
+      'praise_delivery_work', ['Say something kind about his work.', '"Nimma kelasa" = your work. "Chennagide" = is good.', 'Say: "Nimma kelasa tumba chennagide."'],
+      ['ಥ್ಯಾಂಕ್ಸ್ ಸಾರ್! ಇವತ್ತು ದಿನ ಒಳ್ಳೆದಾಯ್ತು.', 'Thanks saar! Ivattu dina olledaytu.', 'Thanks sir! My day just got better.'],
+      ['ಏನಂದ್ರಿ ಸಾರ್? ಹೆಲ್ಮೆಟ್ ಇತ್ತು, ಕೇಳಿಸಲಿಲ್ಲ.', 'Enandri saar? Helmet ittu, kelisalilla.', 'What did you say, sir? I had my helmet on.']),
+  ],
+  outro: ['ಇದೋ ಆರ್ಡರ್ ಬಂತು, ನಾನು ಹೋಗ್ತೀನಿ! ಬೈ ರೋಹನ್ ಸಾರ್.', 'Ido order bantu, naanu hogteeni! Bye Rohan saar.', 'My order is here, I am off! Bye Rohan sir.'],
+  learned: [['ondu prashne kella?', 'may I ask a question?'], ['hege bega talupteera?', 'how do you reach so fast?'], ['nimma kelasa chennagide', 'your work is good']],
+  again: ['ಸಾರ್, ಈಗ ತುಂಬಾ ಬ್ಯುಸಿ. ಆಮೇಲೆ ಮಾತಾಡೋಣ.', 'Saar, iga tumba busy. Aamele maataadona.', 'Sir, very busy now. Let us talk later.'],
+});

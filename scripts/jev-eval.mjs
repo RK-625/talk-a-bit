@@ -1,13 +1,42 @@
 // npm run jev:eval : runs a fixed test set through server/jev.js against the real Jev API and prints a table.
 // Needs JEV_API_KEY in the project-root .env. Costs a fraction of a cent. Use it to tune the thresholds in server/jev.js.
 import fs from 'node:fs';
-import dialogues from '../src/worlds/mumbai/dialogue/index.js';
+import mumbai from '../src/worlds/mumbai/dialogue/index.js';
 import { createJev, summarize } from '../server/jev.js';
 
 const env = { ...process.env };
 try { for (const l of fs.readFileSync(new URL('../.env', import.meta.url), 'utf8').split('\n')) { const m = l.match(/^\s*([A-Z_]+)\s*=\s*(.*)$/); if (m && !(m[1] in env)) env[m[1]] = m[2].replace(/^["']|["']$/g, ''); } } catch { /* no .env */ }
 if (!env.JEV_API_KEY) { console.error('JEV_API_KEY missing in .env'); process.exit(1); }
 const jev = createJev({ apiKey: env.JEV_API_KEY, model: env.JEV_MODEL });
+
+// two sample Kannada dialogues (Bengaluru world), written inline so the eval does not depend on src/worlds/bengaluru
+const kn = (text, roman, en) => ({ text, roman, en });
+const dialogues = {
+  ...mumbai,
+  kn_darshini: {
+    id: 'kn_darshini', name: 'Shankar Anna', role: 'chaiwalaUncle', lang: 'kn', worldId: 'bengaluru',
+    persona: 'Friendly darshini owner who is kind to Rohan, a newcomer learning Kannada.',
+    goal: 'Order a filter coffee at the darshini.',
+    steps: [
+      { id: 'order', npc: kn('ಏನು ಬೇಕು ರೋಹನ್?', 'Enu beku Rohan?', 'What do you want, Rohan?'), instruction: 'Ask for one coffee.',
+        suggest: { roman: 'Ondu coffee kodi.', text: 'ಒಂದು ಕಾಫಿ ಕೊಡಿ.' }, intent: 'order_one_coffee',
+        accept: ['ondu coffee kodi', 'ondu coffee beku', 'ondu kaafi kodi', 'anna ondu coffee kodi', 'ಒಂದು ಕಾಫಿ ಬೇಕು', 'coffee kodi anna', 'ondu filter coffee kodi'] },
+      { id: 'idli', npc: kn('ಇಡ್ಲಿ ಬೇಕಾ?', 'Idli beka?', 'Want idli?'), instruction: 'Say no thanks, only coffee is enough.',
+        suggest: { roman: 'Beda anna, coffee saaku.', text: 'ಬೇಡ ಅಣ್ಣ, ಕಾಫಿ ಸಾಕು.' }, intent: 'decline_idli',
+        accept: ['beda anna coffee saaku', 'illa beda', 'beda coffee mathra', 'ಬೇಡ ಅಣ್ಣ', 'beda saaku', 'beda anna'] },
+    ],
+  },
+  kn_auto: {
+    id: 'kn_auto', name: 'Manjunath', role: 'taxiDriver', lang: 'kn', worldId: 'bengaluru',
+    persona: 'Chatty auto driver who haggles over the meter.',
+    goal: 'Ask an auto driver to take you to MG Road.',
+    steps: [
+      { id: 'where', npc: kn('ಎಲ್ಲಿಗೆ ಹೋಗಬೇಕು ಸಾರ್?', 'Elli hogbeku sar?', 'Where do you want to go, sir?'), instruction: 'Tell him you want to go to MG Road.',
+        suggest: { roman: 'MG Road ge hogbeku.', text: 'ಎಂಜಿ ರೋಡ್ ಗೆ ಹೋಗಬೇಕು.' }, intent: 'say_destination_mg_road',
+        accept: ['MG Road ge hogbeku', 'MG Road ge hogona', 'anna MG Road ge barthira', 'MG Road ge hogbeku anna', 'ಎಂಜಿ ರೋಡ್ ಗೆ ಹೋಗಬೇಕು', 'MG Road ge bartheera'] },
+    ],
+  },
+};
 
 const V = 'valid', R = 'retry';
 // [npc, step index, label, reply, expected verdict, expected reason?]
@@ -49,6 +78,29 @@ const CASES = [
   ['tourist', 0, 'Hindi to English NPC', 'ferry gateway ke paas paani ke pass hai', R],
   ['tourist', 0, 'rude', 'go away you stupid tourist', R, 'rude'],
   ['tourist', 0, 'gibberish', 'asdkj lkj', R],
+  // ---- Kannada (lang kn) ----
+  ['kn_darshini', 0, 'KN suggested phrase', 'Ondu coffee kodi.', V],
+  ['kn_darshini', 0, 'KN accepted variant', 'anna ondu coffee beku', V],
+  ['kn_darshini', 0, 'KN Kannada script', 'ಒಂದು ಕಾಫಿ ಕೊಡಿ', V],
+  ['kn_darshini', 0, 'KN Kanglish paraphrase', 'anna one filter coffee kodi please', V],
+  ['kn_darshini', 0, 'KN Whisper misspelt', 'ondu kaafi kodee', V],
+  ['kn_darshini', 0, 'KN wrong item (tea)', 'ondu tea kodi', R, 'off_task'],
+  ['kn_darshini', 0, 'KN wrong number', 'eradu coffee kodi', R],
+  ['kn_darshini', 0, 'KN pure Hindi', 'bhaiya ek coffee dena', R, 'language'],
+  ['kn_darshini', 0, 'KN Hindi Devanagari', 'भैया एक कॉफ़ी दो', R, 'language'],
+  ['kn_darshini', 0, 'KN pure English', 'Give me one coffee please', R, 'language'],
+  ['kn_darshini', 0, 'KN pizza + answer', 'i like pizza anna ondu coffee kodi', R, 'extra'],
+  ['kn_darshini', 0, 'KN off-task Kannada', 'ನಾನು ನಾಳೆ ಊರಿಗೆ ಹೋಗ್ತೀನಿ', R],
+  ['kn_darshini', 0, 'KN gibberish', 'asdf qwer zxcv', R],
+  ['kn_darshini', 0, 'KN rude', 'you stupid old man ondu coffee kodi', R, 'rude'],
+  ['kn_darshini', 1, 'KN decline: roman', 'beda anna coffee saaku', V],
+  ['kn_darshini', 1, 'KN decline: script', 'ಬೇಡ ಅಣ್ಣ, ಕಾಫಿ ಸಾಕು', V],
+  ['kn_darshini', 1, 'KN decline: partial', 'ಬೇಡ ಅಣ್ಣ', R],
+  ['kn_auto', 0, 'KN auto suggested', 'MG Road ge hogbeku.', V],
+  ['kn_auto', 0, 'KN auto script', 'ಎಂಜಿ ರೋಡ್ ಗೆ ಹೋಗಬೇಕು', V],
+  ['kn_auto', 0, 'KN auto Hindi', 'bhaiya MG Road chalo', R, 'language'],
+  ['kn_auto', 0, 'KN auto English', 'Take me to MG Road please', R, 'language'],
+  ['kn_auto', 0, 'KN auto wrong place', 'airport ge hogbeku', R],
 ];
 
 const pad = (s, n) => String(s).padEnd(n).slice(0, n);
@@ -59,7 +111,7 @@ let bad = 0, used = '';
 const rows = await Promise.all(CASES.map(async (c) => {
   const d = dialogues[c[0]], step = d.steps[c[1]];
   try {
-    return [c, await jev.classify({ lang: d.lang, persona: d.persona, goal: d.goal, npcName: d.name, npcRole: d.role, step, reply: c[3] })];
+    return [c, await jev.classify({ lang: d.lang, worldId: d.worldId, persona: d.persona, goal: d.goal, npcName: d.name, npcRole: d.role, step, reply: c[3] })];
   } catch (e) { return [c, { error: String(e?.message ?? e) }]; }
 }));
 for (const [c, out] of rows) {

@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('photographer', {
+  name: 'Prakash', role: 'street photographer', site: 'Vidhana Soudha, photo tripod', diff: 3,
+  voice: { rate: 1.0, pitch: 0.95 },
+  persona: 'Street photographer with a tripod and a press badge who offers photos in front of the Vidhana Soudha for fifty rupees.',
+  goal: 'Ask for a photo with the Vidhana Soudha, ask the price, and ask when the photo will be ready.',
+  steps: [
+    S('photo', ['ಫೋಟೋ ಬೇಕಾ ಸಾರ್? ಹಿಂದೆ ವಿಧಾನ ಸೌಧ ಬರುತ್ತೆ.', 'Photo beka saar? Hinde Vidhana Soudha barutte.', 'Want a photo, sir? The Vidhana Soudha will be behind you.'],
+      'Ask him to take your photo.', ['Ondu photo tegeeri, please.', 'ಒಂದು ಫೋಟೋ ತೆಗೀರಿ, ಪ್ಲೀಸ್.'],
+      ['ondu photo tegeeri please', 'ondu photo tegeeri', 'photo tegeeri anna', 'nanna photo tegeeri', 'ಒಂದು ಫೋಟೋ ತೆಗೀರಿ', 'ನನ್ನ ಫೋಟೋ ತೆಗೀರಿ', 'photo tegiri sir'],
+      'ask_for_photo', ['Ask him to take a photo of you.', '"Photo tegeeri" = take a photo.', 'Say: "Ondu photo tegeeri, please."'],
+      ['ಸರಿ, ಇಲ್ಲಿ ನಿಲ್ಲಿ. ಸ್ವಲ್ಪ ನಗಿ!', 'Sari, illi nilli. Swalpa nagi!', 'Okay, stand here. Smile a little!'],
+      ['ಫೋಟೋನಾ ಸಾರ್? ಬೇಗ ಹೇಳಿ, ಲೈಟ್ ಹೋಗುತ್ತೆ.', 'Photona saar? Bega heli, light hogutte.', 'A photo, sir? Tell me fast, the light is going.']),
+    S('price', ['ಒಳ್ಳೆ ಫೋಟೋ ಬಂತು! ಹಿಡಿದುಕೊಳ್ಳಿ.', 'Olle photo bantu! Hididukolli.', 'A great photo! Take a look.'],
+      'Ask how much it costs.', ['Eshtu aytu, anna?', 'ಎಷ್ಟು ಆಯ್ತು, ಅಣ್ಣ?'],
+      ['eshtu aytu anna', 'eshtu aytu', 'photo ge eshtu', 'eshtu kodbeku', 'ಎಷ್ಟು ಆಯ್ತು ಅಣ್ಣ', 'ಫೋಟೋಗೆ ಎಷ್ಟು', 'photo eshtu rupayi'],
+      'ask_photo_price', ['Ask what you owe.', '"Eshtu aytu" = how much did it come to?', 'Say: "Eshtu aytu, anna?"'],
+      ['ಐವತ್ತು ರೂಪಾಯಿ ಸಾರ್. ಪ್ರಿಂಟ್ ಸಹಿತ.', 'Aivattu rupayi saar. Print sahita.', 'Fifty rupees sir, with the print.'],
+      ['ರೇಟ್ ಕೇಳಿದ್ರಾ ಸಾರ್?', 'Rate kelidra saar?', 'Did you ask the rate, sir?']),
+    S('ready', ['ಪ್ರಿಂಟ್ ತೆಗೆದು ಇಡ್ತೀನಿ.', 'Print tegedu idteeni.', 'I will keep the print ready.'],
+      'Ask when the photo will be ready.', ['Photo yaavaaga sigutte?', 'ಫೋಟೋ ಯಾವಾಗ ಸಿಗುತ್ತೆ?'],
+      ['photo yaavaaga sigutte', 'yaavaaga sigutte', 'photo yaavaaga ready', 'print yaavaaga sigutte', 'ಫೋಟೋ ಯಾವಾಗ ಸಿಗುತ್ತೆ', 'ಯಾವಾಗ ಸಿಗುತ್ತೆ', 'photo ready yaavaaga'],
+      'ask_photo_ready_time', ['Ask when you can collect it.', '"Yaavaaga" = when. "Sigutte" = will I get.', 'Say: "Photo yaavaaga sigutte?"'],
+      ['ಅರ್ಧ ಗಂಟೆಯಲ್ಲಿ ಬನ್ನಿ ಸಾರ್.', 'Ardha gantelli banni saar.', 'Come back in half an hour, sir.'],
+      ['ಯಾವಾಗ ಅಂತ ಕೇಳಿ ಸಾರ್.', 'Yaavaaga anta keli saar.', 'Ask me when, sir.']),
+  ],
+  outro: ['ಒಳ್ಳೆ ಫೋಟೋ ಬಂದಿದೆ ರೋಹನ್ ಸಾರ್, ಮನೆಗೆ ಕಳಿಸಿ!', 'Olle photo bandide Rohan saar, manege kalisi!', 'A good photo, Rohan sir, send it home!'],
+  learned: [['ondu photo tegeeri', 'please take a photo'], ['eshtu aytu?', 'how much did it come to?'], ['photo yaavaaga sigutte?', 'when will the photo be ready?']],
+  again: ['ಸಾರ್, ಇನ್ನೊಂದು ಫೋಟೋ ಬೇಕಾ?', 'Saar, innondu photo beka?', 'Sir, another photo?'],
+});

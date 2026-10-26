@@ -1,0 +1,158 @@
+// Namma Metro MG Road station platform and the Hebbal-style flyover toll plaza.
+import { dialogue as D, step as S } from '../kit.js';
+
+export const stationCoffee = D('station-chaiwala', {
+  name: 'Muniraju', role: 'platform filter-coffee seller', site: 'Namma Metro MG Road station, platform coffee stall', diff: 2,
+  voice: { rate: 1.05, pitch: 0.9 },
+  persona: 'Platform seller in a green checked lungi, pouring coffee for commuters and calling "coffee, coffee".',
+  goal: 'Ask the price of a coffee and order two with less sugar.',
+  steps: [
+    S('price', ['ಕಾಫಿ, ಕಾಫಿ! ಬಿಸಿ ಕಾಫಿ ಬೇಕಾ?', 'Coffee, coffee! Bisi coffee beka?', 'Coffee, coffee! Want hot coffee?'],
+      'Ask how much a coffee is.', ['Coffee eshtu, anna?', 'ಕಾಫಿ ಎಷ್ಟು, ಅಣ್ಣ?'],
+      ['coffee eshtu anna', 'coffee eshtu', 'ondu coffee ge eshtu', 'kaapi eshtu anna', 'ಕಾಫಿ ಎಷ್ಟು ಅಣ್ಣ', 'ಕಾಫಿ ಎಷ್ಟು', 'one coffee eshtu anna'],
+      'ask_coffee_price', ['Ask the price of coffee.', '"Eshtu" = how much.', 'Say: "Coffee eshtu, anna?"'],
+      ['ಒಂದಕ್ಕೆ ಇಪ್ಪತ್ತು ರೂಪಾಯಿ ಸಾರ್.', 'Ondakke ippattu rupayi saar.', 'Twenty rupees each, sir.'],
+      ['ಕಾಫಿ ರೇಟ್ ಕೇಳ್ತಿದ್ದೀರಾ ಸಾರ್?', 'Coffee rate keltiddira saar?', 'Asking the coffee rate, sir?']),
+    S('sugar', ['ಎಷ್ಟು ಕಾಫಿ ಕೊಡ್ಲಿ? ಸಕ್ಕರೆ ಎಷ್ಟು?', 'Eshtu coffee kodli? Sakkare eshtu?', 'How many coffees? How much sugar?'],
+      'Ask for two coffees with less sugar.', ['Eradu coffee kodi, sakkare kadime.', 'ಎರಡು ಕಾಫಿ ಕೊಡಿ, ಸಕ್ಕರೆ ಕಡಿಮೆ.'],
+      ['eradu coffee kodi sakkare kadime', 'eradu coffee sakkare kadime', 'eradu coffee kodi', 'sakkare kadime haaki eradu coffee', 'ಎರಡು ಕಾಫಿ ಕೊಡಿ ಸಕ್ಕರೆ ಕಡಿಮೆ', 'ಎರಡು ಕಾಫಿ ಸಕ್ಕರೆ ಕಡಿಮೆ', 'two coffee sakkare kadime'],
+      'order_two_coffee_less_sugar', ['Say two coffees and less sugar.', '"Sakkare" = sugar. "Kadime" = less.', 'Say: "Eradu coffee kodi, sakkare kadime."'],
+      ['ಸರಿ ಸಾರ್, ಮೆಟ್ರೋ ಬರೋ ಮುಂಚೆ ರೆಡಿ!', 'Sari saar, metro baro munche ready!', 'Okay sir, ready before the metro comes!'],
+      ['ಎಷ್ಟು ಕಾಫಿ, ಸಕ್ಕರೆ ಎಷ್ಟು? ಬೇಗ ಹೇಳಿ.', 'Eshtu coffee, sakkare eshtu? Bega heli.', 'How many coffees, how much sugar? Say quickly.']),
+  ],
+  outro: ['ಟ್ರೈನ್ ಬರ್ತಿದೆ, ಬೇಗ ಕುಡೀರಿ ಸಾರ್!', 'Train bartide, bega kudiri saar!', 'The train is coming, drink quickly, sir!'],
+  learned: [['coffee eshtu?', 'how much is the coffee?'], ['sakkare kadime', 'less sugar']],
+  again: ['ಸಾರ್, ಇನ್ನೊಂದು ಕಾಫಿ ಬೇಕಾ?', 'Saar, innondu coffee beka?', 'Sir, another coffee?'],
+});
+
+export const womenCoach = D('station-ladies-a', {
+  name: 'Deepa', role: 'women\'s-coach commuter', site: 'Namma Metro MG Road station, platform edge (women\'s coach marker)', diff: 2,
+  voice: { rate: 1.0, pitch: 1.1 },
+  persona: 'Woman in a salwar kameez waiting at the women\'s coach marker with a purple smart card, politely firm.',
+  goal: 'Excuse yourself and say you will take another coach.',
+  steps: [
+    S('marker', ['ಇದು ಮಹಿಳೆಯರ ಕೋಚ್ ಮಾರ್ಕರ್, ಸಾರ್.', 'Idu mahileyara coach marker, saar.', 'This is the women\'s coach marker, sir.'],
+      'Say you will go to another coach.', ['Kshamisi, naanu hindina coach ge hogteeni.', 'ಕ್ಷಮಿಸಿ, ನಾನು ಹಿಂದಿನ ಕೋಚ್‌ಗೆ ಹೋಗ್ತೀನಿ.'],
+      ['kshamisi naanu hindina coach ge hogteeni', 'hindina coach ge hogteeni', 'sari madam hindina coach ge hogteeni', 'kshamisi madam, naanu bere coach ge hogteeni', 'ಕ್ಷಮಿಸಿ ನಾನು ಹಿಂದಿನ ಕೋಚ್‌ಗೆ ಹೋಗ್ತೀನಿ', 'ಹಿಂದಿನ ಕೋಚ್‌ಗೆ ಹೋಗ್ತೀನಿ', 'sorry madam hindina coach ge hogteeni'],
+      'go_to_another_coach', ['Apologise and go elsewhere.', '"Hindina" = the rear. "Coach" is used in Kannada.', 'Say: "Kshamisi, naanu hindina coach ge hogteeni."'],
+      ['ಥ್ಯಾಂಕ್ಸ್ ಸಾರ್, ಹಿಂದೆ ಇನ್ನೂ ಜಾಗ ಇದೆ.', 'Thanks saar, hinde innu jaaga ide.', 'Thanks sir, there is still space at the back.'],
+      ['ಎಲ್ಲಿ ಹೋಗ್ತೀರಾ ಸಾರ್? ಹೇಳಿ.', 'Elli hogteera saar? Heli.', 'Where are you going, sir? Tell me.']),
+  ],
+  outro: ['ಹ್ಯಾಪಿ ಜರ್ನಿ ಸಾರ್!', 'Happy journey saar!', 'Happy journey, sir!'],
+  learned: [['hindina coach ge hogteeni', 'I will go to the rear coach']],
+  again: ['ಸಾರ್, ಹಿಂದಿನ ಕೋಚ್ ಕಡೆ ಹೋಗಿ.', 'Saar, hindina coach kade hogi.', 'Sir, please go towards the rear coach.'],
+});
+
+export const benchElder = D('station-bench-elder', {
+  name: 'Venkoba Rao', role: 'elderly passenger', site: 'Namma Metro MG Road station, platform bench', diff: 2,
+  voice: { rate: 0.85, pitch: 0.8 },
+  persona: 'Thin old man in a Gandhi cap with a cloth bag, waiting patiently for the Majestic metro.',
+  goal: 'Say you are going to Majestic too, and politely refuse his seat.',
+  steps: [
+    S('goes', ['ಮೆಜೆಸ್ಟಿಕ್ ಮೆಟ್ರೋ ಇನ್ನೂ ಬಂದಿಲ್ಲ. ನೀವೂ ಅಲ್ಲಿಗೇನಾ?', 'Majestic metro innu bandilla. Neevoo alligena?', 'The Majestic metro has not come yet. Are you going there too?'],
+      'Say you are going to Majestic too.', ['Haudu thatha, naanoo Majestic ge.', 'ಹೌದು ತಾತ, ನಾನೂ ಮೆಜೆಸ್ಟಿಕ್‌ಗೆ.'],
+      ['haudu thatha naanoo majestic ge', 'naanoo majestic ge thatha', 'haudu naanoo majestic ge hogteeni', 'majestic ge thatha', 'ಹೌದು ತಾತ ನಾನೂ ಮೆಜೆಸ್ಟಿಕ್‌ಗೆ', 'ನಾನೂ ಮೆಜೆಸ್ಟಿಕ್‌ಗೆ', 'haudu thatha majestic ge'],
+      'say_going_to_majestic_too', ['Say you are going there too.', '"Naanoo" = me too.', 'Say: "Haudu thatha, naanoo Majestic ge."'],
+      ['ಹೌದಾ, ಒಳ್ಳೇದಾಯ್ತು, ಜೊತೆ ಸಿಕ್ಕಿತು.', 'Haudaa, olledaytu, jote sikkitu.', 'Is that so, good, I have company.'],
+      ['ಎಲ್ಲಿಗೆ ಹೋಗ್ತೀರಾ ಅಂತ ಹೇಳಿ.', 'Ellige hogteera anta heli.', 'Tell me where you are going.']),
+    S('seat', ['ಬನ್ನಿ ಕೂತ್ಕೊಳ್ಳಿ, ಇನ್ನೂ ಐದು ನಿಮಿಷ ಇದೆ.', 'Banni kootkolli, innu aidu nimisha ide.', 'Come sit, there are still five minutes.'],
+      'Politely say he should sit.', ['Illa thatha, neeve kootkolli.', 'ಇಲ್ಲ ತಾತ, ನೀವೇ ಕೂತ್ಕೊಳ್ಳಿ.'],
+      ['illa thatha neeve kootkolli', 'neeve kootkolli thatha', 'illa neeve kootkolli', 'thatha neeve kootkolli', 'ಇಲ್ಲ ತಾತ ನೀವೇ ಕೂತ್ಕೊಳ್ಳಿ', 'ನೀವೇ ಕೂತ್ಕೊಳ್ಳಿ ತಾತ', 'illa thatha neevu kootkolli'],
+      'offer_seat_back', ['Be polite, let him sit.', '"Neeve" = you yourself.', 'Say: "Illa thatha, neeve kootkolli."'],
+      ['ಎಷ್ಟು ಒಳ್ಳೆ ಸಂಸ್ಕಾರ ಮಗು! ಸರಿ ಕೂತ್ಕೊಳ್ತೀನಿ.', 'Eshtu olle samskaara magu! Sari kootkolteeni.', 'What good manners, child! Okay, I will sit.'],
+      ['ನೀವು ಕೂತ್ಕೊಳ್ತೀರಾ ಇಲ್ವಾ ಹೇಳಿ.', 'Neevu kootkolteera ilva heli.', 'Tell me whether you will sit.']),
+  ],
+  outro: ['ಟ್ರೈನ್ ಬಂತು ಮಗು. ಜೊತೆಗೇ ಹೋಗೋಣ.', 'Train bantu magu. Jotege hogona.', 'The train is here, child. Let us go together.'],
+  learned: [['naanoo Majestic ge', 'I am going to Majestic too'], ['neeve kootkolli', 'please sit yourself']],
+  again: ['ಮಗು, ಮೆಟ್ರೋ ಇನ್ನೂ ಬಂದಿಲ್ಲ.', 'Magu, metro innu bandilla.', 'Child, the metro has not come yet.'],
+});
+
+export const lateCommuter = D('station-commuter-2', {
+  name: 'Prashanth', role: 'office-goer (man)', site: 'Namma Metro MG Road station, platform, near the platform board', diff: 2,
+  voice: { rate: 1.15, pitch: 0.95 },
+  persona: 'Round office-goer in a blue checked shirt checking his watch, anxious about being late for stand-up.',
+  goal: 'Reassure him the train is one minute away and say you are an intern with no team yet.',
+  steps: [
+    S('late', ['ಸ್ಟ್ಯಾಂಡ್‌ಅಪ್‌ಗೆ ಲೇಟ್ ಆಗ್ತಿದೆ! ಟ್ರೈನ್ ಯಾವಾಗ?', 'Stand-up ge late aagtide! Train yaavaaga?', 'I am getting late for stand-up! When is the train?'],
+      'Reassure him: it comes in a minute.', ['Gaabari beda, innondu nimishadalli barutte.', 'ಗಾಬರಿ ಬೇಡ, ಇನ್ನೊಂದು ನಿಮಿಷದಲ್ಲಿ ಬರುತ್ತೆ.'],
+      ['gaabari beda innondu nimishadalli barutte', 'innondu nimishadalli barutte', 'gaabari beda sir barutte', 'ondu nimisha alli barutte', 'ಗಾಬರಿ ಬೇಡ ಇನ್ನೊಂದು ನಿಮಿಷದಲ್ಲಿ ಬರುತ್ತೆ', 'ಇನ್ನೊಂದು ನಿಮಿಷದಲ್ಲಿ ಬರುತ್ತೆ', 'gaabari beda one minute alli barutte'],
+      'reassure_train_in_one_minute', ['Tell him not to worry.', '"Gaabari beda" = do not panic.', 'Say: "Gaabari beda, innondu nimishadalli barutte."'],
+      ['ಹೌದಾ! ಹಾಗಾದ್ರೆ ಸ್ಟ್ಯಾಂಡ್‌ಅಪ್ ಮಿಸ್ ಆಗಲ್ಲ.', 'Haudaa! Haagaadre stand-up miss aagalla.', 'Really! Then I will not miss stand-up.'],
+      ['ಟ್ರೈನ್ ಯಾವಾಗ ಬರುತ್ತೆ ಹೇಳಿ.', 'Train yaavaaga barutte heli.', 'Tell me when the train comes.']),
+    S('team', ['ಥ್ಯಾಂಕ್ಸ್! ನೀವು ಯಾವ ಟೀಮ್?', 'Thanks! Neevu yaava team?', 'Thanks! Which team are you on?'],
+      'Say you are an intern and do not know your team yet.', ['Naanu intern, team innu gottilla.', 'ನಾನು ಇಂಟರ್ನ್, ಟೀಮ್ ಇನ್ನೂ ಗೊತ್ತಿಲ್ಲ.'],
+      ['naanu intern team innu gottilla', 'team innu gottilla', 'naanu intern, team gottilla', 'intern, team innu final aagilla', 'ನಾನು ಇಂಟರ್ನ್ ಟೀಮ್ ಇನ್ನೂ ಗೊತ್ತಿಲ್ಲ', 'ಟೀಮ್ ಇನ್ನೂ ಗೊತ್ತಿಲ್ಲ', 'naanu intern team gottilla'],
+      'say_intern_no_team', ['Say you are an intern.', '"Gottilla" = I do not know.', 'Say: "Naanu intern, team innu gottilla."'],
+      ['ಓ ಇಂಟರ್ನಾ! ವೆಲ್ಕಮ್, ನಮ್ಮ ಟೀಮ್‌ಗೆ ಬನ್ನಿ.', 'O internaa! Welcome, namma team ge banni.', 'Oh, an intern! Welcome, join our team.'],
+      ['ಯಾವ ಟೀಮ್ ಅಂತ ಹೇಳಿ.', 'Yaava team anta heli.', 'Tell me which team.']),
+  ],
+  outro: ['ಟ್ರೈನ್ ಬಂತು! ಆಫೀಸ್‌ನಲ್ಲಿ ಸಿಗೋಣ ರೋಹನ್.', 'Train bantu! Office-nalli sigona Rohan.', 'The train is here! See you at the office, Rohan.'],
+  learned: [['gaabari beda', 'do not panic'], ['team innu gottilla', 'I do not know my team yet']],
+  again: ['ರೋಹನ್, ಮೆಟ್ರೋ ಮಿಸ್ ಮಾಡ್ಬೇಡಿ!', 'Rohan, metro miss maadbedi!', 'Rohan, do not miss the metro!'],
+});
+
+export const ticketClerk = D('station-ticket-clerk', {
+  name: 'Ramesh', role: 'metro ticket clerk', site: 'Namma Metro MG Road station, ticket window', diff: 2,
+  voice: { rate: 1.0, pitch: 0.9 },
+  persona: 'Clerk at the window calling "next!" and issuing tokens and smart-card top-ups with a purple lanyard.',
+  goal: 'Ask for a token to Indiranagar and say you only have a hundred-rupee note.',
+  steps: [
+    S('token', ['ನೆಕ್ಸ್ಟ್! ಎಲ್ಲಿಗೆ ಟೋಕನ್ ಬೇಕು?', 'Next! Ellige token beku?', 'Next! A token to where?'],
+      'Ask for a token to Indiranagar.', ['Indiranagar ge ondu token kodi.', 'ಇಂದಿರಾನಗರಕ್ಕೆ ಒಂದು ಟೋಕನ್ ಕೊಡಿ.'],
+      ['indiranagar ge ondu token kodi', 'ondu token indiranagar ge', 'indiranagar ge token beku', 'indiranagar ge ondu token', 'ಇಂದಿರಾನಗರಕ್ಕೆ ಒಂದು ಟೋಕನ್ ಕೊಡಿ', 'ಇಂದಿರಾನಗರಕ್ಕೆ ಟೋಕನ್ ಬೇಕು', 'Indiranagar ge token kodi sir'],
+      'ask_token_to_indiranagar', ['Name the station and ask for a token.', '"Token" is used in Kannada.', 'Say: "Indiranagar ge ondu token kodi."'],
+      ['ಇಂದಿರಾನಗರ, ಇಪ್ಪತ್ತು ರೂಪಾಯಿ ಆಯ್ತು.', 'Indiranagara, ippattu rupayi aytu.', 'Indiranagar, that is twenty rupees.'],
+      ['ಎಲ್ಲಿಗೆ ಅಂದ್ರಿ ಸಾರ್? ಲೈನ್ ಉದ್ದ ಇದೆ.', 'Ellige andri saar? Line udda ide.', 'Where did you say, sir? The line is long.']),
+    S('change', ['ಚಿಲ್ಲರೆ ಇದ್ಯಾ ಸಾರ್?', 'Chillare idya saar?', 'Do you have change, sir?'],
+      'Say you only have a hundred-rupee note.', ['Illa, noorara notu ide.', 'ಇಲ್ಲ, ನೂರರ ನೋಟು ಇದೆ.'],
+      ['illa noorara notu ide', 'noorara notu ide', 'illa saar noorara notu', 'nooru rupayi notu ide', 'ಇಲ್ಲ ನೂರರ ನೋಟು ಇದೆ', 'ನೂರರ ನೋಟು ಇದೆ', 'illa nooru rupayi mathra'],
+      'say_only_hundred_note', ['Say you have no change.', '"Noorara notu" = a 100 note.', 'Say: "Illa, noorara notu ide."'],
+      ['ಪರವಾಗಿಲ್ಲ, ಇದೋ ಎಂಭತ್ತು ರೂಪಾಯಿ ಚಿಲ್ಲರೆ.', 'Paravagilla, ido embhattu rupayi chillare.', 'No problem, here is eighty rupees change.'],
+      ['ಚಿಲ್ಲರೆ ಇದ್ಯಾ ಇಲ್ವಾ ಹೇಳಿ ಸಾರ್.', 'Chillare idya ilva heli saar.', 'Tell me if you have change or not, sir.']),
+  ],
+  outro: ['ಪ್ಲಾಟ್‌ಫಾರ್ಮ್ ಎರಡು ಸಾರ್. ಹ್ಯಾಪಿ ಜರ್ನಿ!', 'Platform eradu saar. Happy journey!', 'Platform two, sir. Happy journey!'],
+  learned: [['Indiranagar ge ondu token kodi', 'give me a token to Indiranagar']],
+  again: ['ನೆಕ್ಸ್ಟ್! ಸಾರ್, ಮತ್ತೆ ಟೋಕನ್ ಬೇಕಾ?', 'Next! Saar, matte token beka?', 'Next! Sir, need a token again?'],
+});
+
+export const tollAttendant = D('toll-attendant', {
+  name: 'Eshwar', role: 'toll attendant', site: 'Hebbal flyover toll plaza', diff: 1,
+  voice: { rate: 1.0, pitch: 0.85 },
+  persona: 'Attendant in an orange hi-vis shirt directing cars beside the toll post.',
+  goal: 'Step aside when he warns you.',
+  steps: [
+    S('step', ['ಪಕ್ಕಕ್ಕೆ ಬನ್ನಿ ಸಾರ್! ವಾಹನ ಬರ್ತಿದೆ!', 'Pakkakke banni saar! Vaahana bartide!', 'Come to the side, sir! A vehicle is coming!'],
+      'Say you will stand aside.', ['Sari, ee kade nilteeni.', 'ಸರಿ, ಈ ಕಡೆ ನಿಲ್ತೀನಿ.'],
+      ['sari ee kade nilteeni', 'ee kade nilteeni', 'sari pakkakke barteeni', 'sari saar ee kade nilteeni', 'ಸರಿ ಈ ಕಡೆ ನಿಲ್ತೀನಿ', 'ಈ ಕಡೆ ನಿಲ್ತೀನಿ', 'sari pakkakke nilteeni'],
+      'stand_aside_toll', ['Say you will stand aside.', '"Nilteeni" = I will stand.', 'Say: "Sari, ee kade nilteeni."'],
+      ['ಗುಡ್ ಸಾರ್. ಇಲ್ಲಿ ತುಂಬಾ ಟ್ರಾಫಿಕ್, ಹುಷಾರು.', 'Good saar. Illi tumba traffic, hushaaru.', 'Good, sir. Lots of traffic here, be careful.'],
+      ['ಏನಂದ್ರಿ ಸಾರ್? ಹಾರ್ನ್ ಸದ್ದಾಯ್ತು.', 'Enandri saar? Horn saddaytu.', 'What did you say, sir? The horn was loud.']),
+  ],
+  outro: ['ಹೋಗಿ ಸಾರ್, ದಾರಿ ಕ್ಲಿಯರ್ ಆಯ್ತು.', 'Hogi saar, daari clear aytu.', 'Go ahead, sir, the way is clear.'],
+  learned: [['ee kade nilteeni', 'I will stand this side']],
+  again: ['ಸಾರ್, ಪಕ್ಕಕ್ಕೆ, ಪಕ್ಕಕ್ಕೆ!', 'Saar, pakkakke, pakkakke!', 'Sir, aside, aside!'],
+});
+
+export const tollCollector = D('toll-collector', {
+  name: 'Mahadevappa', role: 'toll collector', site: 'Hebbal flyover toll plaza, in the booth', diff: 2,
+  voice: { rate: 1.0, pitch: 0.85 },
+  persona: 'Collector in the booth in specs and a towel, waving cars through and politely explaining the rules to a pedestrian.',
+  goal: 'Ask if a pedestrian pays toll and ask the way to Hebbal.',
+  steps: [
+    S('toll', ['ಟೋಲ್ ಹತ್ತು ರೂಪಾಯಿ, ಬೇಗ ಕೊಡಿ… ಓ, ನಡೆದು ಬಂದಿದ್ದೀರಾ!', 'Toll hattu rupayi, bega kodi… O, nadedu bandiddira!', 'Toll is ten rupees, pay quickly… oh, you came walking!'],
+      'Ask if a pedestrian has to pay the toll.', ['Naanu nadedu hogtiddini, toll illa alva?', 'ನಾನು ನಡೆದು ಹೋಗ್ತಿದ್ದೀನಿ, ಟೋಲ್ ಇಲ್ಲ ಅಲ್ವಾ?'],
+      ['naanu nadedu hogtiddini toll illa alva', 'nadedu hogtiddini toll illa alva', 'toll illa alva nadedu', 'nadedu hogtini toll beka', 'ನಾನು ನಡೆದು ಹೋಗ್ತಿದ್ದೀನಿ ಟೋಲ್ ಇಲ್ಲ ಅಲ್ವಾ', 'ನಡೆದು ಹೋಗ್ತಿದ್ದೀನಿ ಟೋಲ್ ಇಲ್ಲ ಅಲ್ವಾ', 'toll illa alva saar'],
+      'ask_pedestrian_toll', ['Ask whether walkers pay.', '"Nadedu" = on foot.', 'Say: "Naanu nadedu hogtiddini, toll illa alva?"'],
+      ['ಇಲ್ಲ ಸಾರ್, ಪಾದಚಾರಿಗೆ ಟೋಲ್ ಇಲ್ಲ.', 'Illa saar, paadachaarige toll illa.', 'No sir, no toll for pedestrians.'],
+      ['ಟೋಲ್ ಬಗ್ಗೆ ಕೇಳ್ತೀರಾ ಸಾರ್?', 'Toll bagge kelteera saar?', 'Are you asking about the toll, sir?']),
+    S('way', ['ಬೇರೆ ಏನಾದ್ರೂ ಕೇಳ್ಬೇಕಾ ಸಾರ್?', 'Bere enaadru kelbeka saar?', 'Anything else to ask, sir?'],
+      'Ask the way to Hebbal.', ['Hebbala kade hogo daari yaavudu?', 'ಹೆಬ್ಬಾಳ ಕಡೆ ಹೋಗೋ ದಾರಿ ಯಾವುದು?'],
+      ['hebbala kade hogo daari yaavudu', 'hebbala daari yaavudu', 'hebbala ge hege hogodu', 'hebbala kade daari heli', 'ಹೆಬ್ಬಾಳ ಕಡೆ ಹೋಗೋ ದಾರಿ ಯಾವುದು', 'ಹೆಬ್ಬಾಳ ದಾರಿ ಯಾವುದು', 'hebbala ge daari heli saar'],
+      'ask_way_to_hebbal', ['Ask the way to Hebbal.', '"Daari" = way.', 'Say: "Hebbala kade hogo daari yaavudu?"'],
+      ['ಫ್ಲೈಓವರ್ ಕೆಳಗೆ ಬಲಕ್ಕೆ ತಿರುಗಿ, ಸೀದಾ ಹೋಗಿ.', 'Flyover kelage balakke tirugi, seedha hogi.', 'Turn right under the flyover, then go straight.'],
+      ['ದಾರಿ ಯಾವುದು ಅಂತ ಕೇಳಿ ಸಾರ್.', 'Daari yaavudu anta keli saar.', 'Ask me which way, sir.']),
+  ],
+  outro: ['ಹುಷಾರಾಗಿ ಹೋಗಿ ಸಾರ್, ರಸ್ತೆ ದಾಟುವಾಗ ನೋಡಿ.', 'Hushaaragi hogi saar, raste daatuvaaga nodi.', 'Go carefully, sir, look when crossing the road.'],
+  learned: [['Hebbala kade hogo daari yaavudu?', 'which way to Hebbal?']],
+  again: ['ಸಾರ್, ಟೋಲ್ ಕೊಟ್ಟು ಹೋಗಿ… ಓ, ನೀವಾ!', 'Saar, toll kottu hogi… O, neevaa!', 'Sir, pay toll and go… oh, it is you!'],
+});

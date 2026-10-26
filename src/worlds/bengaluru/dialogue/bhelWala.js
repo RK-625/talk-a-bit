@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('bhelWala', {
+  name: 'Raju', role: 'churumuri seller', site: 'Lakeside park, churumuri cart', diff: 3,
+  voice: { rate: 1.1, pitch: 1.0 },
+  persona: 'Round, joking churumuri seller in a pink cap who jokes while mixing the puffed rice. Teases the newcomer kindly.',
+  goal: 'Order a churumuri, ask for less spice and no onion, and pay 30 rupees.',
+  steps: [
+    S('order', ['ಚುರುಮುರಿ ಚುರುಮುರಿ! ರೋಹನ್ ಸಾರ್, ಬಿಸಿಬಿಸಿ ಮಾಡ್ಲಾ?', 'Churumuri churumuri! Rohan saar, bisibisi maadla?', 'Churumuri, churumuri! Rohan sir, shall I make a fresh one?'],
+      'Order one churumuri.', ['Ondu churumuri kodi.', 'ಒಂದು ಚುರುಮುರಿ ಕೊಡಿ.'],
+      ['ondu churumuri kodi', 'anna ondu churumuri kodi', 'ondu churumuri beku', 'ondu plate churumuri kodi', 'ಒಂದು ಚುರುಮುರಿ ಕೊಡಿ', 'ಒಂದು ಚುರುಮುರಿ ಬೇಕು', 'one churumuri kodi anna'],
+      'order_one_churumuri', ['Ask for one churumuri.', 'One = "ondu". Give = "kodi".', 'Say: "Ondu churumuri kodi."'],
+      ['ತಗೊಳ್ಳಿ, ಟೊಮೆಟೊ ಈರುಳ್ಳಿ ಹಾಕಿ ಕಲಸ್ತೀನಿ.', 'Tagolli, tomato eerulli haaki kalasteeni.', 'Right, mixing in tomato and onion.'],
+      ['ಏನು ಅಂದ್ರಿ ಸಾರ್? ಕಲಸ್ತಾ ಇದ್ದೆ, ಕೇಳಿಸಲಿಲ್ಲ.', 'Enu andri saar? Kalasta idde, kelisalilla.', 'What did you say, sir? I was mixing, did not hear.']),
+    S('spice', ['ಖಾರ ಬೇಕಾ, ಈರುಳ್ಳಿ ಬೇಕಾ?', 'Khaara beka, eerulli beka?', 'Want spice and onion?'],
+      'Ask for less spice and no onion.', ['Khaara kadime, eerulli beda.', 'ಖಾರ ಕಡಿಮೆ, ಈರುಳ್ಳಿ ಬೇಡ.'],
+      ['khaara kadime eerulli beda', 'eerulli beda khaara kadime', 'khaara kadime haaki eerulli beda', 'eerulli haakbeda', 'ಖಾರ ಕಡಿಮೆ ಈರುಳ್ಳಿ ಬೇಡ', 'ಈರುಳ್ಳಿ ಬೇಡ', 'less khaara onion beda'],
+      'less_spice_no_onion', ['Say less spice and no onion.', 'Less spice = "khaara kadime". No onion = "eerulli beda".', 'Say: "Khaara kadime, eerulli beda."'],
+      ['ಸರಿ ಸಾರ್, ಸಪ್ಪೆ ಚುರುಮುರಿ ರೆಡಿ!', 'Sari saar, sappe churumuri ready!', 'Okay sir, a mild churumuri coming up!'],
+      ['ಖಾರನಾ, ಈರುಳ್ಳಿನಾ? ಯಾವುದು ಬೇಡ?', 'Khaarana, eerullina? Yaavudu beda?', 'Spice or onion? Which one do you not want?']),
+    S('pay', ['ತಗೊಳ್ಳಿ ಸಾರ್. ಮೂವತ್ತು ರೂಪಾಯಿ.', 'Tagolli saar. Moovattu rupayi.', 'Here sir. Thirty rupees.'],
+      'Pay 30 rupees.', ['Tagolli, moovattu rupayi.', 'ತಗೊಳ್ಳಿ, ಮೂವತ್ತು ರೂಪಾಯಿ.'],
+      ['tagolli moovattu rupayi', 'moovattu rupayi', 'idu moovattu rupayi', 'moovattu kodteeni', 'ತಗೊಳ್ಳಿ ಮೂವತ್ತು ರೂಪಾಯಿ', 'ಮೂವತ್ತು ರೂಪಾಯಿ', 'here moovattu rupayi anna'],
+      'pay_thirty_rupees', ['Give the money and say how much.', '30 = "moovattu".', 'Say: "Tagolli, moovattu rupayi."'],
+      ['ಧನ್ಯವಾದ ಸಾರ್! ಲೇಕ್ ನೋಡ್ತಾ ತಿನ್ನಿ.', 'Dhanyavaada saar! Lake nodta tinni.', 'Thank you sir! Eat while watching the lake.'],
+      ['ಎಷ್ಟು ಕೊಡ್ತೀರಾ ಸಾರ್? ಮೂವತ್ತು ಆಯ್ತು.', 'Eshtu kodteera saar? Moovattu aytu.', 'How much will you give, sir? It is thirty.']),
+  ],
+  outro: ['ಚುರುಮುರಿ ಮೇಲೆ ಕಾಫಿ ಕುಡಿಬೇಡಿ, ಹೊಟ್ಟೆ ಗಲಾಟೆ ಮಾಡುತ್ತೆ!', 'Churumuri mele coffee kudibedi, hotte galaate maadutte!', 'Do not drink coffee after churumuri, your tummy will protest!'],
+  learned: [['ondu churumuri kodi', 'give me one churumuri'], ['khaara kadime, eerulli beda', 'less spice, no onion'], ['moovattu rupayi', 'thirty rupees']],
+  again: ['ಸಾರ್, ಇನ್ನೊಂದು ಚುರುಮುರಿ ಮಾಡ್ಲಾ?', 'Saar, innondu churumuri maadla?', 'Sir, shall I make another churumuri?'],
+});

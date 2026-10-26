@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('cricketKid', {
+  name: 'Chintu', role: 'gully cricket batter', site: 'Darshini square, cricket gully', diff: 2,
+  voice: { rate: 1.15, pitch: 1.25 },
+  persona: 'Bossy kid batter who shouts "out!" and "not out!" but lets the new tall Rohan join the game.',
+  goal: 'Ask to join the game, choose to bat first, and say you are ready.',
+  steps: [
+    S('join', ['ಏ, ಬೇಗ ಬಾ! ಒಬ್ಬ ಆಟಗಾರ ಕಮ್ಮಿ ಇದ್ದಾನೆ.', 'Ae, bega baa! Obba aatagaara kammi iddaane.', 'Hey, come quick! We are one player short.'],
+      'Ask to join the game.', ['Naanu aadla?', 'ನಾನು ಆಡ್ಲಾ?'],
+      ['naanu aadla', 'naanu kooda aadla', 'naanu aadbahuda', 'nange kooda aadbeku', 'ನಾನು ಆಡ್ಲಾ', 'ನಾನೂ ಆಡ್ಲಾ', 'naanu join aagla'],
+      'ask_to_join_game', ['Ask if you can play.', '"Naanu" = I. "aadla" = shall I play?', 'Say: "Naanu aadla?"'],
+      ['ಹೂಂ, ಆಡು! ಆದ್ರೆ ರೂಲ್ಸ್ ನಂದೇ.', 'Hoon, aadu! Aadre rules nandhe.', 'Yes, play! But the rules are mine.'],
+      ['ಏನು? ಆಡ್ತೀಯಾ ಇಲ್ವಾ?', 'Enu? Aadteeya ilva?', 'What? Will you play or not?']),
+    S('bat', ['ಬ್ಯಾಟಿಂಗ್ ಬೇಕಾ, ಬೌಲಿಂಗ್ ಬೇಕಾ?', 'Batting beka, bowling beka?', 'Do you want batting or bowling?'],
+      'Choose to bat first.', ['Naanu batting maadteeni.', 'ನಾನು ಬ್ಯಾಟಿಂಗ್ ಮಾಡ್ತೀನಿ.'],
+      ['naanu batting maadteeni', 'batting maadteeni', 'batting beku', 'naanu modalu batting', 'ನಾನು ಬ್ಯಾಟಿಂಗ್ ಮಾಡ್ತೀನಿ', 'ಬ್ಯಾಟಿಂಗ್ ಬೇಕು', 'first batting kodi'],
+      'choose_batting', ['Say you want to bat.', '"Batting maadteeni" = I will bat.', 'Say: "Naanu batting maadteeni."'],
+      ['ಸರಿ, ಬ್ಯಾಟ್ ತಗೋ. ಜೋರಾಗಿ ಹೊಡಿ!', 'Sari, bat tago. Joragi hodi!', 'Okay, take the bat. Hit hard!'],
+      ['ಬ್ಯಾಟಿಂಗಾ ಬೌಲಿಂಗಾ? ಬೇಗ ಹೇಳು!', 'Battinga bowlinga? Bega helu!', 'Batting or bowling? Say it fast!']),
+    S('ready', ['ರೆಡಿ ಆದ್ರೆ ಹೇಳು, ಬಾಲ್ ಹಾಕ್ತೀನಿ.', 'Ready aadre helu, ball haakteeni.', 'Tell me when you are ready, I will bowl.'],
+      'Say you are ready.', ['Naanu ready!', 'ನಾನು ರೆಡಿ!'],
+      ['naanu ready', 'ready ide', 'ready, haaki', 'ready aagidini', 'ನಾನು ರೆಡಿ', 'ರೆಡಿ ಇದೀನಿ', 'ready haaki'],
+      'say_ready', ['Tell him you are ready.', '"Ready" works in Kannada too.', 'Say: "Naanu ready!"'],
+      ['ಹಾಕ್ತೀನಿ ನೋಡು! ಒನ್, ಟೂ, ತ್ರೀ!', 'Haakteeni nodu! One, two, three!', 'Watch, here it comes! One, two, three!'],
+      ['ರೆಡಿನಾ ಇಲ್ವಾ ಅಂತ ಹೇಳು!', 'Ready-na ilva anta helu!', 'Say whether you are ready or not!']),
+  ],
+  outro: ['ಸಿಕ್ಸ್! ಇಲ್ಲ ಇಲ್ಲ, ಔಟ್! ಮತ್ತೆ ಬಾ ಅಣ್ಣ.', 'Six! Illa illa, out! Matte baa anna.', 'Six! No no, out! Come again, brother.'],
+  learned: [['naanu aadla?', 'can I play?'], ['naanu batting maadteeni', 'I will bat'], ['naanu ready', 'I am ready']],
+  again: ['ಅಣ್ಣ ಬಂದ್ರು! ಇನ್ನೊಂದು ಮ್ಯಾಚ್ ಆಡೋಣ್ವಾ?', 'Anna bandru! Innondu match aadonva?', 'Brother is here! Shall we play another match?'],
+});

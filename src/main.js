@@ -6,6 +6,7 @@ import { createMusic } from './game/audio/music.js';
 const WORLDS = {
   'dozy-hollow': () => import('./worlds/dozy-hollow/index.js'),
   mumbai: () => import('./worlds/mumbai/index.js'),
+  bengaluru: () => import('./worlds/bengaluru/index.js'),
 };
 const DEFAULT_WORLD = 'mumbai';
 

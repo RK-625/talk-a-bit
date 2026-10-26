@@ -1,6 +1,6 @@
 /**
- * game/talk/speak.js: speak(text, { lang = 'hi', voice = { rate, pitch, name? } }) -> Promise (resolves when done, cancelled or failed).
- *   Browser speechSynthesis: a hi-IN voice for Hindi, en-IN / en-GB for English. Voices load asynchronously (handled).
+ * game/talk/speak.js: speak(text, { lang = 'hi' | 'kn' | 'en', voice = { rate, pitch, name? } }) -> Promise (resolves when done, cancelled or failed).
+ *   Browser speechSynthesis: a hi-IN voice for Hindi, a kn-IN voice for Kannada (none installed: text only, ONE console warning), en-IN / en-GB for English. Voices load asynchronously (handled).
  *   cancel() stops the current line. If no voice for the language exists the text is still shown by the UI; we warn once.
  *   Keep this behind speak() so a better TTS can replace it later.
  */
@@ -12,7 +12,7 @@ let current = null; // keep a reference (Chrome can garbage-collect utterances m
 function loadVoices() { voices = synth?.getVoices?.() ?? []; }
 if (synth) { loadVoices(); synth.addEventListener?.('voiceschanged', loadVoices); }
 
-const PREFS = { hi: ['hi-IN', 'hi'], en: ['en-IN', 'en-GB', 'en-US', 'en'] };
+const PREFS = { hi: ['hi-IN', 'hi'], kn: ['kn-IN', 'kn'], en: ['en-IN', 'en-GB', 'en-US', 'en'] };
 
 /** best available voice for 'hi' | 'en' (or null) */
 export function pickVoice(lang = 'hi', name = null) {
@@ -32,7 +32,8 @@ export function speak(text, { lang = 'hi', voice = {} } = {}) {
     if (!synth || !text) return resolve();
     cancel();
     const v = pickVoice(lang, voice.name);
-    if (!v && !warned.has(lang)) { warned.add(lang); console.warn(`[talk] no ${lang === 'hi' ? 'Hindi (hi-IN)' : 'English'} speech voice installed; showing text only`); }
+    if (!v && !warned.has(lang)) { warned.add(lang); console.warn(`[talk] no ${lang === 'hi' ? 'Hindi (hi-IN)' : lang === 'kn' ? 'Kannada (kn-IN)' : 'English'} speech voice installed; showing text only`); }
+    if (!v && lang === 'kn') return resolve(); // never let the default voice mangle Kannada script
     const u = new SpeechSynthesisUtterance(text);
     if (v) { u.voice = v; u.lang = v.lang; } else u.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
     u.rate = voice.rate ?? 1; u.pitch = voice.pitch ?? 1; u.volume = voice.volume ?? 1;

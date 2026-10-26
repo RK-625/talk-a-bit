@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('priest', {
+  name: 'Archaka Ramesh Bhat', role: 'temple priest (archaka)', site: 'Temple door (gopura-style shrine)', diff: 3,
+  voice: { rate: 0.85, pitch: 0.8 },
+  persona: 'Serene archaka ringing the bell and waving the aarti lamp, chanting softly. Gentle with the newcomer and generous with prasada.',
+  goal: 'Greet him respectfully, ask which festival is coming, and ask for prasada.',
+  steps: [
+    S('greet', ['ಓಂ ನಮಃ ಶಿವಾಯ. ದರ್ಶನಕ್ಕೆ ಬಂದ್ರಾ?', 'Om namah Shivaya. Darshanakke bandra?', 'Om namah Shivaya. Have you come for darshan?'],
+      'Greet the priest respectfully.', ['Namaskara, swami.', 'ನಮಸ್ಕಾರ, ಸ್ವಾಮಿ.'],
+      ['namaskara swami', 'namaskara', 'namaskaragalu swami', 'namaste swami', 'ನಮಸ್ಕಾರ ಸ್ವಾಮಿ', 'ನಮಸ್ಕಾರ', 'namaskara guruji'],
+      'greet_priest', ['Greet him with a folded-hands word.', '"Namaskara" is the polite greeting.', 'Say: "Namaskara, swami."'],
+      ['ಶುಭವಾಗಲಿ. ಒಳಗೆ ಬನ್ನಿ.', 'Shubhavagali. Olage banni.', 'May good come to you. Please come in.'],
+      ['ನಮಸ್ಕಾರ ಹೇಳಲ್ವಾ? ಹಿರಿಯರಿಗೆ ಗೌರವ ಇರಲಿ.', 'Namaskara helalva? Hiriyarige gaurava irali.', 'No greeting? Let there be respect for elders.']),
+    S('festival', ['ಈ ವಾರ ವಿಶೇಷ ಪೂಜೆ ಇದೆ, ಗೊತ್ತಾ?', 'Ee vaara vishesha pooje ide, gottaa?', 'There is a special puja this week, did you know?'],
+      'Ask which festival it is.', ['Yaava habba, swami?', 'ಯಾವ ಹಬ್ಬ, ಸ್ವಾಮಿ?'],
+      ['yaava habba swami', 'yaava habba', 'ee vaara yaava habba', 'yaavudu habba swami', 'ಯಾವ ಹಬ್ಬ ಸ್ವಾಮಿ', 'ಯಾವ ಹಬ್ಬ', 'swami yaava habba ide'],
+      'ask_which_festival', ['Ask which festival it is.', '"Yaava" = which. "Habba" = festival.', 'Say: "Yaava habba, swami?"'],
+      ['ಮಹಾಶಿವರಾತ್ರಿ. ರಾತ್ರಿ ಇಡೀ ಭಜನೆ ಇರುತ್ತೆ.', 'Mahashivaratri. Raatri idi bhajane irutte.', 'Mahashivaratri. There will be bhajans all night.'],
+      ['ಯಾವ ಹಬ್ಬ ಅಂತ ಕೇಳ್ತಿದ್ದೀರಾ?', 'Yaava habba anta keltiddira?', 'Are you asking which festival?']),
+    S('prasada', ['ಪೂಜೆ ಆಯ್ತು. ಇನ್ನೇನು ಬೇಕು?', 'Pooje aytu. Innenu beku?', 'The puja is done. What else do you need?'],
+      'Ask for prasada.', ['Swami, prasada kodi.', 'ಸ್ವಾಮಿ, ಪ್ರಸಾದ ಕೊಡಿ.'],
+      ['swami prasada kodi', 'prasada kodi swami', 'prasada beku', 'swalpa prasada kodi', 'ಸ್ವಾಮಿ ಪ್ರಸಾದ ಕೊಡಿ', 'ಪ್ರಸಾದ ಕೊಡಿ', 'swami prasada sigutta'],
+      'ask_for_prasada', ['Ask for the blessed food.', '"Prasada" = temple offering. "Kodi" = please give.', 'Say: "Swami, prasada kodi."'],
+      ['ತಗೊಳ್ಳಿ, ಪುಳಿಯೋಗರೆ ಪ್ರಸಾದ. ಬಲಗೈ ಚಾಚಿ.', 'Tagolli, puliyogare prasada. Balagai chaachi.', 'Take this puliyogare prasada. Stretch out your right hand.'],
+      ['ಪ್ರಸಾದ ಬೇಕಾ? ಹೇಳಿ ಮಗು.', 'Prasada beka? Heli magu.', 'Do you want prasada? Say so, child.']),
+  ],
+  outro: ['ದೇವರ ಆಶೀರ್ವಾದ ಇರಲಿ ರೋಹನ್. ಹೋಗಿ ಬನ್ನಿ.', 'Devara aashirvaada irali Rohan. Hogi banni.', 'May God bless you Rohan. Go and come again.'],
+  learned: [['namaskara, swami', 'greetings, swami'], ['yaava habba?', 'which festival?'], ['prasada kodi', 'please give prasada']],
+  again: ['ಮತ್ತೆ ದರ್ಶನಕ್ಕೆ ಬಂದ್ರಾ? ಒಳ್ಳೆದು.', 'Matte darshanakke bandra? Olledu.', 'Back for darshan again? Good.'],
+});

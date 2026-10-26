@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('trafficCop', {
+  name: 'Constable Shivanna', role: 'traffic police', site: 'Vidhana Soudha road junction', diff: 2,
+  voice: { rate: 0.95, pitch: 0.8 },
+  persona: 'Strict but fair traffic policeman at the Vidhana Soudha junction who explains the signal and the one-way patiently to a newcomer.',
+  goal: 'Ask the way to Lalbagh, ask if it is far, and thank the constable.',
+  steps: [
+    S('way', ['ಸಾರ್, ಜೀಬ್ರಾ ಕ್ರಾಸಿಂಗ್‌ನಲ್ಲಿ ಹೋಗಿ. ಏನು ಬೇಕಿತ್ತು?', 'Saar, zebra crossing-alli hogi. Enu bekittu?', 'Sir, cross at the zebra crossing. What did you need?'],
+      'Ask the way to Lalbagh.', ['Lalbagh ge hege hogodu, saar?', 'ಲಾಲ್‌ಬಾಗ್‌ಗೆ ಹೇಗೆ ಹೋಗೋದು, ಸಾರ್?'],
+      ['lalbagh ge hege hogodu saar', 'lalbagh ge hege hogodu', 'lalbagh ge daari eshtu', 'lalbagh daari heli saar', 'ಲಾಲ್‌ಬಾಗ್‌ಗೆ ಹೇಗೆ ಹೋಗೋದು', 'ಲಾಲ್‌ಬಾಗ್ ದಾರಿ ಹೇಳಿ ಸಾರ್', 'saar Lalbagh ge hege hogbeku'],
+      'ask_way_to_lalbagh', ['Ask how to get to Lalbagh.', '"Hege hogodu" = how to go.', 'Say: "Lalbagh ge hege hogodu, saar?"'],
+      ['ಸೀದಾ ಹೋಗಿ, ಸಿಗ್ನಲ್‌ನಲ್ಲಿ ಎಡಕ್ಕೆ ತಿರುಗಿ.', 'Seedha hogi, signal-alli edakke tirugi.', 'Go straight, turn left at the signal.'],
+      ['ಎಲ್ಲಿಗೆ ಅಂದ್ರಿ ಸಾರ್? ಸೈರನ್ ಸದ್ದಾಯ್ತು.', 'Ellige andri saar? Siren saddaytu.', 'Where did you say, sir? The siren was loud.']),
+    S('far', ['ಅಲ್ಲಿ ಒಂದು ವನ್‌ವೇ ಇದೆ, ನೋಡ್ಕೊಂಡು ಹೋಗಿ.', 'Alli ondu one-way ide, nodkondu hogi.', 'There is a one-way there, go carefully.'],
+      'Ask if it is far.', ['Tumba doora ideya?', 'ತುಂಬಾ ದೂರ ಇದೆಯಾ?'],
+      ['tumba doora ideya', 'doora ideya', 'tumba doora ide', 'alli tanaka doora ideya', 'ತುಂಬಾ ದೂರ ಇದೆಯಾ', 'ದೂರ ಇದೆಯಾ', 'far ideya saar'],
+      'ask_if_far', ['Ask whether it is far away.', '"Doora" = far. "ideya" = is it?', 'Say: "Tumba doora ideya?"'],
+      ['ಇಲ್ಲ ಸಾರ್, ಹತ್ತು ನಿಮಿಷ ಅಷ್ಟೇ.', 'Illa saar, hattu nimisha ashte.', 'No sir, just ten minutes.'],
+      ['ದೂರನಾ ಅಂತ ಕೇಳ್ತಿದ್ದೀರಾ?', 'Doorana anta keltiddira?', 'Are you asking if it is far?']),
+    S('thanks', ['ಹುಷಾರಾಗಿ ಹೋಗಿ, ರೋಹನ್ ಸಾರ್.', 'Hushaaragi hogi, Rohan saar.', 'Go carefully, Rohan sir.'],
+      'Thank the constable.', ['Thumba thanks, saar.', 'ತುಂಬಾ ಥ್ಯಾಂಕ್ಸ್, ಸಾರ್.'],
+      ['tumba thanks saar', 'dhanyavaada saar', 'tumba dhanyavaada saar', 'thanks saar', 'ತುಂಬಾ ಥ್ಯಾಂಕ್ಸ್ ಸಾರ್', 'ಧನ್ಯವಾದ ಸಾರ್', 'ಥ್ಯಾಂಕ್ಸ್ ಸಾರ್'],
+      'thank_constable', ['Thank him politely.', '"Tumba" = very. "Thanks" or "dhanyavaada".', 'Say: "Tumba thanks, saar."'],
+      ['ಪರವಾಗಿಲ್ಲ, ಸೇಫ್ ಆಗಿ ಹೋಗಿ.', 'Paravagilla, safe aagi hogi.', 'No problem, go safely.'],
+      ['ಏನು ಹೇಳ್ತೀರಿ ಸಾರ್? ವಿಸಿಲ್ ಕೇಳಿಸ್ತು.', 'Enu helteeri saar? Whistle kelistu.', 'What are you saying, sir? I heard the whistle.']),
+  ],
+  outro: ['ಸಿಗ್ನಲ್ ಹಸಿರು ಆಯ್ತು, ಹೋಗಿ ಹೋಗಿ!', 'Signal hasiru aytu, hogi hogi!', 'The signal is green, go go!'],
+  learned: [['Lalbagh ge hege hogodu?', 'how do I get to Lalbagh?'], ['tumba doora ideya?', 'is it very far?'], ['tumba thanks', 'thanks a lot']],
+  again: ['ಸಾರ್, ಮತ್ತೆ ದಾರಿ ತಪ್ಪಿದ್ರಾ?', 'Saar, matte daari tappidra?', 'Sir, lost your way again?'],
+});

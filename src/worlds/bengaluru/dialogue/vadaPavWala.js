@@ -1,0 +1,31 @@
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('vadaPavWala', {
+  name: 'Venkatesh', role: 'masala-dosa cart man', site: 'Darshini square, masala dosa and bisi bele bath cart', diff: 1,
+  voice: { rate: 1.0, pitch: 0.9 },
+  persona: 'Chatty dosa-cart man whose hands are always busy on the hot tawa. Friendly to Rohan, the newcomer.',
+  goal: 'Order two masala dosas, ask for less spicy chutney, and pay 100 rupees.',
+  steps: [
+    S('order', ['ದೋಸೆ ದೋಸೆ! ರೋಹನ್, ಎಷ್ಟು ದೋಸೆ ಬೇಕು?', 'Dose dose! Rohan, eshtu dose beku?', 'Dosa, dosa! Rohan, how many dosas do you want?'],
+      'Order two masala dosas.', ['Anna, eradu masale dose kodi.', 'ಅಣ್ಣ, ಎರಡು ಮಸಾಲೆ ದೋಸೆ ಕೊಡಿ.'],
+      ['eradu masale dose kodi', 'anna eradu masale dose beku', 'eradu dose kodi', 'eradu masala dosa kodi anna', 'ಎರಡು ಮಸಾಲೆ ದೋಸೆ ಕೊಡಿ', 'ಅಣ್ಣ ಎರಡು ದೋಸೆ ಬೇಕು', 'anna two masala dose kodi'],
+      'order_two_masala_dosa', ['Say the number and "masala dosa".', 'Two = "eradu". Dosa = "dose".', 'Say: "Anna, eradu masale dose kodi."'],
+      ['ಆಯ್ತು, ಬಿಸಿ ತವಾ ಮೇಲೆ ಹಾಕ್ತೀನಿ.', 'Aytu, bisi tava mele haakteeni.', 'Okay, putting them on the hot tawa.'],
+      ['ಎಷ್ಟು ದೋಸೆ ಅಂದ್ರಿ? ತವಾ ಸದ್ದಾಯ್ತು.', 'Eshtu dose andri? Tava saddaytu.', 'How many dosas did you say? The tawa was noisy.']),
+    S('chutney', ['ಚಟ್ನಿ ಖಾರ ಜಾಸ್ತಿ ಹಾಕ್ಲಾ?', 'Chutney khaara jaasti haakla?', 'Shall I put extra spicy chutney?'],
+      'Ask for less spicy chutney.', ['Khaara kadime haaki, anna.', 'ಖಾರ ಕಡಿಮೆ ಹಾಕಿ, ಅಣ್ಣ.'],
+      ['khaara kadime haaki', 'khaara jaasti beda', 'swalpa khaara saaku', 'anna khaara kadime', 'ಖಾರ ಕಡಿಮೆ ಹಾಕಿ', 'ಖಾರ ಜಾಸ್ತಿ ಬೇಡ', 'less khaara haaki anna'],
+      'ask_less_spicy_chutney', ['Ask him to go easy on the spice.', 'Spice = "khaara". Less = "kadime".', 'Say: "Khaara kadime haaki, anna."'],
+      ['ಸರಿ, ಸ್ವಲ್ಪವೇ ಹಾಕ್ತೀನಿ. ಹೊಸಬರಿಗೆ ಖಾರ ಕಷ್ಟ.', 'Sari, swalpave haakteeni. Hosabarige khaara kashta.', 'Okay, just a little. Spice is hard for newcomers.'],
+      ['ಖಾರ ಜಾಸ್ತಿನಾ, ಕಡಿಮೆನಾ?', 'Khaara jaastina, kadimena?', 'More spice or less?']),
+    S('pay', ['ತಗೊಳ್ಳಿ, ಎರಡು ದೋಸೆ. ನೂರು ರೂಪಾಯಿ ಆಯ್ತು.', 'Tagolli, eradu dose. Nooru rupayi aytu.', 'Here, two dosas. That comes to a hundred rupees.'],
+      'Pay 100 rupees.', ['Tagolli, nooru rupayi.', 'ತಗೊಳ್ಳಿ, ನೂರು ರೂಪಾಯಿ.'],
+      ['tagolli nooru rupayi', 'nooru rupayi anna', 'idu nooru rupayi', 'nooru kodteeni', 'ತಗೊಳ್ಳಿ ನೂರು ರೂಪಾಯಿ', 'ನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ', 'here nooru rupayi anna'],
+      'pay_hundred_rupees', ['Hand over the money and say how much.', '100 = "nooru". Rupees = "rupayi".', 'Say: "Tagolli, nooru rupayi."'],
+      ['ಥ್ಯಾಂಕ್ಯು! ಚಟ್ನಿ ಬೇಕಿದ್ರೆ ಇನ್ನೂ ಇದೆ.', 'Thank you! Chutney bekidre innu ide.', 'Thank you! There is more chutney if you want.'],
+      ['ದುಡ್ಡು ಕೊಡ್ತೀರಾ ಸಾರ್? ಬೇಗ ಹೇಳಿ.', 'Duddu kodteera saar? Bega heli.', 'Will you pay, sir? Tell me quickly.']),
+  ],
+  outro: ['ಚೆನ್ನಾಗಿ ತಿನ್ನಿ ರೋಹನ್, ಮತ್ತೆ ಬನ್ನಿ.', 'Chennagi tinni Rohan, matte banni.', 'Eat well Rohan, come again.'],
+  learned: [['eradu masale dose kodi', 'give me two masala dosas'], ['khaara kadime haaki', 'put less spice'], ['nooru rupayi', 'a hundred rupees']],
+  again: ['ರೋಹನ್, ಇನ್ನೊಂದು ದೋಸೆ ಹಾಕ್ಲಾ?', 'Rohan, innondu dose haakla?', 'Rohan, shall I make one more dosa?'],
+});
