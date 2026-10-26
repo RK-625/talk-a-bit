@@ -22,6 +22,7 @@ import { segmentPoint } from './colliders.js';
 
 // ---- tunables --------------------------------------------------------------
 const WALK_SPEED = 6;
+const SPRINT = 1.6; // Shift held: run
 const ACCEL_GROUND = 12; // 1/s response of velocity toward target
 const ACCEL_AIR = 3.5;
 const TURN_RATE = 14; // 1/s response of facing toward move direction
@@ -102,7 +103,7 @@ export function createPlayer({ hero, planet, colliders, spawn = {}, radius: play
     const right = _b.crossVectors(fwd, up); // fwd x up = right
     const want = new THREE.Vector3().addScaledVector(fwd, input.moveY).addScaledVector(right, input.moveX);
     const mag = Math.min(1, want.length());
-    if (mag > 1e-4) want.multiplyScalar(WALK_SPEED * mag / want.length());
+    if (mag > 1e-4) want.multiplyScalar(WALK_SPEED * (input.sprint ? SPRINT : 1) * mag / want.length());
 
     // ---- accelerate ----
     tangent(vel);
@@ -220,7 +221,7 @@ export function createPlayer({ hero, planet, colliders, spawn = {}, radius: play
   function animate(dt, speed) {
     const moving = THREE.MathUtils.clamp(speed / WALK_SPEED, 0, 1);
     walkAmt += (moving - walkAmt) * (1 - Math.exp(-12 * dt));
-    phase += dt * (6 + 8 * walkAmt) * (grounded ? 1 : 0.2);
+    phase += dt * (6 + 8 * walkAmt * Math.max(1, speed / WALK_SPEED)) * (grounded ? 1 : 0.2); // faster steps when running
     if (object.userData.animate) {
       object.userData.animate(dt, { speed, walk: walkAmt, grounded, vr, time, phase });
       return;

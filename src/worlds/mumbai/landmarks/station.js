@@ -110,7 +110,7 @@ export function createStation(ink, opts = {}) {
       ...[-6.8, 1.8, 7.0].map((x) => ({ x, z: -1.5, radius: 0.5, height: 1.0 })),
     ],
     walkable: [
-      { shape: 'rect', x: 0, z: 0, w: L, d: PD, y: PH },
+      { shape: 'rect', x: 0, z: 0, w: L + 1, d: PD + 1, y: PH }, // the whole stone base, not just the slab: its 0.5 ledge must not sink the hero
       { shape: 'ramp', x: L / 2 + RAMP_LEN / 2, z: -0.2, w: RAMP_LEN, d: 2.6, y0: RAMP_LOW, y1: PH, rising: '-x' },
       { shape: 'ramp', x: -L / 2 - RAMP_LEN / 2, z: -0.2, w: RAMP_LEN, d: 2.6, y0: RAMP_LOW, y1: PH, rising: '+x' },
     ],

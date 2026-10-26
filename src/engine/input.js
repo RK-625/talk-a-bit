@@ -1,7 +1,7 @@
 /**
  * engine/input.js: createInput(canvas) -> { read() } where read() returns and resets
- *   { moveX (+1 right), moveY (+1 forward), jump (held), lookDX, lookDY (px since last read), zoom (+ = out, fractional) }.
- *   Desktop only: keyboard WASD/arrows/Space, mouse drag, wheel. Keys are ignored while a text field has focus (conversations).
+ *   { moveX (+1 right), moveY (+1 forward), jump (held), sprint (Shift held), lookDX, lookDY (px since last read), zoom (+ = out, fractional) }.
+ *   Desktop only: keyboard WASD/arrows/Space/Shift, mouse drag, wheel. Keys are ignored while a text field has focus (conversations).
  *   input.setLocked(true) freezes movement/look/zoom (conversations); input.clearKeys() drops held keys.
  */
 // Keyboard + mouse input -> { moveX, moveY, jump, lookDX, lookDY, zoom }
@@ -59,7 +59,7 @@ export function createInput(canvas) {
     get locked() { return locked; },
     clearKeys() { keys.clear(); },
     read() {
-      if (locked) { look = { x: 0, y: 0 }; zoom = 0; return { moveX: 0, moveY: 0, jump: false, lookDX: 0, lookDY: 0, zoom: 0 }; }
+      if (locked) { look = { x: 0, y: 0 }; zoom = 0; return { moveX: 0, moveY: 0, jump: false, sprint: false, lookDX: 0, lookDY: 0, zoom: 0 }; }
       let mx = (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0);
       let my = (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0);
       const len = Math.hypot(mx, my);
@@ -68,6 +68,7 @@ export function createInput(canvas) {
         moveX: mx,
         moveY: my,
         jump: keys.has('Space'),
+        sprint: keys.has('ShiftLeft') || keys.has('ShiftRight'),
         lookDX: look.x,
         lookDY: look.y,
         zoom,
