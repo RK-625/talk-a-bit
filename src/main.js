@@ -7,6 +7,8 @@ const WORLDS = {
   'dozy-hollow': () => import('./worlds/dozy-hollow/index.js'),
   mumbai: () => import('./worlds/mumbai/index.js'),
   bengaluru: () => import('./worlds/bengaluru/index.js'),
+  hyderabad: () => import('./worlds/hyderabad/index.js'),
+  chennai: () => import('./worlds/chennai/index.js'),
 };
 const DEFAULT_WORLD = 'mumbai';
 

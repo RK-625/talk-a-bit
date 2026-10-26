@@ -1,0 +1,38 @@
+// Santhome devotee at the basilica gate.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('pilgrim', {
+  name: 'Joseph Ayya', role: 'Santhome devotee', site: 'Santhome Basilica gate', diff: 3,
+  voice: { rate: 0.9, pitch: 0.9 },
+  persona: 'Kindly thin man with a basket of white flowers and candles, humming a hymn at the gate; explains how to light a candle and where to sit.',
+  goal: 'Greet him, ask when the church closes, ask where to light a candle, and thank him.',
+  steps: [
+    S('greet', ['வாங்கம்மா, ஆண்டவர் உங்களை ஆசீர்வதிப்பார்.', 'Vaangammaa, aandavar ungalai aaseervadhippaar.', 'Come, dear, the Lord will bless you.'],
+      'Greet him and ask how he is.', ['Vanakkam ayya, nalla irukkeengala?', 'வணக்கம் ஐயா, நல்லா இருக்கீங்களா?'],
+      ['vanakkam ayya nalla irukkeengala', 'vanakkam ayya', 'ayya nalla irukkeengala', 'vanakkam nalla irukkeengala', 'vanakkam ayya sukhama', 'வணக்கம் ஐயா, நல்லா இருக்கீங்களா', 'வணக்கம் ஐயா'],
+      'greet_devotee', ['Greet him politely.', '"Nalla irukkeengala?" = are you well?', 'Say: "Vanakkam ayya, nalla irukkeengala?"'],
+      ['கடவுள் புண்ணியத்துல நல்லா இருக்கேன். நீங்க?', 'Kadavul punniyatthula nallaa irukken. Neenga?', 'By God grace I am well. And you?'],
+      ['என்ன சொல்றீங்க? கொஞ்சம் மெதுவா சொல்லுங்க.', 'Enna soldreenga? Konjam methuvaa sollunga.', 'What are you saying? Say it a bit slower.']),
+    S('closing', ['சாயந்திர பிரார்த்தனை இருக்கு. நிறைய பேர் வருவாங்க.', 'Saayandhira pirarthanai irukku. Niraiya per varuvaanga.', 'There is evening prayer. Many people will come.'],
+      'Ask when the church closes.', ['Church eppo mooduvaanga ayya?', 'சர்ச் எப்போ மூடுவாங்க ஐயா?'],
+      ['church eppo mooduvaanga ayya', 'church eppo moodum', 'eppo moodum ayya', 'church moodura neram enna', 'ethanai manikku moodum ayya', 'சர்ச் எப்போ மூடுவாங்க', 'எப்போ மூடுவாங்க ஐயா'],
+      'ask_closing_time', ['Ask the closing time.', '"Eppo" = when. "Mooduvaanga" = they close.', 'Say: "Church eppo mooduvaanga ayya?"'],
+      ['ராத்திரி ஒன்பது மணிக்கு மூடுவாங்கம்மா.', 'Raatthiri onbadhu manikku mooduvaangammaa.', 'They close at nine at night, dear.'],
+      ['மூடுற நேரம் கேக்கறீங்களா?', 'Moodura neram kekkareengalaa?', 'Asking the closing time?']),
+    S('candle', ['உள்ள போகலாம். மெழுகுவர்த்தி வாங்கிக்கோங்க.', 'Ulla pogalaam. Mezhuguvartthi vaangikkonga.', 'You can go in. Take a candle.'],
+      'Ask where to light a candle.', ['Mezhuguvartthi enga yetthanum?', 'மெழுகுவர்த்தி எங்க ஏத்தணும்?'],
+      ['mezhuguvartthi enga yetthanum', 'candle enga yetthanum ayya', 'candle enga yethanum', 'mezhuguvartthi enga vaikkanum', 'candle yetha enga poganum', 'மெழுகுவர்த்தி எங்க ஏத்தணும்', 'மெழுகுவர்த்தி எங்க வைக்கணும்'],
+      'ask_where_to_light_candle', ['Ask where to put the candle.', '"Enga" = where. "Yetthanum" = must light.', 'Say: "Mezhuguvartthi enga yetthanum?"'],
+      ['அந்த பக்கம் ஸ்டாண்ட் இருக்கு பாருங்க. அங்க ஏத்துங்க.', 'Andha pakkam stand irukku paarunga. Anga yetthunga.', 'See the stand on that side. Light it there.'],
+      ['எதை எங்கன்னு கேக்கறீங்க?', 'Edhai engannu kekkareenga?', 'What and where are you asking?']),
+    S('thanks', ['அங்க உக்காந்து கொஞ்ச நேரம் பிரார்த்தனை பண்ணுங்க.', 'Anga ukkaandhu konja neram pirarthanai pannunga.', 'Sit there and pray for a while.'],
+      'Thank him.', ['Romba nandri ayya.', 'ரொம்ப நன்றி ஐயா.'],
+      ['romba nandri ayya', 'nandri ayya', 'ungalukku nandri ayya', 'thanks ayya romba nandri', 'நன்றி ஐயா', 'ரொம்ப நன்றி ஐயா', 'ayya nandri'],
+      'thank_devotee', ['Thank him kindly.', 'Thanks = "nandri". Sir = "ayya".', 'Say: "Romba nandri ayya."'],
+      ['கடவுள் உங்களை காப்பாத்துவார். போய்ட்டு வாங்கம்மா.', 'Kadavul ungalai kaappaatthuvaar. Poittu vaangammaa.', 'God will protect you. Go and come back, dear.'],
+      ['ஒண்ணும் சொல்ல வேணாமா?', 'Onnum solla venaamaa?', 'Nothing to say?']),
+  ],
+  outro: ['அமைதியா இருங்கம்மா. சென்னை உங்களுக்கு நல்லது செய்யும்.', 'Amaidhiyaa irungammaa. Chennai ungalukku nalladhu seyyum.', 'Stay at peace, dear. Chennai will be good to you.'],
+  learned: [['nalla irukkeengala?', 'are you well?'], ['church eppo mooduvaanga?', 'when does the church close?'], ['romba nandri', 'thank you very much']],
+  again: ['மறுபடி வந்தீங்களா? ஆண்டவர் உங்களோட இருக்கார்.', 'Marubadi vandheengalaa? Aandavar ungalodu irukkaar.', 'You came again? The Lord is with you.'],
+});

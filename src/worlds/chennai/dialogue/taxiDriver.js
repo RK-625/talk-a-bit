@@ -1,0 +1,38 @@
+// Auto driver at the Fort St. George auto stand.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('taxiDriver', {
+  name: 'Pandi Anna', role: 'auto driver', site: 'Fort St. George auto stand, parked auto', diff: 2,
+  voice: { rate: 1.05, pitch: 0.85 },
+  persona: 'Chatty auto driver who first says "meter-la podamaaten" but gives in with a laugh once he hears Meera is learning Tamil.',
+  goal: 'Ask if he goes to Central, ask him to put the meter, ask the fare, and pay at the end.',
+  steps: [
+    S('where', ['ஆட்டோ வேணுமா மேடம்? எங்க போகணும்?', 'Auto venumaa madam? Enga poganum?', 'Need an auto, madam? Where do you want to go?'],
+      'Ask if he will go to Central station.', ['Anna, Central varuveengala?', 'அண்ணா, சென்ட்ரல் வருவீங்களா?'],
+      ['central varuveengala', 'anna central varuveengala', 'central poganum anna', 'central varuma anna', 'anna central ku varuveengala', 'சென்ட்ரல் வருவீங்களா', 'சென்ட்ரல் போகணும் அண்ணா'],
+      'ask_auto_to_central', ['Name the place and ask if he comes.', '"Varuveengala?" = will you come?', 'Say: "Anna, Central varuveengala?"'],
+      ['சென்ட்ரலா? சரி, வாங்க ஏறுங்க.', 'Centrala? Sari, vaanga erunga.', 'Central? Okay, come get in.'],
+      ['எங்கன்னு சொன்னீங்க? காதுல விழல.', 'Engannu sonneenga? Kaadhula vizhala.', 'Where did you say? I could not hear.']),
+    S('meter', ['மீட்டர்-ல போட மாட்டேன் மேடம், நூறு ரூபா.', 'Meter-la podamaaten madam, nooru rubaa.', 'I will not go by meter, madam, it is a hundred rupees.'],
+      'Ask him politely to put the meter.', ['Meter podunga anna.', 'மீட்டர் போடுங்க அண்ணா.'],
+      ['meter podunga anna', 'meter podunga', 'meter pottu ponga anna', 'anna meter podunga please', 'meter-la ponga anna', 'மீட்டர் போடுங்க', 'மீட்டர் போடுங்க அண்ணா'],
+      'ask_for_meter', ['Ask him to switch the meter on.', 'Meter = "meter". Put = "podunga".', 'Say: "Meter podunga anna."'],
+      ['சரி மேடம், புதுசா தமிழ் கத்துக்கிறீங்க, மீட்டர் போடுறேன்.', 'Sari madam, pudhusaa Tamizh katthukkireenga, meter podren.', 'Okay madam, you are learning Tamil, I will put the meter.'],
+      ['மீட்டரா, நூறு ரூபாயா?', 'Meterraa, nooru rubaayaa?', 'Meter, or the hundred rupees?']),
+    S('fare', ['ஏறுங்க ஏறுங்க. டிராஃபிக் இருக்கு, கொஞ்சம் லேட் ஆகும்.', 'Erunga erunga. Traffic irukku, konjam late aagum.', 'Get in. There is traffic, it will take a little time.'],
+      'Ask roughly how much it will be.', ['Evvalavu aagum anna?', 'எவ்வளவு ஆகும் அண்ணா?'],
+      ['evvalavu aagum anna', 'evvalavu aagum', 'evvalavu rubaa aagum', 'fare evvalavu anna', 'எவ்வளவு ஆகும் அண்ணா', 'எவ்வளவு ஆகும்', 'evlo aagum anna'],
+      'ask_fare', ['Ask how much it will cost.', '"Evvalavu" = how much. "aagum" = will it be.', 'Say: "Evvalavu aagum anna?"'],
+      ['எண்பது ரூபா ஆகலாம் மேடம்.', 'Enbadhu rubaa aagalaam madam.', 'It could be around eighty rupees, madam.'],
+      ['என்ன கேட்டீங்க? ரேட்டா?', 'Enna ketteenga? Rate-aa?', 'What did you ask? The rate?']),
+    S('pay', ['சென்ட்ரல் வந்தாச்சு மேடம். எண்பது ரூபா.', 'Central vandhaachu madam. Enbadhu rubaa.', 'We are at Central, madam. Eighty rupees.'],
+      'Pay him and say thanks.', ['Indhaanga anna, nandri.', 'இந்தாங்க அண்ணா, நன்றி.'],
+      ['indhaanga anna nandri', 'indhaanga anna enbadhu rubaa', 'idhaanga anna nandri', 'nandri anna', 'thanks anna indhaanga', 'இந்தாங்க அண்ணா நன்றி', 'நன்றி அண்ணா'],
+      'pay_and_thank_driver', ['Hand over the money and thank him.', '"Indhaanga" = here you are. "Nandri" = thanks.', 'Say: "Indhaanga anna, nandri."'],
+      ['நன்றிங்க! பார்த்து போங்க மேடம்.', 'Nandringa! Paarthu ponga madam.', 'Thank you! Go carefully, madam.'],
+      ['காசு குடுக்கறீங்களா மேடம்? இங்கயே நிறுத்தியிருக்கேன்.', 'Kaasu kudukkareengalaa madam? Ingaye niruthiyirukken.', 'Will you pay, madam? I have stopped right here.']),
+  ],
+  outro: ['மறுபடி ஆட்டோ வேணும்னா சொல்லுங்க மீரா மேடம்!', 'Marubadi auto venumnaa sollunga Meera madam!', 'If you need an auto again, tell me, Meera madam!'],
+  learned: [['Central varuveengala?', 'will you come to Central?'], ['meter podunga', 'please put the meter'], ['evvalavu aagum?', 'how much will it be?']],
+  again: ['என்ன மேடம், மறுபடி ஆட்டோ வேணுமா?', 'Enna madam, marubadi auto venumaa?', 'What, madam, need an auto again?'],
+});

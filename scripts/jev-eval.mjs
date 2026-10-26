@@ -38,6 +38,43 @@ const dialogues = {
   },
 };
 
+// two sample Tamil dialogues (Chennai) and two Telugu ones (Hyderabad), inline for the same reason
+const southern = (id, name, role, lang, worldId, persona, goal, steps) => ({ id, name, role, lang, worldId, persona, goal, steps });
+Object.assign(dialogues, {
+  ta_teakadai: southern('ta_teakadai', 'Murugan Anna', 'chaiwalaUncle', 'ta', 'chennai', 'Warm tea-kadai owner who is kind to Meera, a food blogger learning Tamil.', 'Order a tea at the tea kadai.', [
+    { id: 'order', npc: kn('என்ன வேணும் மீரா?', 'Enna venum Meera?', 'What do you want, Meera?'), instruction: 'Ask for one tea.',
+      suggest: { roman: 'Anna, oru tea kudunga.', text: 'அண்ணே, ஒரு டீ கொடுங்க.' }, intent: 'order_one_tea',
+      accept: ['anna oru tea kudunga', 'oru tea venum anna', 'oru tea kudunga', 'anne oru tee kodunga', 'ஒரு டீ வேணும்', 'tea kudunga anna', 'oru chai kudunga anna'] },
+    { id: 'biscuit', npc: kn('பிஸ்கட் வேணுமா?', 'Biscuit venuma?', 'Want a biscuit?'), instruction: 'Say no thanks, only tea is enough.',
+      suggest: { roman: 'Venaam anna, tea mattum podhum.', text: 'வேணாம் அண்ணே, டீ மட்டும் போதும்.' }, intent: 'decline_biscuit',
+      accept: ['venaam anna tea mattum podhum', 'venam anna', 'vendaam tea mattum podhum', 'வேணாம் அண்ணே', 'illa anna tea podhum', 'venaam podhum'] },
+  ]),
+  ta_auto: southern('ta_auto', 'Selvam', 'taxiDriver', 'ta', 'chennai', 'Chatty auto driver who haggles over the fare.', 'Ask an auto driver to take you to Marina Beach.', [
+    { id: 'where', npc: kn('எங்க போகணும் மேடம்?', 'Enga poganum madam?', 'Where do you want to go, madam?'), instruction: 'Ask if he will go to Marina Beach.',
+      suggest: { roman: 'Anna, Marina Beach varuma?', text: 'அண்ணே, மெரினா பீச் வருமா?' }, intent: 'ask_go_marina_beach',
+      accept: ['anna marina beach varuma', 'marina beach varuma', 'marina beach pogaNum anna', 'anne marina beach varuvingala', 'மெரினா பீச் வருமா', 'marina beach poganum'] },
+    { id: 'fare', npc: kn('நூறு ரூபா ஆகும்.', 'Nooru rubaa aagum.', 'It will be a hundred rupees.'), instruction: 'Say that is too much and offer seventy rupees.',
+      suggest: { roman: 'Romba jaasthi anna, ezhupadhu rubaa tharen.', text: 'ரொம்ப ஜாஸ்தி அண்ணே, எழுபது ரூபா தர்றேன்.' }, intent: 'haggle_seventy',
+      accept: ['romba jaasthi anna ezhupadhu rubaa tharen', 'jaasthi anna ezhupadhu rubaa', 'ezhupadhu rubaa tharen anna', 'romba athigam anna ezhupadhu', 'எழுபது ரூபா தர்றேன்', 'seventy rupees tharen anna'] },
+  ]),
+  te_irani: southern('te_irani', 'Saleem Bhai', 'chaiwalaUncle', 'te', 'hyderabad', 'Warm Irani cafe owner who encourages Sameer, a fresh graduate learning Telugu.', 'Order an Irani chai at the cafe.', [
+    { id: 'order', npc: kn('ఏం కావాలి సమీర్?', 'Em kavali Sameer?', 'What do you want, Sameer?'), instruction: 'Ask for one Irani chai.',
+      suggest: { roman: 'Anna, oka Irani chai ivvandi.', text: 'అన్నా, ఒక ఇరానీ చాయ్ ఇవ్వండి.' }, intent: 'order_one_irani_chai',
+      accept: ['anna oka irani chai ivvandi', 'oka irani chai kavali', 'oka chai ivvandi anna', 'bhai oka irani chai ivvandi', 'ఒక ఇరానీ చాయ్ కావాలి', 'irani chai ivvandi anna'] },
+    { id: 'biscuit', npc: kn('ఉస్మానియా బిస్కెట్ కావాలా?', 'Osmania biscuit kavala?', 'Want an Osmania biscuit?'), instruction: 'Say no thanks, only chai is enough.',
+      suggest: { roman: 'Vaddu anna, chai chalu.', text: 'వద్దు అన్నా, చాయ్ చాలు.' }, intent: 'decline_biscuit',
+      accept: ['vaddu anna chai chalu', 'vaddu anna', 'vaddandi chai chalu', 'వద్దు అన్నా', 'ledu anna chai chalu', 'vaddu chalu'] },
+  ]),
+  te_auto: southern('te_auto', 'Yadagiri', 'taxiDriver', 'te', 'hyderabad', 'Chatty auto driver who haggles over the meter.', 'Ask an auto driver to take you to Charminar.', [
+    { id: 'where', npc: kn('ఎక్కడికి వెళ్ళాలి సార్?', 'Ekkadiki vellali sir?', 'Where do you want to go, sir?'), instruction: 'Ask if he will go to Charminar.',
+      suggest: { roman: 'Anna, Charminar ki vastara?', text: 'అన్నా, చార్మినార్ కి వస్తారా?' }, intent: 'ask_go_charminar',
+      accept: ['anna charminar ki vastara', 'charminar ki vastara', 'charminar ki vellali anna', 'anna charminar ki velthara', 'చార్మినార్ కి వస్తారా', 'charminar vastara anna'] },
+    { id: 'fare', npc: kn('నూటయాభై అవుతుంది.', 'Nootayabhai avuthundi.', 'It will be one hundred fifty.'), instruction: 'Say that is too much and offer one hundred rupees.',
+      suggest: { roman: 'Chala ekkuva anna, nooru rupayalu istanu.', text: 'చాలా ఎక్కువ అన్నా, నూరు రూపాయలు ఇస్తాను.' }, intent: 'haggle_hundred',
+      accept: ['chala ekkuva anna nooru rupayalu istanu', 'ekkuva anna nooru istanu', 'nooru rupayalu istanu anna', 'chala ekkuva anna nooru', 'నూరు రూపాయలు ఇస్తాను', 'hundred rupees istanu anna'] },
+  ]),
+});
+
 const V = 'valid', R = 'retry';
 // [npc, step index, label, reply, expected verdict, expected reason?]
 const CASES = [
@@ -101,6 +138,56 @@ const CASES = [
   ['kn_auto', 0, 'KN auto Hindi', 'bhaiya MG Road chalo', R, 'language'],
   ['kn_auto', 0, 'KN auto English', 'Take me to MG Road please', R, 'language'],
   ['kn_auto', 0, 'KN auto wrong place', 'airport ge hogbeku', R],
+  // ---- Tamil (lang ta) ----
+  ['ta_teakadai', 0, 'TA suggested phrase', 'Anna, oru tea kudunga.', V],
+  ['ta_teakadai', 0, 'TA accepted variant', 'oru tea venum anna', V],
+  ['ta_teakadai', 0, 'TA Tamil script', 'ஒரு டீ கொடுங்க', V],
+  ['ta_teakadai', 0, 'TA Tanglish paraphrase', 'anna one strong tea kudunga please', V],
+  ['ta_teakadai', 0, 'TA Whisper misspelt', 'anne oru thee kodunga', V],
+  ['ta_teakadai', 0, 'TA wrong item (coffee)', 'anna oru coffee kudunga', R, 'off_task'],
+  ['ta_teakadai', 0, 'TA wrong number', 'anna anju tea kudunga', R],
+  ['ta_teakadai', 0, 'TA pure Hindi', 'bhaiya ek chai dena', R, 'language'],
+  ['ta_teakadai', 0, 'TA Hindi Devanagari', 'भैया एक चाय दो', R, 'language'],
+  ['ta_teakadai', 0, 'TA pure English', 'Give me one tea please', R, 'language'],
+  ['ta_teakadai', 0, 'TA pizza + answer', 'i like pizza anna oru tea kudunga', R, 'extra'],
+  ['ta_teakadai', 0, 'TA off-task Tamil', 'நான் நாளைக்கு ஊருக்குப் போறேன்', R],
+  ['ta_teakadai', 0, 'TA gibberish', 'asdf qwer zxcv', R],
+  ['ta_teakadai', 0, 'TA rude', 'you stupid old man oru tea kudunga', R, 'rude'],
+  ['ta_teakadai', 1, 'TA decline: roman', 'venaam anna tea mattum podhum', V],
+  ['ta_teakadai', 1, 'TA decline: script', 'வேணாம் அண்ணே, டீ மட்டும் போதும்', V],
+  ['ta_teakadai', 1, 'TA decline: partial', 'வேணாம் அண்ணே', R],
+  ['ta_auto', 0, 'TA auto suggested', 'Anna, Marina Beach varuma?', V],
+  ['ta_auto', 0, 'TA auto script', 'அண்ணே, மெரினா பீச் வருமா', V],
+  ['ta_auto', 0, 'TA auto Hindi', 'bhaiya Marina Beach chaloge', R, 'language'],
+  ['ta_auto', 0, 'TA auto English', 'Take me to Marina Beach please', R, 'language'],
+  ['ta_auto', 0, 'TA auto wrong place', 'anna airport varuma', R],
+  ['ta_auto', 1, 'TA haggle suggested', 'Romba jaasthi anna, ezhupadhu rubaa tharen.', V],
+  ['ta_auto', 1, 'TA haggle wrong amount', 'romba jaasthi anna, aimbadhu rubaa tharen', R],
+  // ---- Telugu (lang te) ----
+  ['te_irani', 0, 'TE suggested phrase', 'Anna, oka Irani chai ivvandi.', V],
+  ['te_irani', 0, 'TE accepted variant', 'oka irani chai kavali', V],
+  ['te_irani', 0, 'TE Telugu script', 'ఒక ఇరానీ చాయ్ ఇవ్వండి', V],
+  ['te_irani', 0, 'TE Tenglish paraphrase', 'anna one irani chai ivvandi please', V],
+  ['te_irani', 0, 'TE Whisper misspelt', 'ana oka irani chay ivandi', V],
+  ['te_irani', 0, 'TE wrong item (coffee)', 'anna oka coffee ivvandi', R, 'off_task'],
+  ['te_irani', 0, 'TE wrong number', 'anna aidu irani chai ivvandi', R],
+  ['te_irani', 0, 'TE pure Hindi', 'bhai ek irani chai dena', R, 'language'],
+  ['te_irani', 0, 'TE Hindi Devanagari', 'भाई एक ईरानी चाय दो', R, 'language'],
+  ['te_irani', 0, 'TE pure English', 'Give me one Irani chai please', R, 'language'],
+  ['te_irani', 0, 'TE pizza + answer', 'i like pizza anna oka irani chai ivvandi', R, 'extra'],
+  ['te_irani', 0, 'TE off-task Telugu', 'నేను రేపు ఊరికి వెళ్తున్నాను', R],
+  ['te_irani', 0, 'TE gibberish', 'asdf qwer zxcv', R],
+  ['te_irani', 0, 'TE rude', 'you stupid old man oka irani chai ivvandi', R, 'rude'],
+  ['te_irani', 1, 'TE decline: roman', 'vaddu anna chai chalu', V],
+  ['te_irani', 1, 'TE decline: script', 'వద్దు అన్నా, చాయ్ చాలు', V],
+  ['te_irani', 1, 'TE decline: partial', 'వద్దు అన్నా', R],
+  ['te_auto', 0, 'TE auto suggested', 'Anna, Charminar ki vastara?', V],
+  ['te_auto', 0, 'TE auto script', 'అన్నా, చార్మినార్ కి వస్తారా', V],
+  ['te_auto', 0, 'TE auto Hindi', 'bhaiya Charminar chaloge', R, 'language'],
+  ['te_auto', 0, 'TE auto English', 'Take me to Charminar please', R, 'language'],
+  ['te_auto', 0, 'TE auto wrong place', 'anna airport ki vastara', R],
+  ['te_auto', 1, 'TE haggle suggested', 'Chala ekkuva anna, nooru rupayalu istanu.', V],
+  ['te_auto', 1, 'TE haggle wrong amount', 'chala ekkuva anna, aravai rupayalu istanu', R],
 ];
 
 const pad = (s, n) => String(s).padEnd(n).slice(0, n);

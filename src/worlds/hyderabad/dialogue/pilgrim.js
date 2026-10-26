@@ -1,0 +1,38 @@
+// Devotee at the Buddha island causeway gate.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('pilgrim', {
+  name: 'Sarojamma', role: 'devotee', site: 'Buddha island causeway gate', diff: 2,
+  voice: { rate: 0.9, pitch: 1.1 },
+  persona: 'Kind devotee with a flower basket who explains the etiquette and the way across to the Buddha statue.',
+  goal: 'Greet her, ask about boat timings, ask where to leave chappals, and thank her.',
+  steps: [
+    S('greet', ['నమస్తే బాబూ! బుద్ధుడి దర్శనానికి వచ్చావా?', 'Namaste, dear! Have you come to see the Buddha?'],
+      'Greet her.', 'నమస్కారం అమ్మా.',
+      ['namaskaram amma', 'namaste amma', 'amma namaskaram', 'namaskaram ammagaru', 'నమస్కారం అమ్మగారూ'],
+      ['Greet her politely.', 'Hello = "namaskaram". Mother = "amma".'],
+      ['శుభం బాబూ. చాలా మంచి ప్రదేశం ఇది.', 'Blessings, dear. This is a very nice place.'],
+      ['నమస్కారం చెప్పు బాబూ, సిగ్గు ఎందుకు?', 'Say namaskaram, dear, why shy?']),
+    S('time', ['బోటులో వెళ్ళాలి, సాయంత్రం వరకు ఉంటాయి.', 'You have to go by boat, they run until evening.'],
+      'Ask what time the boats stop.', 'బోట్లు ఎన్ని గంటల వరకు ఉంటాయి?',
+      ['botlu enni gantala varaku untayi', 'boat enni gantalaku aagipotundi', 'boat timings enti amma', 'enni gantala varaku boat', 'బోట్లు ఎన్ని గంటల వరకు ఉంటాయి'],
+      ['Ask about the closing time.', 'Until = "varaku". How many hours = "enni gantalu".'],
+      ['ఆరు గంటల వరకు బాబూ. ముందే వెళ్ళు.', 'Until six, dear. Go early.'],
+      ['ఏ టైం అని అడగాలి బాబూ.', 'You should ask what time, dear.']),
+    S('chappals', ['గుడిలో చెప్పులు వేసుకోకూడదు సుమా.', 'You must not wear chappals in the temple.'],
+      'Ask where to leave your chappals.', 'చెప్పులు ఎక్కడ వదలాలి?',
+      ['cheppulu ekkada vadalali', 'chappals ekkada vadalali amma', 'cheppulu ekkada petali', 'cheppulu ekkada pettali', 'చెప్పులు ఎక్కడ వదలాలి'],
+      ['Ask where footwear goes.', 'Chappals = "cheppulu". Where = "ekkada".'],
+      ['ఆ గేటు దగ్గర స్టాండ్ ఉంది బాబూ.', 'There is a stand by that gate, dear.'],
+      ['చెప్పుల గురించి అడుగు బాబూ.', 'Ask about the chappals, dear.']),
+    S('thanks', ['అంతే, ఇక వెళ్ళు. బుద్ధుడు మంచి చేస్తాడు.', 'That is all, now go. The Buddha will do good.'],
+      'Thank her warmly.', 'చాలా ధన్యవాదాలు అమ్మా.',
+      ['chala dhanyavadalu amma', 'thanks amma', 'dhanyavadalu ammagaru', 'thank you amma', 'ధన్యవాదాలు అమ్మా'],
+      ['Thank her.', 'Thank you = "dhanyavadalu".'],
+      ['మంచి బాబు. ఉద్యోగం త్వరగా వస్తుంది.', 'Good boy. You will get a job soon.'],
+      ['ఒక థాంక్స్ చెప్పి వెళ్ళు బాబూ.', 'Say a thanks and then go, dear.']),
+  ],
+  outro: ['జాగ్రత్తగా వెళ్ళి రా బాబూ, బుద్ధుడి దగ్గర ప్రార్థించు.', 'Go safely and return, dear, pray at the Buddha.'],
+  learned: [['namaskaram amma', 'greetings, mother'], ['cheppulu ekkada vadalali', 'where do I leave my chappals'], ['dhanyavadalu amma', 'thank you, mother']],
+  again: ['బాబూ, బుద్ధుణ్ణి చూసావా?', 'Dear, did you see the Buddha?'],
+});

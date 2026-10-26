@@ -4,7 +4,7 @@
  * createTalk({ camera, player, cameraRig, input, worldId }) -> talk   (the engine makes one and passes it to world.build as ctx.talk)
  *
  *   World API:
- *     talk.register({ id, role, object, convo?, explicitId?, name?, lang = 'hi' | 'kn' | 'en', canTurn = true, active?(), hold?(on) }) -> handle
+ *     talk.register({ id, role, object, convo?, explicitId?, name?, lang = 'hi' | 'kn' | 'ta' | 'te' | 'en', canTurn = true, active?(), hold?(on) }) -> handle
  *         convo:true marks the ONE NPC that gets the full conversation for its role (others of that role only greet);
  *         explicitId: a placement id that has its own dialogue (checked first). object: the NPC's Object3D (userData.setLookTarget(v) is used when present); id/role pick the dialogue (id first, then role);
  *         canTurn:false for things that steer their own body (walkers); hold(true|false) pauses/resumes the NPC while you talk.
@@ -13,7 +13,7 @@
  *     talk.setGreetings([line, ...])                short lines (same { text, roman, en } shape) for NPCs that have no dialogue
  *     A dialogue with tutorial:true gets a first-load hint (note + arrow: "New here? Talk to <name> at the <place>", dialogue.place default 'tapri') until the player has talked to that NPC once.
  *     talk.state -> 'idle' | 'ambient' | 'npc' | 'await' | 'checking' | 'react' | 'reward'
- *   Player: walk near an NPC (about 3 units, roughly in front) -> "बात करो / Talk [E]" (Kannada NPCs / the bengaluru world: "ಮಾತಾಡಿ / Talk [E]"); E starts; Esc leaves; P opens the phrasebook.
+ *   Player: walk near an NPC (about 3 units, roughly in front) -> "बात करो / Talk [E]" (Kannada NPCs / the bengaluru world: "ಮಾತಾಡಿ / Talk [E]"; chennai "பேசுங்க / Talk [E]"; hyderabad "మాట్లాడండి / Talk [E]"); E starts; Esc leaves; P opens the phrasebook.
  *   NPCs without a dialogue just say a short greeting (spoken) when you press E.
  */
 import * as THREE from 'three';
@@ -30,7 +30,21 @@ const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3
 const wp = (o, out) => out.set(o.matrixWorld.elements[12], o.matrixWorld.elements[13], o.matrixWorld.elements[14]);
 const tangentOf = (v, up) => v.addScaledVector(up, -v.dot(up));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const speechLang = (l) => (l === 'en' ? 'en' : l === 'kn' ? 'kn' : 'hi');
+const speechLang = (l) => (['en', 'kn', 'ta', 'te'].includes(l) ? l : 'hi');
+const WORLD_LANG = { bengaluru: 'kn', chennai: 'ta', hyderabad: 'te' }; // a southern world labels every NPC bubble in its language
+const NPC_LABEL = { bengaluru: 'Bengalurian', chennai: 'Chennaiite', hyderabad: 'Hyderabadi' }; // default card / phrasebook name
+const FALLBACK_RETRY = {
+  kn: { text: 'ಏನು? ಇನ್ನೊಮ್ಮೆ ಹೇಳಿ.', roman: 'Enu? Innomme heli.', en: 'What? Say it again.' },
+  ta: { text: 'என்ன? திரும்பச் சொல்லுங்க.', roman: 'Enna? Thirumba sollunga.', en: 'What? Say it again.' },
+  te: { text: 'ఏంటి? మళ్ళీ చెప్పండి.', roman: 'Enti? Malli cheppandi.', en: 'What? Say it again.' },
+  hi: { text: 'क्या? फिर से बोल।', roman: 'Kya? Phir se bol.', en: 'What? Say it again.' },
+};
+const FALLBACK_VALID = {
+  kn: { text: 'ಸರಿ.', roman: 'Sari.', en: 'Okay.' },
+  ta: { text: 'சரி.', roman: 'Sari.', en: 'Okay.' },
+  te: { text: 'సరే.', roman: 'Sare.', en: 'Okay.' },
+  hi: { text: 'ठीक है।', roman: 'Theek hai.', en: 'Okay.' },
+};
 const hash = (s) => { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; };
 
 function defaultHints(step) {
@@ -163,7 +177,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
       wp(cand.object, _a);
       const s = project(_a, 2.55, _b);
       const dd = dialogueFor(cand);
-      if (s) ui.showBubble(s.x, s.y, { ...(dd ? { difficulty: dd.difficulty, tutorial: !!dd.tutorial } : {}), lang: (dd?.lang ?? cand.lang) === 'kn' || worldId === 'bengaluru' ? 'kn' : 'hi' }); else ui.hideBubble();
+      if (s) ui.showBubble(s.x, s.y, { ...(dd ? { difficulty: dd.difficulty, tutorial: !!dd.tutorial } : {}), lang: WORLD_LANG[worldId] ?? (['kn', 'ta', 'te'].includes(dd?.lang ?? cand.lang) ? (dd?.lang ?? cand.lang) : 'hi') }); else ui.hideBubble();
       state = 'idle';
       if (pressE) { pressE = false; start(cand); }
     } else ui.hideBubble();
@@ -233,7 +247,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     finishGuide(t);
     conv = { t, dlg, i: 0, attempt: 0, assisted: 0, token: Math.random(), q0, abort: null };
     input.clearKeys(); input.setLocked(true);
-    ui.openCard({ name: dlg.name ?? t.name ?? (worldId === 'bengaluru' ? 'Bengalurian' : 'Mumbaikar') });
+    ui.openCard({ name: dlg.name ?? t.name ?? (NPC_LABEL[worldId] ?? 'Mumbaikar') });
     window.dispatchEvent(new CustomEvent('talkabit:conversation', { detail: { on: true } })); // music ducks
     // two-shot: camera behind Chotu, looking at the pair
     wp(t.object, _a); _b.copy(_a).sub(player.object.position); tangentOf(_b, player.up).normalize();
@@ -287,14 +301,14 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     state = 'react'; ui.flashRetry();
     ui.setHint(hint, c.attempt); ui.setReason(reasonLine(res.reason, c.dlg.lang));
     ui.setBusy(false); ui.focusInput(); state = 'await';
-    await say(step.onRetry ?? (c.dlg.lang === 'kn' ? { text: 'ಏನು? ಇನ್ನೊಮ್ಮೆ ಹೇಳಿ.', roman: 'Enu? Innomme heli.', en: 'What? Say it again.' } : { text: 'क्या? फिर से बोल।', roman: 'Kya? Phir se bol.', en: 'What? Say it again.' }), { react: true, wait: false });
+    await say(step.onRetry ?? (FALLBACK_RETRY[c.dlg.lang] ?? FALLBACK_RETRY.hi), { react: true, wait: false });
   }
 
   async function advance(step, assisted) {
     const c = conv, tok = c.token; state = 'react';
     if (!assisted) ui.flashValid();
     ui.setHint(null, 0);
-    await Promise.all([say(step.onValid ?? (c.dlg.lang === 'kn' ? { text: 'ಸರಿ.', roman: 'Sari.', en: 'Okay.' } : { text: 'ठीक है।', roman: 'Theek hai.', en: 'Okay.' }), { wait: true }), sleep(1300)]);
+    await Promise.all([say(step.onValid ?? (FALLBACK_VALID[c.dlg.lang] ?? FALLBACK_VALID.hi), { wait: true }), sleep(1300)]);
     if (!conv || conv.token !== tok) return;
     if (++c.i < c.dlg.steps.length) return runStep();
     outro();
@@ -305,7 +319,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     ui.setBusy(true);
     const learned = (c.dlg.learned ?? []).length ? c.dlg.learned : c.dlg.steps.filter((s) => s.suggest).map((s) => ({ roman: s.suggest.roman, en: s.instruction, text: s.suggest.text }));
     if (c.dlg.id && !doneIds.has(c.dlg.id)) { doneIds.add(c.dlg.id); try { localStorage.setItem('talkabit.done.v1', JSON.stringify([...doneIds])); } catch { /* storage blocked */ } }
-    phrasebook.add(c.dlg.name ?? c.t.name ?? (worldId === 'bengaluru' ? 'Bengalurian' : 'Mumbaikar'), worldId, learned);
+    phrasebook.add(c.dlg.name ?? c.t.name ?? (NPC_LABEL[worldId] ?? 'Mumbaikar'), worldId, learned);
     const p = c.dlg.outro ? say(c.dlg.outro, { wait: true }) : Promise.resolve();
     ui.showReward({ learned });
     state = 'reward';

@@ -1,0 +1,38 @@
+// HITEC City tower gate guard, with the walk-in interview board.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('securityGuard', {
+  name: 'Sudhakar', role: 'HITEC security guard', site: 'HITEC City tower gate booth', diff: 3,
+  voice: { rate: 1.0, pitch: 0.85 },
+  persona: 'Fair but formal gate guard who checks IDs and tells job-seekers about the walk-in interview board.',
+  goal: 'Say you came for the walk-in interview, show your ID, ask where to sign, and ask which floor.',
+  steps: [
+    S('purpose', ['హలో సార్, ఇక్కడ ఎవరిని కలవాలి?', 'Hello sir, whom do you want to meet here?'],
+      'Say you came for the walk-in interview.', 'వాక్-ఇన్ ఇంటర్వ్యూ కోసం వచ్చాను.',
+      ['walk-in interview kosam vachanu', 'walk in interview kosam vachanu sir', 'interview kosam vachanu', 'nenu walk in interview ki vachanu', 'వాక్-ఇన్ ఇంటర్వ్యూ కోసం వచ్చాను సార్'],
+      ['Say why you are here.', 'For the interview = "interview kosam". I came = "vachanu".'],
+      ['ఓహో, ఇంటర్వ్యూ కోసమా! బోర్డు అక్కడ ఉంది.', 'Oh, for an interview! The board is there.'],
+      ['ఎందుకు వచ్చారో స్పష్టంగా చెప్పండి సార్.', 'Say clearly why you came, sir.']),
+    S('id', ['ఐడీ కార్డ్ చూపించండి సార్.', 'Please show your ID card, sir.'],
+      'Show your ID card.', 'ఇదిగోండి నా ఐడీ కార్డ్.',
+      ['idigondi naa id card', 'ide naa id card sir', 'idigondi sir id card', 'naa id card idigo', 'ఇదిగోండి నా ఐడీ కార్డ్'],
+      ['Hand over your ID.', 'Here you are = "idigondi". My ID card = "naa id card".'],
+      ['సరే, మీ పేరు సమీర్. విజిటర్ పాస్ ఇస్తున్నా.', 'Okay, your name is Sameer. I am giving a visitor pass.'],
+      ['కార్డ్ చూపించండి సార్, ఇది రూల్.', 'Show the card, sir, it is the rule.']),
+    S('sign', ['రిజిస్టర్ లో సంతకం పెట్టాలి.', 'You have to sign in the register.'],
+      'Ask where to sign.', 'ఎక్కడ సంతకం చేయాలి?',
+      ['ekkada santakam cheyali', 'ekkada sign cheyali sir', 'santakam ekkada cheyali', 'sign ekkada pettali', 'ఎక్కడ సంతకం చేయాలి'],
+      ['Ask where to sign.', 'Sign = "santakam". Where = "ekkada".'],
+      ['ఇక్కడ, ఈ చివరి లైన్ లో, తేదీ కూడా వేయండి.', 'Here, on this last line, add the date too.'],
+      ['ఎక్కడ అని అడగండి, ఇంకోసారి.', 'Ask where, once again.']),
+    S('floor', ['అయిపోయింది సార్, ఇక లోపలికి వెళ్ళండి.', 'Done sir, now go inside.'],
+      'Ask which floor the interview hall is on.', 'ఇంటర్వ్యూ హాల్ ఏ ఫ్లోర్ లో ఉంది?',
+      ['interview hall ye floor lo undi', 'interview hall ye floor sir', 'ye floor lo interview', 'hall ye floor lo undi', 'ఇంటర్వ్యూ హాల్ ఏ ఫ్లోర్'],
+      ['Ask about the floor.', 'Which floor = "ye floor".'],
+      ['ఐదో ఫ్లోర్, లిఫ్ట్ కుడివైపు. ఆల్ ది బెస్ట్!', 'Fifth floor, the lift is on the right. All the best!'],
+      ['ఫ్లోర్ గురించి అడగండి సార్.', 'Ask about the floor, sir.']),
+  ],
+  outro: ['లోపల నమ్మకంగా మాట్లాడండి సార్, మీకు ఉద్యోగం వస్తుంది!', 'Speak with confidence inside, sir, you will get the job!'],
+  learned: [['interview kosam vachanu', 'I came for an interview'], ['ekkada santakam cheyali', 'where do I sign']],
+  again: ['సార్, ఇంటర్వ్యూ ఎలా అయింది?', 'Sir, how did the interview go?'],
+});

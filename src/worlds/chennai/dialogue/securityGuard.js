@@ -1,0 +1,38 @@
+// IT-park security guard at the gate booth.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('securityGuard', {
+  name: 'Anwar', role: 'IT-park security guard', site: 'IT park gate booth', diff: 4,
+  voice: { rate: 1.0, pitch: 0.8 },
+  persona: 'Fair but formal gate guard with a visitor register and a teal ID lanyard, checking every ID; needs a visitor pass for Meera.',
+  goal: 'Say you are visiting the cafeteria manager, show your ID, ask where to sign, and ask where the lift is.',
+  steps: [
+    S('who', ['நில்லுங்க மேடம். யாரை பாக்கணும்?', 'Nillunga madam. Yaarai paakkanum?', 'Stop, madam. Whom do you want to meet?'],
+      'Say you are here to meet the cafeteria manager.', ['Naan cafeteria manager-a paakkanum.', 'நான் கேஃபடீரியா மேனேஜரை பாக்கணும்.'],
+      ['naan cafeteria manager-a paakkanum', 'cafeteria manager-a paakkanum saar', 'cafeteria manager paakka vandhen', 'naan cafeteria manager-a paaka vandhirukken', 'manager-a paakkanum saar', 'நான் கேஃபடீரியா மேனேஜரை பாக்கணும்', 'கேஃபடீரியா மேனேஜரை பாக்கணும் சார்'],
+      'say_visiting_cafeteria_manager', ['Say who you want to meet.', '"Paakkanum" = want to meet.', 'Say: "Naan cafeteria manager-a paakkanum."'],
+      ['சரி மேடம். பிளாக்கர்-ன்னு சொல்லியிருக்காரு.', 'Sari madam. Blogger-nnu solliyirukkaaru.', 'Okay, madam. He mentioned a blogger.'],
+      ['யாரை பாக்கணும்னு தெளிவா சொல்லுங்க.', 'Yaarai paakkanumnu thelivaa sollunga.', 'Say clearly whom you want to meet.']),
+    S('id', ['அப்பாயின்ட்மென்ட் இருக்கா? ஐடி காட்டுங்க.', 'Appointment irukkaa? ID kaattunga.', 'Do you have an appointment? Show your ID.'],
+      'Show your ID card.', ['Idhaanga, en ID card.', 'இதாங்க, என் ஐடி கார்டு.'],
+      ['idhaanga en ID card', 'idhaanga saar ID card', 'ID card idhaanga saar', 'en ID idhaanga', 'ID card kaattaren saar', 'இதாங்க என் ஐடி கார்டு', 'ஐடி கார்டு இதாங்க சார்'],
+      'show_id_card', ['Hand over your ID.', '"Idhaanga" = here you are.', 'Say: "Idhaanga, en ID card."'],
+      ['சரியா இருக்கு மேடம். இங்க பதிவேடு இருக்கு.', 'Sariyaa irukku madam. Inga padhivedu irukku.', 'All good, madam. Here is the register.'],
+      ['ஐடி காட்டுங்க மேடம், ப்ளீஸ்.', 'ID kaattunga madam, please.', 'Show the ID, madam, please.']),
+    S('sign', ['இந்த பதிவேட்டுல கையெழுத்து போடணும்.', 'Indha padhivettula kaiyezhutthu podanum.', 'You need to sign this register.'],
+      'Ask where to sign.', ['Enga kaiyezhutthu podanum saar?', 'எங்க கையெழுத்து போடணும் சார்?'],
+      ['enga kaiyezhutthu podanum saar', 'enga sign pannanum saar', 'enga kaiyezhutthu', 'sign enga podanum saar', 'inga sign pannattuma saar', 'எங்க கையெழுத்து போடணும் சார்', 'எங்க சைன் பண்ணணும் சார்'],
+      'ask_where_to_sign', ['Ask where to sign.', '"Enga" = where. "Kaiyezhutthu" = signature.', 'Say: "Enga kaiyezhutthu podanum saar?"'],
+      ['இந்த கடைசி வரில, பேரும் நேரமும் எழுதுங்க.', 'Indha kadaisi varila, perum neramum ezhudhunga.', 'In this last row, write your name and the time.'],
+      ['எங்கன்னு கேக்கறீங்களா மேடம்?', 'Engannu kekkareengalaa madam?', 'Are you asking where, madam?']),
+    S('lift', ['விசிட்டர் பாஸ் இந்தாங்க. பத்திரமா வச்சுக்கோங்க.', 'Visitor pass indhaanga. Pathiramaa vachukkonga.', 'Here is your visitor pass. Keep it safe.'],
+      'Ask where the lift is.', ['Lift enga irukku saar?', 'லிஃப்ட் எங்க இருக்கு சார்?'],
+      ['lift enga irukku saar', 'lift enga saar', 'lift enga irukku', 'cafeteria ku lift enga saar', 'lift endha pakkam saar', 'லிஃப்ட் எங்க இருக்கு சார்', 'லிஃப்ட் எங்க சார்'],
+      'ask_where_lift', ['Ask where the lift is.', '"Lift enga?" = where is the lift?', 'Say: "Lift enga irukku saar?"'],
+      ['நேரா போய் வலது பக்கம். கேஃபடீரியா ரெண்டாவது மாடி.', 'Neraa poi valadhu pakkam. Cafeteria rendaavadhu maadi.', 'Straight, then right. Cafeteria is on the second floor.'],
+      ['லிஃப்ட் எங்கன்னு கேளுங்க.', 'Lift engannu kelunga.', 'Ask where the lift is.']),
+  ],
+  outro: ['உள்ள போங்க மேடம். நல்லா சாப்பாடு கிடைக்கும்!', 'Ulla ponga madam. Nalla saappaadu kidaikkum!', 'Go inside, madam. You will get good food!'],
+  learned: [['naan ... paakkanum', 'I want to meet ...'], ['enga kaiyezhutthu podanum?', 'where should I sign?'], ['lift enga irukku?', 'where is the lift?']],
+  again: ['மேடம், இன்னும் ஏதாவது உதவி வேணுமா?', 'Madam, innum edhaavadhu udhavi venumaa?', 'Madam, need any more help?'],
+});

@@ -1,0 +1,38 @@
+// Metro commuter reading the timetable at the Hyderabad Metro station.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('commuter', {
+  name: 'Swapna', role: 'metro commuter', site: 'Hyderabad Metro station, timetable board', diff: 3,
+  voice: { rate: 1.05, pitch: 1.1 },
+  persona: 'Helpful regular commuter who knows the trains, the smart card and the women-only first coach.',
+  goal: 'Check the metro goes to HITEC City, ask which coach, the next train, and the smart card.',
+  steps: [
+    S('route', ['ఏంటి సార్, ఎక్కడికి వెళ్ళాలి? టైమ్ టేబుల్ చూస్తున్నారా?', 'What is it, sir, where to? Looking at the timetable?'],
+      'Ask if this metro goes to HITEC City.', 'ఈ మెట్రో హైటెక్ సిటీ వెళ్తుందా?',
+      ['ee metro hitec city veltunda', 'ee metro hitec city ki veltunda madam', 'metro hitec city ki veltunda', 'hitec city ki ee metro', 'ఈ మెట్రో హైటెక్ సిటీకి వెళ్తుందా'],
+      ['Ask if it goes there.', 'This metro = "ee metro". Goes = "veltunda".'],
+      ['అవును, ఇదే మెట్రో. అమీర్ పేట్ లో మారాలి.', 'Yes, this is the one. Change at Ameerpet.'],
+      ['ఎక్కడికి వెళ్ళాలో అడుగు, ఇంకోసారి.', 'Ask where it goes, once more.']),
+    S('coach', ['మొదటి కోచ్ మహిళలకు సార్, అక్కడ ఎక్కకండి.', 'The first coach is for women, sir, do not board there.'],
+      'Ask which coach you should board.', 'నేను ఏ కోచ్ ఎక్కాలి?',
+      ['nenu ye coach ekkali', 'ye coach ekkali madam', 'ye coach lo ekkali', 'nenu ekkada ekkali', 'నేను ఏ కోచ్ ఎక్కాలి'],
+      ['Ask which coach.', 'Which coach = "ye coach". Should I board = "ekkali".'],
+      ['రెండో కోచ్ లేదా మూడో కోచ్ ఎక్కండి.', 'Board the second or third coach.'],
+      ['కోచ్ గురించి అడుగు సార్.', 'Ask about the coach, sir.']),
+    S('next', ['టైమ్ టేబుల్ ప్రకారం ఒక ట్రైన్ ఇప్పుడే వెళ్ళింది.', 'According to the timetable, one train just left.'],
+      'Ask when the next train comes.', 'తర్వాత మెట్రో ఎప్పుడు వస్తుంది?',
+      ['tarvata metro eppudu vastundi', 'next metro eppudu', 'metro inka eppudu vastundi', 'tarvata train eppudu', 'తర్వాత మెట్రో ఎప్పుడు'],
+      ['Ask about the next one.', 'Next = "tarvata". When = "eppudu".'],
+      ['ఐదు నిమిషాల్లో వస్తుంది, బోర్డు చూడండి.', 'It comes in five minutes, look at the board.'],
+      ['ఎప్పుడు వస్తుందని అడుగు సార్.', 'Ask when it comes, sir.']),
+    S('card', ['టోకెన్ ఎందుకు సార్? స్మార్ట్ కార్డ్ తీసుకోండి.', 'Why a token, sir? Take a smart card.'],
+      'Ask where to get a smart card.', 'స్మార్ట్ కార్డ్ ఎక్కడ దొరుకుతుంది?',
+      ['smart card ekkada dorukutundi', 'smart card ekkada teesukovali', 'card ekkada dorukutundi madam', 'smart card ekkada ivvaru', 'స్మార్ట్ కార్డ్ ఎక్కడ దొరుకుతుంది'],
+      ['Ask where to buy it.', 'Where = "ekkada". Is available = "dorukutundi".'],
+      ['టికెట్ కౌంటర్ దగ్గర ఇస్తారు. రీఛార్జ్ కూడా చేసుకోవచ్చు.', 'They give it at the ticket counter. You can recharge too.'],
+      ['కార్డ్ గురించి అడుగు సార్.', 'Ask about the card, sir.']),
+  ],
+  outro: ['ఇంటర్వ్యూకి ఆల్ ది బెస్ట్ సార్! మెట్రో లో టైమ్ కి చేరుతారు.', 'All the best for the interview, sir! You will reach on time by metro.'],
+  learned: [['ee metro hitec city veltunda', 'does this metro go to HITEC City'], ['ye coach ekkali', 'which coach should I board'], ['smart card ekkada dorukutundi', 'where can I get a smart card']],
+  again: ['సార్, మళ్ళీ మెట్రో ఎక్కుతున్నారా?', 'Sir, taking the metro again?'],
+});

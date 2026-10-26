@@ -1,0 +1,38 @@
+// Mirchi bajji man at the cart on the Irani cafe square.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('vadaPavWala', {
+  name: 'Narsimha', role: 'mirchi bajji man', site: 'Irani cafe square, mirchi bajji cart', diff: 2,
+  voice: { rate: 1.05, pitch: 0.9 },
+  persona: 'Round, chatty bajji man whose hands are always busy at the hot kadhai; asks every customer about their day.',
+  goal: 'Order four mirchi bajji, less spice, and pay forty rupees.',
+  steps: [
+    S('order', ['గరం గరం మిర్చి బజ్జీ! ఎన్ని కావాలి సార్?', 'Hot hot mirchi bajji! How many do you want, sir?'],
+      'Order four mirchi bajji.', 'నాలుగు మిర్చి బజ్జీలు ఇవ్వండి.',
+      ['nalugu mirchi bajji ivvandi', 'nalugu bajji kavali', 'anna nalugu mirchi bajjilu ivvandi', 'four mirchi bajji ivvandi', 'నాలుగు మిర్చి బజ్జీలు కావాలి'],
+      ['Say the number and what you want.', 'Four = "nalugu". Mirchi bajji = chilli fritters.'],
+      ['తీసుకో, తాజా బజ్జీలు. వేడిగా ఉన్నాయి!', 'Take them, fresh bajji. They are hot!'],
+      ['ఎన్ని కావాలి? నాలుగా, ఆరా?', 'How many? Four, or six?']),
+    S('spice', ['కారం ఎక్కువ వేయనా, తక్కువ వేయనా?', 'Shall I add more spice or less?'],
+      'Ask for less spice.', 'కారం తక్కువ వేయండి.',
+      ['karam takkuva veyandi', 'takkuva karam veyandi', 'konchem karam veyandi anna', 'karam takkuva anna', 'కారం తక్కువగా వేయండి'],
+      ['Say you want it mild.', 'Spice = "karam". Less = "takkuva".'],
+      ['సరే, తక్కువ కారం, ఉల్లిపాయ ఎక్కువ వేస్తాను.', 'Okay, less spice and more onion.'],
+      ['కారం ఎక్కువా, తక్కువా? చెప్పు సార్.', 'More spice or less? Tell me, sir.']),
+    S('price', ['ఇదిగో బజ్జీలు! ఇంకేమైనా కావాలా?', 'Here are your bajji! Anything else?'],
+      'Ask how much it is.', 'ఎంత అయింది అన్నా?',
+      ['enta ayindi anna', 'enta ayindi', 'ela enta anna', 'total enta anna', 'ఎంత అయింది'],
+      ['Ask about the price.', '"Enta" = how much.'],
+      ['నలభై రూపాయలు సార్. ఇంటర్వ్యూ ఉందా ఈ రోజు?', 'Forty rupees, sir. Got an interview today?'],
+      ['రేటు అడుగుతున్నావా? సరిగ్గా చెప్పు.', 'Asking the price? Say it properly.']),
+    S('pay', ['నలభై రూపాయలు. క్యాష్ ఇస్తావా, యూపీఐ చేస్తావా?', 'Forty rupees. Will you give cash or pay by UPI?'],
+      'Say you will pay cash.', 'ఇదిగోండి నలభై రూపాయలు, క్యాష్ ఇస్తున్నాను.',
+      ['idigondi nalabhai rupayalu cash istunnanu', 'cash istanu anna', 'idigondi anna nalabhai rupayalu', 'cash ichestanu', 'ఇదిగోండి నలభై రూపాయలు'],
+      ['Say you pay in cash.', 'Cash = "cash". Here you are = "idigondi".'],
+      ['బాగుంది! మళ్ళీ రా సమీర్, ఉద్యోగం వస్తుంది లే.', 'Good! Come again Sameer, you will get a job.'],
+      ['క్యాషా, యూపీఐనా? త్వరగా చెప్పు.', 'Cash or UPI? Say it quickly.']),
+  ],
+  outro: ['మళ్ళీ రా సమీర్, గరం గరం బజ్జీలు ఎప్పుడూ రెడీ!', 'Come again Sameer, hot bajji are always ready!'],
+  learned: [['nalugu mirchi bajji ivvandi', 'give me four mirchi bajji'], ['karam takkuva veyandi', 'less spice please']],
+  again: ['సమీర్ సార్, ఇంకో ప్లేట్ బజ్జీ వేయనా?', 'Sameer sir, shall I fry another plate?'],
+});

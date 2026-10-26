@@ -1,0 +1,38 @@
+// Laad Bazaar bangle seller at the Charminar site.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('koliFisherwoman', {
+  name: 'Shabana Akka', role: 'Laad Bazaar bangle seller', site: 'Laad Bazaar bangle stalls', diff: 4,
+  voice: { rate: 1.05, pitch: 1.15 },
+  persona: 'Sharp, cheerful bangle seller who holds bangles up to the light and loves a friendly bargain.',
+  goal: 'Ask for bangles for your mother, ask the price, bargain, and buy one set.',
+  steps: [
+    S('gift', ['గాజులు, గాజులు! ఎవరికి కావాలి సార్?', 'Bangles, bangles! Who are they for, sir?'],
+      'Say the bangles are for your mother.', 'అమ్మ కోసం గాజులు కావాలి.',
+      ['amma kosam gajulu kavali', 'amma kosam gajulu kavali akka', 'amma ki gajulu kavali', 'mummy ki gajulu kavali', 'అమ్మ కోసం గాజులు కావాలి అక్కా'],
+      ['Say who the bangles are for.', 'Mother = "amma". For = "kosam". Bangles = "gajulu".'],
+      ['ఓహో, అమ్మ కోసమా! ఇదిగో, ఆకుపచ్చ సెట్ చాలా బాగుంటుంది.', 'Oho, for your mother! Here, the green set will look lovely.'],
+      ['ఎవరికి అని అడిగాను సార్. చెప్పండి.', 'I asked who for, sir. Tell me.']),
+    S('price', ['మెరిసే గాజులు, చూడండి సార్. తీసుకుంటారా?', 'Shiny bangles, look sir. Will you take them?'],
+      'Ask the price of this set.', 'ఈ సెట్ ఎంత అక్కా?',
+      ['ee set enta akka', 'ee gajulu enta akka', 'ee set price enta', 'ee green set enta', 'ఈ గాజుల సెట్ ఎంత'],
+      ['Ask how much.', 'This set = "ee set". How much = "enta".'],
+      ['ఈ సెట్ మూడు వందలు సార్, లాక్ గాజులు.', 'This set is three hundred, sir, real lac bangles.'],
+      ['రేటు అడగండి సార్, ఇంకోసారి చెప్పండి.', 'Ask the rate, sir, say it again.']),
+    S('bargain', ['మూడు వందలు మాత్రమే, నిజంగా తక్కువే!', 'Only three hundred, truly cheap!'],
+      'Say it is too much and offer 200.', 'చాలా ఎక్కువ అక్కా, రెండు వందలు ఇస్తాను.',
+      ['chala ekkuva akka rendu vandalu istanu', 'rendu vandalu istanu akka', 'ekkuva akka rendu vandalu', 'rendu vandalaki ivvandi akka', 'రెండు వందలు ఇస్తాను అక్కా'],
+      ['Say it is too much, then offer a price.', '200 = "rendu vandalu".'],
+      ['అయ్యో, నష్టం సార్! సరే, రెండు వందల యాభై చివరి రేటు.', 'Oh, a loss, sir! Okay, two-fifty is the last price.'],
+      ['బేరం చేయండి సార్, మీ రేటు చెప్పండి.', 'Bargain, sir, tell me your price.']),
+    S('buy', ['రెండు వందల యాభై. ఒక సెట్టా, రెండా?', 'Two-fifty. One set or two?'],
+      'Say one set is enough and pay.', 'ఒక్క సెట్ చాలు, ఇదిగోండి.',
+      ['okka set chalu idigondi', 'oka set chalu akka', 'okka set ivvandi idigondi', 'oka set chalu', 'ఒక్క సెట్ చాలు'],
+      ['Say you want only one.', 'One set = "okka set". Enough = "chalu".'],
+      ['సరే సార్, అమ్మకి చాలా నచ్చుతాయి. మళ్ళీ రండి!', 'Okay sir, your mother will love them. Come again!'],
+      ['ఒకటా, రెండా? త్వరగా చెప్పండి.', 'One or two? Say quickly.']),
+  ],
+  outro: ['మీకు ఉద్యోగం రాగానే, ఇంకో సెట్ గాజులు తీసుకోండి!', 'When you get the job, take another set of bangles!'],
+  learned: [['ee set enta', 'how much is this set'], ['chala ekkuva', 'that is too much'], ['okka set chalu', 'one set is enough']],
+  again: ['సార్, గాజులు నచ్చాయా? ఇంకా కొత్త రంగులు వచ్చాయి.', 'Sir, did you like the bangles? New colours have come.'],
+});

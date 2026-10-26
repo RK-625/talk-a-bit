@@ -1,0 +1,38 @@
+// Porter at the Kacheguda station forecourt.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('coolie', {
+  name: 'Hanumanthu', role: 'Kacheguda porter', site: 'Kacheguda station forecourt', diff: 3,
+  voice: { rate: 1.0, pitch: 0.8 },
+  persona: 'Proud porter in a red shirt with a brass armband who steadies a trunk on his head and knows every platform.',
+  goal: 'Ask which platform the Tirupati train uses, where it is, the porter fee, and thank him.',
+  steps: [
+    S('platform', ['ఎటు వెళ్ళాలి సార్? ట్రైన్ ఏదో చెప్పండి.', 'Where to, sir? Tell me which train.'],
+      'Ask which platform the Tirupati train uses.', 'తిరుపతి ట్రైన్ ఏ ప్లాట్ఫామ్ మీద వస్తుంది?',
+      ['tirupati train ye platform meeda vastundi', 'tirupati train ye platform', 'tirupati train platform enti', 'ye platform lo tirupati train', 'తిరుపతి ట్రైన్ ఏ ప్లాట్ఫామ్'],
+      ['Ask about the platform.', 'Which platform = "ye platform". Comes = "vastundi".'],
+      ['తిరుపతి ట్రైన్ నాలుగో ప్లాట్ఫామ్ మీద వస్తుంది సార్.', 'The Tirupati train comes on platform four, sir.'],
+      ['ఏ ట్రైన్ అని చెప్పండి సార్, వినపడలేదు.', 'Tell me which train, sir, I could not hear.']),
+    S('where', ['నాలుగో ప్లాట్ఫామ్, వంతెన దాటి వెళ్ళాలి.', 'Platform four, you have to cross the bridge.'],
+      'Ask where platform four is.', 'నాలుగో ప్లాట్ఫామ్ ఎక్కడ ఉంది?',
+      ['nalugo platform ekkada undi', 'nalugo platform ekkada', 'platform nalugu ekkada undi', 'nalugo platform ki daari', 'నాలుగో ప్లాట్ఫామ్ ఎక్కడ'],
+      ['Ask where it is.', 'Fourth = "nalugo". Where = "ekkada".'],
+      ['నా వెనుక రండి సార్, మెట్ల పైకి వెళ్ళాలి.', 'Follow me, sir, we go up the steps.'],
+      ['ప్లాట్ఫామ్ నంబర్ ఏంటి? మళ్ళీ చెప్పండి.', 'What is the platform number? Say again.']),
+    S('charge', ['సామాను నేను మోస్తాను సార్, ఇవ్వండి.', 'I will carry the luggage, sir, give it.'],
+      'Ask how much he charges to carry it.', 'సామాను మోయడానికి ఎంత తీసుకుంటారు?',
+      ['samanu moyadaniki enta teesukuntaru', 'samanu moyadaniki enta', 'luggage ki enta anna', 'moyadaniki enta avutundi', 'సామాను మోయడానికి ఎంత'],
+      ['Ask the fee.', 'To carry = "moyadaniki". How much = "enta".'],
+      ['వంద రూపాయలు సార్, లైసెన్స్ రేటే.', 'A hundred rupees, sir, the licensed rate.'],
+      ['రేటు అడగండి సార్, మొహమాటం వద్దు.', 'Ask the rate, sir, do not hesitate.']),
+    S('thanks', ['ఇదిగో మీ సీట్, ట్రైన్ వచ్చే వరకు కూర్చోండి.', 'Here is your seat, sit until the train comes.'],
+      'Thank him.', 'చాలా థాంక్స్ అన్నా, మీరు చాలా సహాయం చేశారు.',
+      ['chala thanks anna meeru chala sahayam chesaru', 'dhanyavadalu anna', 'thanks anna', 'chala thanks anna', 'చాలా థాంక్స్ అన్నా'],
+      ['Thank him for helping.', 'Help = "sahayam". You did = "chesaru".'],
+      ['పర్లేదు సార్, ఇదే నా పని. జాగ్రత్తగా వెళ్ళండి!', 'No problem, sir, this is my job. Travel safe!'],
+      ['ఏమీ అనరా సార్? ఒక మాట చెప్పండి.', 'Nothing to say, sir? Say a word.']),
+  ],
+  outro: ['ఉద్యోగం దొరికి మళ్ళీ రండి సార్, అప్పుడు నేను మోస్తా!', 'Come again once you get a job, sir, then I will carry it!'],
+  learned: [['ye platform meeda vastundi', 'which platform does it come on'], ['enta teesukuntaru', 'how much do you charge']],
+  again: ['సార్, ట్రైన్ ఎక్కారా? ఇంకా సామాను ఉందా?', 'Sir, did you board? Any more luggage?'],
+});

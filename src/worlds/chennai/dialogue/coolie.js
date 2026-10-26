@@ -1,0 +1,38 @@
+// Central porter in a red shirt on the Chennai Central forecourt.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('coolie', {
+  name: 'Velu', role: 'Central porter', site: 'Chennai Central forecourt', diff: 3,
+  voice: { rate: 1.0, pitch: 0.85 },
+  persona: 'Proud porter in a red shirt with a brass armband and a trunk on his head, steadying it with both hands; proud of his licence badge number.',
+  goal: 'Ask which platform the Coimbatore train uses, where it is, what the porter charge is, and pay and thank.',
+  steps: [
+    S('platform', ['பெட்டி தூக்கணுமா மேடம்? எந்த ட்ரெயின்?', 'Petti thookkanumaa madam? Endha train?', 'Need your bag carried, madam? Which train?'],
+      'Ask which platform the Coimbatore train uses.', ['Coimbatore train endha platform anna?', 'கோயம்புத்தூர் ட்ரெயின் எந்த பிளாட்ஃபார்ம் அண்ணா?'],
+      ['coimbatore train endha platform anna', 'coimbatore train endha platform', 'kovai train endha platform anna', 'coimbatore ku endha platform', 'anna coimbatore train platform evvalavu', 'கோயம்புத்தூர் ட்ரெயின் எந்த பிளாட்ஃபார்ம்', 'கோவை ட்ரெயின் எந்த பிளாட்ஃபார்ம் அண்ணா'],
+      'ask_platform_coimbatore', ['Name the train and ask which platform.', '"Endha platform?" = which platform?', 'Say: "Coimbatore train endha platform anna?"'],
+      ['கோவையா? நாலாவது பிளாட்ஃபார்ம் மேடம்.', 'Kovaiyaa? Naalaavadhu platform madam.', 'Coimbatore? Platform four, madam.'],
+      ['எந்த ஊருன்னு சொன்னீங்க மேடம்?', 'Endha oorunnu sonneenga madam?', 'Which town did you say, madam?']),
+    S('where', ['நாலாவது பிளாட்ஃபார்ம். படி ஏறி இறங்கணும்.', 'Naalaavadhu platform. Padi eri iranganum.', 'Platform four. You have to climb up and down the stairs.'],
+      'Ask where that platform is.', ['Adhu enga irukku anna?', 'அது எங்க இருக்கு அண்ணா?'],
+      ['adhu enga irukku anna', 'adhu enga irukku', 'platform enga irukku anna', 'naalaavadhu platform enga', 'enga poganum anna', 'அது எங்க இருக்கு அண்ணா', 'பிளாட்ஃபார்ம் எங்க இருக்கு'],
+      'ask_platform_location', ['Ask where it is.', '"Enga irukku?" = where is it?', 'Say: "Adhu enga irukku anna?"'],
+      ['என் கூட வாங்க மேடம், நான் கூட்டிட்டு போறேன்.', 'En kooda vaanga madam, naan koottittu poren.', 'Come with me, madam, I will take you.'],
+      ['எதை கேக்கறீங்க மேடம்?', 'Edhai kekkareenga madam?', 'What are you asking, madam?']),
+    S('charge', ['பெட்டியை நான் தூக்கறேன். இந்த நம்பர் என் பேட்ஜ்.', 'Pettiyai naan thookkaren. Indha number en badge.', 'I will carry the trunk. This number is my badge.'],
+      'Ask how much the porter charge is.', ['Evvalavu kudukkanum anna?', 'எவ்வளவு கொடுக்கணும் அண்ணா?'],
+      ['evvalavu kudukkanum anna', 'evvalavu kudukkanum', 'kooli evvalavu anna', 'evvalavu venum anna', 'charge evvalavu anna', 'எவ்வளவு கொடுக்கணும் அண்ணா', 'கூலி எவ்வளவு'],
+      'ask_porter_charge', ['Ask what to pay.', '"Kudukkanum" = must give.', 'Say: "Evvalavu kudukkanum anna?"'],
+      ['நூறு ரூபா போதும் மேடம். லைசென்ஸ் ரேட்.', 'Nooru rubaa podhum madam. Licence rate.', 'A hundred rupees is enough, madam. Licensed rate.'],
+      ['கூலி கேக்கறீங்களா மேடம்?', 'Kooli kekkareengalaa madam?', 'Asking the charge, madam?']),
+    S('pay', ['இதோ நாலாவது பிளாட்ஃபார்ம் வந்தாச்சு. நூறு ரூபா.', 'Idho naalaavadhu platform vandhaachu. Nooru rubaa.', 'Here is platform four. A hundred rupees.'],
+      'Pay and thank him.', ['Idho anna, romba thanks.', 'இதோ அண்ணா, ரொம்ப தேங்க்ஸ்.'],
+      ['idho anna romba thanks', 'idho anna nooru rubaa', 'nooru rubaa anna thanks', 'romba nandri anna idho', 'thanks anna', 'இதோ அண்ணா ரொம்ப தேங்க்ஸ்', 'நூறு ரூபா இதோ அண்ணா'],
+      'pay_porter_and_thank', ['Pay and say thanks.', '"Idho" = here it is.', 'Say: "Idho anna, romba thanks."'],
+      ['நன்றி மேடம்! சுகமா பயணம் போங்க.', 'Nandri madam! Sugamaa payanam ponga.', 'Thanks, madam! Have a pleasant journey.'],
+      ['பணம் குடுக்கறீங்களா மேடம்?', 'Panam kudukkareengalaa madam?', 'Will you pay, madam?']),
+  ],
+  outro: ['அடுத்த தடவை வந்தா என்னை கூப்பிடுங்க மீரா மேடம்!', 'Adutha thadavai vandhaa ennai kooppidunga Meera madam!', 'Next time you come, call me, Meera madam!'],
+  learned: [['endha platform?', 'which platform?'], ['adhu enga irukku?', 'where is it?'], ['evvalavu kudukkanum?', 'how much should I pay?']],
+  again: ['மேடம், இன்னொரு பெட்டி இருக்கா?', 'Madam, innoru petti irukkaa?', 'Madam, another bag to carry?'],
+});

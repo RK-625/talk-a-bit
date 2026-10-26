@@ -1,0 +1,38 @@
+// TSRTC conductor at the Charminar bus stop.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('busConductor', {
+  name: 'Ramulu', role: 'TSRTC conductor', site: 'Charminar bus stop', diff: 3,
+  voice: { rate: 1.15, pitch: 0.9 },
+  persona: 'Hurried but polite city-bus conductor with a ticket machine, calling out stops all day.',
+  goal: 'Check the bus goes to Koti, buy a ticket, handle change, and ask to be told the stop.',
+  steps: [
+    S('route', ['కోఠీ, సికింద్రాబాద్! ఎక్కడికి వెళ్ళాలి?', 'Koti, Secunderabad! Where do you want to go?'],
+      'Ask if this bus goes to Koti.', 'ఈ బస్సు కోఠీకి వెళ్తుందా?',
+      ['ee bus koti ki veltunda', 'ee bus koti ki velthundha', 'bus koti ki veltunda sir', 'koti ki ee bus veltundi ya', 'ఈ బస్సు కోఠీకి వెళ్తుందా'],
+      ['Ask if the bus goes there.', 'This bus = "ee bus". Goes = "veltunda".'],
+      ['అవును, కోఠీకి వెళ్తుంది. ఎక్కండి, ఎక్కండి!', 'Yes, it goes to Koti. Get in, get in!'],
+      ['ఎక్కడికి అని అడుగుతున్నావా? గట్టిగా చెప్పు.', 'Asking where it goes? Say it louder.']),
+    S('ticket', ['లోపలికి రండి. టికెట్ తీసుకోండి.', 'Come inside. Take a ticket.'],
+      'Ask for one ticket to Koti.', 'కోఠీకి ఒక టికెట్ ఇవ్వండి.',
+      ['koti ki oka ticket ivvandi', 'oka ticket ivvandi koti ki', 'sir koti ki oka ticket', 'koti ticket ivvandi', 'కోఠీకి ఒక టికెట్ కావాలి'],
+      ['Say "one ticket to Koti".', 'Ticket = "ticket". Give = "ivvandi".'],
+      ['ఇదిగో టికెట్. ఇరవై రూపాయలు.', 'Here is the ticket. Twenty rupees.'],
+      ['టికెట్ ఎన్ని? ఎక్కడికి? త్వరగా చెప్పు.', 'How many tickets? To where? Say it fast.']),
+    S('change', ['ఇరవై ఇవ్వండి. చిల్లర ఉందా?', 'Give twenty. Do you have change?'],
+      'Say you only have a hundred note.', 'నా దగ్గర చిల్లర లేదు, వంద నోటు ఉంది.',
+      ['naa daggara chillara ledu vandha notu undi', 'chillara ledu sir vanda notu undi', 'vanda notu matrame undi', 'naa daggara vanda notu undi', 'నా దగ్గర వంద నోటు ఉంది'],
+      ['Say you have no change.', 'No change = "chillara ledu". A hundred = "vanda".'],
+      ['సరే, వంద ఇవ్వు, మిగతావి తర్వాత ఇస్తాను.', 'Okay, give the hundred, I will return the rest later.'],
+      ['చిల్లర ఉందా, లేదా? చెప్పండి.', 'Change or not? Tell me.']),
+    S('stop', ['ఇంకేమైనా చెప్పాలా సార్?', 'Anything else to ask, sir?'],
+      'Ask him to tell you when Koti comes.', 'కోఠీ రాగానే చెప్పండి, ప్లీజ్.',
+      ['koti ragane cheppandi please', 'koti raganey cheppandi', 'koti vachinappudu cheppandi sir', 'koti stop vaste cheppandi', 'కోఠీ రాగానే చెప్పండి'],
+      ['Ask him to call out your stop.', 'When it comes = "ragane". Tell = "cheppandi".'],
+      ['సరే, కోఠీ రాగానే అరుస్తాను. కూర్చో.', 'Okay, I will shout when Koti comes. Sit.'],
+      ['ఏమైనా అడగాలా? స్టాప్ గురించి చెప్పు.', 'Want to ask something? Tell me about your stop.']),
+  ],
+  outro: ['కోఠీ వచ్చింది సార్, దిగండి! ఇంటర్వ్యూ బాగా చేయండి.', 'Koti is here, sir, get down! Do well in your interview.'],
+  learned: [['koti ki oka ticket ivvandi', 'give me one ticket to Koti'], ['chillara ledu', 'I have no change'], ['cheppandi', 'please tell me']],
+  again: ['సార్, మళ్ళీ బస్సు ఎక్కుతారా? కోఠీ, కోఠీ!', 'Sir, taking the bus again? Koti, Koti!'],
+});

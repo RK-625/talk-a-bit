@@ -1,0 +1,38 @@
+// MTC bus conductor at the Fort St. George bus stop.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('busConductor', {
+  name: 'Kumar Anna', role: 'MTC bus conductor', site: 'Fort St. George bus stop (MTC)', diff: 3,
+  voice: { rate: 1.15, pitch: 0.9 },
+  persona: 'Hurried but polite MTC conductor with a ticket machine on a strap, calling "Central, Central!" and helping newcomers find the right bus.',
+  goal: 'Ask which bus goes to Marina Beach, buy a ticket, ask about a day pass, and ask him to tell you the stop.',
+  steps: [
+    S('route', ['சென்ட்ரல், சென்ட்ரல்! எங்க போகணும் மேடம்?', 'Central, Central! Enga poganum madam?', 'Central, Central! Where do you want to go, madam?'],
+      'Ask which bus goes to Marina Beach.', ['Marina beach ku endha bus?', 'மெரினா பீச்சுக்கு எந்த பஸ்?'],
+      ['marina beach ku endha bus', 'anna marina beach ku endha bus', 'marina ku endha bus anna', 'marina beach poga endha bus', 'endha bus marina beach ku', 'மெரினா பீச்சுக்கு எந்த பஸ்', 'மெரினாவுக்கு எந்த பஸ் அண்ணா'],
+      'ask_bus_to_marina', ['Ask which bus.', '"Endha bus" = which bus. "Ku" = to.', 'Say: "Marina beach ku endha bus?"'],
+      ['மெரினாவுக்கா? இந்த பஸ்ஸே போகும், ஏறுங்க.', 'Marinaavukkaa? Indha bus-e pogum, erunga.', 'To Marina? This very bus goes, get on.'],
+      ['எந்த இடம்னு சொல்லுங்க, பஸ் கிளம்புது.', 'Endha idamnu sollunga, bus kilambudhu.', 'Tell me which place, the bus is leaving.']),
+    S('ticket', ['உள்ள போங்க. டிக்கெட் எடுக்கணுமா?', 'Ulla ponga. Ticket edukkanumaa?', 'Go inside. Want to take a ticket?'],
+      'Ask for one ticket.', ['Oru ticket kudunga anna.', 'ஒரு டிக்கெட் கொடுங்க அண்ணா.'],
+      ['oru ticket kudunga', 'oru ticket kudunga anna', 'oru ticket venum anna', 'anna one ticket kudunga', 'ticket oru kudunga', 'ஒரு டிக்கெட் கொடுங்க', 'ஒரு டிக்கெட் வேணும்'],
+      'ask_one_ticket', ['Ask for one ticket.', 'One = "oru". Ticket = "ticket".', 'Say: "Oru ticket kudunga anna."'],
+      ['இந்தாங்க டிக்கெட். பத்திரமா வச்சுக்கோங்க.', 'Indhaanga ticket. Pathiramaa vachukkonga.', 'Here is the ticket. Keep it safe.'],
+      ['எத்தனை டிக்கெட்? சொல்லுங்க சீக்கிரம்.', 'Etthanai ticket? Sollunga seekkiram.', 'How many tickets? Tell me quickly.']),
+    S('pass', ['ஒரு நாள் முழுக்க சுத்தணும்னா பாஸ் இருக்கு.', 'Oru naal muzhukka suthanumnaa pass irukku.', 'If you want to roam the whole day, there is a pass.'],
+      'Ask how much the day pass is.', ['Day pass evvalavu anna?', 'டே பாஸ் எவ்வளவு அண்ணா?'],
+      ['day pass evvalavu anna', 'day pass evvalavu', 'pass evvalavu anna', 'oru naal pass evvalavu', 'day pass evlo anna', 'டே பாஸ் எவ்வளவு', 'பாஸ் எவ்வளவு அண்ணா'],
+      'ask_day_pass_price', ['Ask the price of the pass.', '"Evvalavu" = how much.', 'Say: "Day pass evvalavu anna?"'],
+      ['எழுபது ரூபா. நாள் முழுக்க எங்கயும் போகலாம்.', 'Ezhubadhu rubaa. Naal muzhukka engayum pogalaam.', 'Seventy rupees. You can go anywhere all day.'],
+      ['பாஸ் விலையா கேக்கறீங்க? சரியா சொல்லுங்க.', 'Pass vilaiyaa kekkareenga? Sariyaa sollunga.', 'You are asking the pass price? Say it properly.']),
+    S('stop', ['மெரினா வர இன்னும் பத்து நிமிஷம் ஆகும்.', 'Marina vara innum patthu nimisham aagum.', 'It will take ten more minutes to reach Marina.'],
+      'Ask him to tell you when Marina comes.', ['Marina vandhaa sollunga anna.', 'மெரினா வந்தா சொல்லுங்க அண்ணா.'],
+      ['marina vandhaa sollunga anna', 'marina vandhaa sollunga', 'marina vandha sollunga anna', 'anna marina vandhaa sollunga please', 'stop vandhaa sollunga anna', 'மெரினா வந்தா சொல்லுங்க', 'மெரினா வந்தா சொல்லுங்க அண்ணா'],
+      'ask_to_be_told_stop', ['Ask him to tell you.', '"Vandhaa" = when it comes. "Sollunga" = please tell.', 'Say: "Marina vandhaa sollunga anna."'],
+      ['கவலைப்படாதீங்க, நானே சொல்றேன். இறங்கி கடல பாருங்க.', 'Kavalaippadaadheenga, naane solren. Irangi kadala paarunga.', 'Do not worry, I will tell you. Get down and see the sea.'],
+      ['எந்த ஸ்டாப்புன்னு சொன்னீங்க?', 'Endha stop-punnu sonneenga?', 'Which stop did you say?']),
+  ],
+  outro: ['பாத்து இறங்குங்க மீரா, அடுத்த பஸ்ல பாக்கலாம்!', 'Paathu irangunga Meera, adutha bus-la paakkalaam!', 'Get down carefully, Meera, see you on the next bus!'],
+  learned: [['Marina beach ku endha bus?', 'which bus goes to Marina Beach?'], ['oru ticket kudunga', 'give me one ticket'], ['Marina vandhaa sollunga', 'tell me when Marina comes']],
+  again: ['என்ன மீரா, திரும்ப பஸ்ஸா? ஏறுங்க!', 'Enna Meera, thirumba bus-aa? Erunga!', 'What, Meera, the bus again? Get on!'],
+});

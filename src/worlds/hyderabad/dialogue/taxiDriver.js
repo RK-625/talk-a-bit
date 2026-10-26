@@ -1,0 +1,38 @@
+// Auto driver at the Charminar auto stand.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('taxiDriver', {
+  name: 'Yadagiri', role: 'auto driver', site: 'Charminar auto stand', diff: 3,
+  voice: { rate: 1.05, pitch: 0.85 },
+  persona: 'Chatty auto driver who always tries to skip the meter and haggle, but is kind to a graduate heading to interviews.',
+  goal: 'Get an auto to HITEC City at a fair price.',
+  steps: [
+    S('where', ['ఎక్కడికి వెళ్ళాలి సార్? ఆటో కావాలా?', 'Where do you want to go, sir? Need an auto?'],
+      'Ask if he will go to HITEC City.', 'అన్నా, హైటెక్ సిటీకి వస్తారా?',
+      ['anna hitec city ki vastara', 'hitec city ki vastara', 'hitech city ki velthara anna', 'anna hitec city ki velli', 'హైటెక్ సిటీకి వస్తారా'],
+      ['Ask if he will come.', 'Will you come = "vastara".'],
+      ['హైటెక్ సిటీనా? ఎక్కండి సార్, తీసుకెళ్తాను.', 'HITEC City? Get in, sir, I will take you.'],
+      ['ఎక్కడికి అన్నావ్? ఇంకోసారి చెప్పు.', 'Where did you say? Say it once more.']),
+    S('fare', ['చాలా దూరం సార్. రెండు వందలు అవుతుంది.', 'It is very far, sir. It will be two hundred.'],
+      'Say it is too much and offer 150.', 'చాలా ఎక్కువ అన్నా, నూట యాభై ఇస్తాను.',
+      ['chala ekkuva anna nooru yabhai istanu', 'nooru yabhai istanu anna', 'ekkuva anna nooru yabhai', 'chala ekkuva nooru yabhai', 'నూట యాభై ఇస్తాను'],
+      ['Say it is a lot, then offer your price.', 'Too much = "chala ekkuva". 150 = "nooru yabhai".'],
+      ['సరే సార్, మీ కోసం నూట యాభై. ఎక్కండి.', 'Okay sir, for you one-fifty. Get in.'],
+      ['బేరం చెయ్యి సార్, రేటు చెప్పు.', 'Bargain, sir, tell me your rate.']),
+    S('interview', ['ఈ రోజు ఇంటర్వ్యూ కి వెళ్తున్నారా సార్?', 'Are you going for an interview today, sir?'],
+      'Say yes, you have an interview today.', 'అవును, ఈ రోజు ఇంటర్వ్యూ ఉంది.',
+      ['avunu ee roju interview undi', 'avunu interview undi anna', 'ee roju interview undi', 'avunu interview ki velthunnanu', 'అవును ఈ రోజు ఇంటర్వ్యూ ఉంది'],
+      ['Answer yes, then say what you have.', 'Interview = "interview". There is = "undi".'],
+      ['ఆల్ ది బెస్ట్ సార్! తప్పకుండా వస్తుంది ఉద్యోగం.', 'All the best, sir! You will surely get the job.'],
+      ['ఇంటర్వ్యూ ఉందా లేదా? చెప్పు సార్.', 'Interview or not? Tell me, sir.']),
+    S('pay', ['హైటెక్ సిటీ వచ్చేసింది! నూట యాభై ఇవ్వండి.', 'HITEC City is here! Give one-fifty.'],
+      'Hand over the money and say thanks.', 'ఇదిగోండి అన్నా, థాంక్స్!',
+      ['idigondi anna thanks', 'idigondi anna dabbulu', 'thanks anna idigo', 'idigondi anna chala thanks', 'ఇదిగోండి అన్నా'],
+      ['Give the money and be polite.', 'Here you are = "idigondi".'],
+      ['థాంక్స్ సార్! ఇంటర్వ్యూ లో అదరగొట్టండి.', 'Thanks, sir! Do great in the interview.'],
+      ['డబ్బులు ఇవ్వండి సార్, నేను వెళ్ళాలి.', 'Please pay, sir, I have to go.']),
+  ],
+  outro: ['జాగ్రత్త సార్, తిరిగి వచ్చేటప్పుడు కూడా నా ఆటోనే ఎక్కండి!', 'Take care, sir, take my auto for the way back too!'],
+  learned: [['hitec city ki vastara', 'will you come to HITEC City'], ['chala ekkuva anna', 'that is too much, anna'], ['idigondi', 'here you are']],
+  again: ['సార్, మళ్ళీ ఆటో కావాలా? యాదగిరి రెడీ!', 'Sir, need an auto again? Yadagiri is ready!'],
+});

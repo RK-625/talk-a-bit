@@ -1,0 +1,38 @@
+// Suburban commuter reading the timetable board at the Chennai suburban station.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('commuter', {
+  name: 'Prakash', role: 'suburban commuter', site: 'Chennai suburban station platform, timetable board', diff: 3,
+  voice: { rate: 1.05, pitch: 0.95 },
+  persona: 'Thin office-goer reading the timetable board and checking his watch; knows which local train goes to the beach side.',
+  goal: 'Ask if the train goes to the beach station, which platform, when the next train is, and where to buy a ticket.',
+  steps: [
+    S('goes', ['என்ன மேடம், ட்ரெயின் தேடறீங்களா?', 'Enna madam, train thedareengalaa?', 'What, madam, are you looking for a train?'],
+      'Ask if this train goes to the beach station.', ['Indha train beach station pogumaa?', 'இந்த ட்ரெயின் பீச் ஸ்டேஷன் போகுமா?'],
+      ['indha train beach station pogumaa', 'indha train beach pogumaa', 'beach station pogumaa', 'indha train beach ku pogumaa', 'saar indha train beach pogumaa', 'இந்த ட்ரெயின் பீச் ஸ்டேஷன் போகுமா', 'இந்த ட்ரெயின் பீச் போகுமா'],
+      'ask_train_goes_to_beach', ['Ask if the train goes to the beach.', '"Pogumaa?" = does it go?', 'Say: "Indha train beach station pogumaa?"'],
+      ['ஆமா, இது பீச் வரைக்கும் போகும்.', 'Aamaa, idhu beach varaikkum pogum.', 'Yes, this goes all the way to Beach.'],
+      ['எந்த ஸ்டேஷன்? திரும்ப சொல்லுங்க.', 'Endha station? Thirumba sollunga.', 'Which station? Say it again.']),
+    S('platform', ['பீச் ட்ரெயின் வேற பிளாட்ஃபார்ம்ல நிக்கும்.', 'Beach train vera platform-la nikkum.', 'The beach train stands on another platform.'],
+      'Ask which platform.', ['Endha platform-la nikkum saar?', 'எந்த பிளாட்ஃபார்ம்ல நிக்கும் சார்?'],
+      ['endha platform-la nikkum saar', 'endha platform saar', 'endha platform-la varum', 'platform number enna saar', 'endha platform ku poganum', 'எந்த பிளாட்ஃபார்ம்ல நிக்கும்', 'எந்த பிளாட்ஃபார்ம் சார்'],
+      'ask_which_platform', ['Ask which platform.', '"Endha platform" = which platform.', 'Say: "Endha platform-la nikkum saar?"'],
+      ['ரெண்டாவது பிளாட்ஃபார்ம். மேல பாலத்த தாண்டி போங்க.', 'Rendaavadhu platform. Mela paalatthai thaandi ponga.', 'Platform two. Cross the bridge above.'],
+      ['பிளாட்ஃபார்ம் பத்தி கேக்கறீங்களா?', 'Platform patthi kekkareengalaa?', 'Asking about the platform?']),
+    S('next', ['இப்போதான் ஒண்ணு போச்சு. அடுத்தது பத்து நிமிஷத்துல.', 'Ippodhaan onnu pochu. Adutthadhu patthu nimishatthula.', 'One just left. The next is in ten minutes.'],
+      'Ask when the next train is.', ['Adutha train eppo saar?', 'அடுத்த ட்ரெயின் எப்போ சார்?'],
+      ['adutha train eppo saar', 'adutha train eppo varum', 'next train eppo saar', 'adutha train evvalavu neram', 'eppo varum adutha train', 'அடுத்த ட்ரெயின் எப்போ சார்', 'அடுத்த ட்ரெயின் எப்போ'],
+      'ask_next_train', ['Ask when the next one is.', '"Adutha" = next. "Eppo" = when.', 'Say: "Adutha train eppo saar?"'],
+      ['ஒன்பது பன்னிரண்டுக்கு வரும். கூட்டம் ஜாஸ்தி இருக்காது.', 'Onbadhu panniranduku varum. Koottam jaasthi irukkaadhu.', 'It comes at 9:12. It will not be too crowded.'],
+      ['எப்போன்னு கேக்கறீங்களா?', 'Epponnu kekkareengalaa?', 'Are you asking when?']),
+    S('ticket', ['டிக்கெட் இருக்கா? இல்லன்னா சீக்கிரம் எடுத்துடுங்க.', 'Ticket irukkaa? Illannaa seekkiram eduthudunga.', 'Do you have a ticket? If not, buy one quickly.'],
+      'Ask where to buy a ticket.', ['Ticket enga vaanganum saar?', 'டிக்கெட் எங்க வாங்கணும் சார்?'],
+      ['ticket enga vaanganum saar', 'ticket enga vaanganum', 'ticket window enga saar', 'ticket enga kidaikkum', 'enga ticket edukkanum', 'டிக்கெட் எங்க வாங்கணும் சார்', 'டிக்கெட் எங்க வாங்கணும்'],
+      'ask_where_ticket', ['Ask where to buy it.', '"Enga" = where. "Vaanganum" = must buy.', 'Say: "Ticket enga vaanganum saar?"'],
+      ['அந்த ஜன்னல்ல வாங்குங்க. வரிசையில நில்லுங்க.', 'Andha jannal-la vaangunga. Varisaiyila nillunga.', 'Buy at that window. Stand in the queue.'],
+      ['டிக்கெட் வேணுமா? எங்கன்னு கேளுங்க.', 'Ticket venumaa? Engannu kelunga.', 'Need a ticket? Ask where.']),
+  ],
+  outro: ['சந்தோஷமா போய்ட்டு வாங்க மீரா. பீச்ல சுண்டல் சாப்பிடுங்க!', 'Santhoshamaa poittu vaanga Meera. Beach-la sundal saappidunga!', 'Have a good trip, Meera. Eat sundal on the beach!'],
+  learned: [['indha train beach pogumaa?', 'does this train go to Beach?'], ['adutha train eppo?', 'when is the next train?'], ['ticket enga vaanganum?', 'where do I buy a ticket?']],
+  again: ['மீரா, இன்னொரு ட்ரெயின் பத்தி கேக்கணுமா?', 'Meera, innoru train patthi kekkanumaa?', 'Meera, want to ask about another train?'],
+});

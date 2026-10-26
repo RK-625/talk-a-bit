@@ -2,7 +2,7 @@
 // Run: node scripts/validate-dialogue.mjs <world folder> <cast .md file> [--min N]
 //   e.g. node scripts/validate-dialogue.mjs src/worlds/bengaluru docs/BENGALURU_CAST.md --min 130
 // Loads <world folder>/dialogue/index.js (default export = { id: dialogue }, named export GREETINGS). Same checks as Mumbai's, plus
-// lang 'kn' (Kannada script text / romanised Kannada roman / English en) and an optional `place` string. --min = least number of dialogues / cast ids (default 65).
+// lang 'kn' / 'ta' / 'te' (script text in Kannada / Tamil / Telugu script, Latin roman, English en) and an optional `place` string. --min = least number of dialogues / cast ids (default 65).
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -23,6 +23,9 @@ const line = (where, l) => {
 };
 const hasDevanagari = (s) => /[ऀ-ॿ]/.test(s);
 const hasKannada = (s) => /[\u0C80-\u0CFF]/.test(s);
+const hasTamil = (s) => /[\u0B80-\u0BFF]/.test(s);
+const hasTelugu = (s) => /[\u0C00-\u0C7F]/.test(s);
+const SCRIPTS = { kn: ['Kannada', hasKannada], ta: ['Tamil', hasTamil], te: ['Telugu', hasTelugu] };
 const ids = new Set();
 const entries = Object.entries(dialogues);
 if (entries.length < MIN) err('index', `only ${entries.length} dialogues (need ${MIN})`);
@@ -33,7 +36,7 @@ for (const [key, d] of entries) {
   if (ids.has(d.id)) err(w, 'duplicate id'); ids.add(d.id);
   for (const k of ['name', 'role', 'persona', 'goal']) if (!isStr(d[k])) err(w, `missing ${k}`);
   if (d.place !== undefined && !isStr(d.place)) err(w, 'place must be a non-empty string');
-  if (!['hi', 'en', 'kn'].includes(d.lang)) err(w, `bad lang ${d.lang}`);
+  if (!['hi', 'en', 'kn', 'ta', 'te'].includes(d.lang)) err(w, `bad lang ${d.lang}`);
   if (!d.voice || typeof d.voice.rate !== 'number' || typeof d.voice.pitch !== 'number') err(w, 'bad voice');
   if (!(d.difficulty >= 1 && d.difficulty <= 5)) err(w, 'bad difficulty');
   if (!Array.isArray(d.steps) || d.steps.length < 1 || d.steps.length > 4) err(w, 'steps must be 1-4');
@@ -52,12 +55,13 @@ for (const [key, d] of entries) {
       if (s.npc && hasDevanagari(s.npc.roman)) err(sw, 'npc.roman contains Devanagari');
       if (s.suggest && !hasDevanagari(s.suggest.text)) err(sw, 'suggest.text should be Devanagari');
     }
-    if (d.lang === 'kn') {
-      if (!hasKannada(s.npc?.text || '')) err(sw, 'npc.text should be Kannada script');
-      if (s.npc && hasKannada(s.npc.roman)) err(sw, 'npc.roman contains Kannada script');
-      if (s.suggest && !hasKannada(s.suggest.text)) err(sw, 'suggest.text should be Kannada script');
-      if (s.suggest && hasKannada(s.suggest.roman)) err(sw, 'suggest.roman contains Kannada script');
-      for (const k of ['onValid', 'onRetry']) { if (s[k] && !hasKannada(s[k].text || '')) err(sw, `${k}.text should be Kannada script`); }
+    if (SCRIPTS[d.lang]) {
+      const [nm, has] = SCRIPTS[d.lang];
+      if (!has(s.npc?.text || '')) err(sw, `npc.text should be ${nm} script`);
+      if (s.npc && has(s.npc.roman)) err(sw, `npc.roman contains ${nm} script`);
+      if (s.suggest && !has(s.suggest.text)) err(sw, `suggest.text should be ${nm} script`);
+      if (s.suggest && has(s.suggest.roman)) err(sw, `suggest.roman contains ${nm} script`);
+      for (const k of ['onValid', 'onRetry']) { if (s[k] && !has(s[k].text || '')) err(sw, `${k}.text should be ${nm} script`); }
     }
     const words = (s.npc?.text || '').split(/\s+/).length;
     if (words > 15) err(sw, `npc line has ${words} words (>15)`);

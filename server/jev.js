@@ -8,7 +8,7 @@
  *   buildRequest(payload) -> { state, questions }
  */
 import { TypeSafeClient, noul, choice } from '@typesafe-ai/sdk';
-import { toRoman, hasKannada } from '../src/game/translit.js';
+import { toRoman, hasKannada, hasTamil, hasTelugu } from '../src/game/translit.js';
 
 // ---- thresholds (tune with `npm run jev:eval`) ----
 export const DOES_TASK_MIN = 0.7;       // does_task >= this -> the reply does the task
@@ -18,20 +18,24 @@ export const RUDE_MAX = 0.7;            // is_rude must be below this
 export const HINDI_PROB_MIN = 0.5;      // lang 'hi': P(reply_language = hindi) must be at least this (pure English scored ~0.2, Hinglish ~0.9)
 export const HINDI_OK_EN_TASK = 2;      // lang 'en': a 'hindi' pick is tolerated when does_task is at least this (2 = never: Hindi to an English NPC retries)
 export const KANNADA_PROB_MIN = 0.5;     // lang 'kn': P(reply_language = kannada) must be at least this
+export const TAMIL_PROB_MIN = 0.75;      // lang 'ta': P(reply_language = tamil) must be at least this (checked on the probability, not the argmax: Hindi with a Tamil place name scored tamil 0.61; genuine Tamil/Tanglish scored >= 0.97)
+export const TELUGU_PROB_MIN = 0.75;     // lang 'te': same rule for Telugu (Hindi with a Telugu place name scored hindi 0.64; genuine Telugu/Tenglish scored >= 0.89)
 export const DEFAULT_MODEL = 'jev-latest';
 export const SDK_TIMEOUT_MS = 6000;
 export const SDK_RETRIES = 1;
 
 const SETTING = 'A language-practice game set in Mumbai. The player (Chotu, a chai-seller kid) is talking to a local.';
 const SETTING_BLR = 'A language-practice game set in Bengaluru. The player (Rohan, a 22-year-old tech intern from Delhi, new in the city and learning Kannada) is talking to a local.';
+const SETTING_CHE = 'A language-practice game set in Chennai. The player (Meera, a 26-year-old food blogger from Pune on a Chennai food trail, learning Tamil to talk to vendors) is talking to a local.';
+const SETTING_HYD = 'A language-practice game set in Hyderabad. The player (Sameer, a 22-year-old fresh engineering graduate who just moved to Hyderabad for a job hunt and is learning Telugu) is talking to a local.';
 const hasDevanagari = (s) => /[ऀ-ॿ]/.test(s);
-const EXPECTED = { hi: 'Hindi (romanised Hindi, Devanagari or Hinglish all count)', kn: 'Kannada (Kannada script, romanised Kannada or Kanglish with a few English words all count)', en: 'English' };
+const EXPECTED = { hi: 'Hindi (romanised Hindi, Devanagari or Hinglish all count)', kn: 'Kannada (Kannada script, romanised Kannada or Kanglish with a few English words all count)', ta: 'Tamil (Tamil script, romanised Tamil or Tanglish with a few English words all count)', te: 'Telugu (Telugu script, romanised Telugu or Tenglish with a few English words all count)', en: 'English' };
 
 export function buildRequest({ lang = 'hi', worldId, persona, goal, step, npcName, npcRole, reply }) {
   const r = String(reply ?? '').trim();
   const examples = [step.suggest?.roman, ...(step.accept ?? [])].filter(Boolean);
   const state = {
-    setting: lang === 'kn' || worldId === 'bengaluru' ? SETTING_BLR : SETTING,
+    setting: worldId === 'chennai' || lang === 'ta' ? SETTING_CHE : worldId === 'hyderabad' || lang === 'te' ? SETTING_HYD : lang === 'kn' || worldId === 'bengaluru' ? SETTING_BLR : SETTING,
     npc: { name: npcName ?? 'a local', role: npcRole ?? 'local', persona: persona ?? '' },
     conversation_goal: goal ?? '',
     npc_line: { original: step.npc?.text, romanised: step.npc?.roman, english: step.npc?.en },
@@ -39,7 +43,7 @@ export function buildRequest({ lang = 'hi', worldId, persona, goal, step, npcNam
     expected_language: EXPECTED[lang] ?? EXPECTED.en,
     example_good_replies: examples,
     player_reply: r,
-    ...(hasDevanagari(r) || hasKannada(r) ? { player_reply_romanised: toRoman(r) } : {}),
+    ...(hasDevanagari(r) || hasKannada(r) || hasTamil(r) || hasTelugu(r) ? { player_reply_romanised: toRoman(r) } : {}),
     note: 'The reply was dictated with speech-to-text: expect spelling mistakes, missing punctuation, mixed scripts.',
   };
   const questions = {
@@ -50,6 +54,14 @@ export function buildRequest({ lang = 'hi', worldId, persona, goal, step, npcNam
     reply_language: lang === 'kn'
       ? choice('Which language is `player_reply` written in? Romanised Kannada counts as Kannada.', {
         kannada: 'Kannada, romanised Kannada or Kanglish (Kannada with a few English words), any script', hindi: 'Hindi or Hinglish, any script', english: 'English only', other: 'Another language', none: 'Not language / gibberish',
+      })
+      : lang === 'ta'
+      ? choice('Which language is `player_reply` written in? Romanised Tamil counts as Tamil.', {
+        tamil: 'Tamil, romanised Tamil or Tanglish (Tamil with a few English words), any script', hindi: 'Hindi or Hinglish, any script', english: 'English only', other: 'Another language (Kannada, Telugu, Malayalam...)', none: 'Not language / gibberish',
+      })
+      : lang === 'te'
+      ? choice('Which language is `player_reply` written in? Romanised Telugu counts as Telugu.', {
+        telugu: 'Telugu, romanised Telugu or Tenglish (Telugu with a few English words), any script', hindi: 'Hindi or Hinglish, any script (Urdu-style Hyderabadi Hindi counts as Hindi)', english: 'English only', other: 'Another language (Kannada, Tamil, Malayalam...)', none: 'Not language / gibberish',
       })
       : choice('Which language is `player_reply` written in? Romanised Hindi counts as Hindi.', {
         hindi: 'Hindi or Hinglish, any script', english: 'English only', other: 'Another language', none: 'Not language / gibberish',
@@ -66,7 +78,12 @@ export function decide(a, lang = 'hi') {
   const task = a.does_task.noul, extra = a.has_unrelated_content.noul, rude = a.is_rude.noul;
   const lc = a.reply_language.choice, pHindi = a.reply_language.probabilities?.hindi ?? (lc === 'hindi' ? 1 : 0);
   const pKn = a.reply_language.probabilities?.kannada ?? (lc === 'kannada' ? 1 : 0);
-  const langOk = lang === 'kn'
+  const pTa = a.reply_language.probabilities?.tamil ?? (lc === 'tamil' ? 1 : 0), pTe = a.reply_language.probabilities?.telugu ?? (lc === 'telugu' ? 1 : 0);
+  const langOk = lang === 'ta'
+    ? pTa >= TAMIL_PROB_MIN
+    : lang === 'te'
+    ? pTe >= TELUGU_PROB_MIN
+    : lang === 'kn'
     ? lc === 'kannada' || pKn >= KANNADA_PROB_MIN
     : lang === 'hi'
     ? lc === 'hindi' || pHindi >= HINDI_PROB_MIN
