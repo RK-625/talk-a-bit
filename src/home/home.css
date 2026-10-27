@@ -1,0 +1,81 @@
+/* home/home.css: warm-paper styling for the home page (scoped under html.home / .home-page so the game's canvas styles are untouched). */
+html.home, html.home body { height: auto; min-height: 100%; overflow: auto; overscroll-behavior: auto; }
+html.home body {
+  --ink: #2b2a33;
+  margin: 0; color: var(--ink); font-family: 'Patrick Hand', 'Kalam', 'Segoe Print', cursive;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,.55), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(190,160,110,.18), transparent 45%),
+    repeating-linear-gradient(0deg, rgba(120,100,60,.035) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(120,100,60,.03) 0 1px, transparent 1px 4px),
+    #ece6d6;
+}
+.home-page { max-width: 1240px; margin: 0 auto; padding: 56px 28px 40px; box-sizing: border-box; }
+.hero-head { text-align: center; }
+.kicker { margin: 0; font-size: 22px; letter-spacing: .04em; opacity: .7; transform: rotate(-1.5deg); }
+.hero-head h1 {
+  margin: 4px 0 6px; font: 800 clamp(64px, 11vw, 132px)/1 'Baloo 2', 'Baloo Tamma 2', sans-serif; color: var(--ink);
+  text-shadow: 4px 5px 0 #f6c9d6, 7px 8px 0 rgba(43,42,51,.14); transform: rotate(-1.2deg); letter-spacing: -.01em;
+}
+.hero-head h1 span { color: #e0517a; font-size: .72em; }
+.tagline { margin: 0 auto; max-width: 720px; font: 700 clamp(24px, 3vw, 34px)/1.25 'Kalam', cursive; }
+.sub { margin: 10px auto 0; max-width: 560px; font-size: 22px; opacity: .72; }
+.squig { width: 220px; margin-top: 14px; }
+.pick { margin: 44px 0 6px; text-align: center; font: 700 30px/1 'Kalam', cursive; }
+.pick::after { content: ''; display: block; width: 70px; height: 4px; margin: 8px auto 0; background: #e0517a; border-radius: 3px; transform: rotate(-2deg); }
+
+.cards { list-style: none; margin: 0; padding: 26px 0 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 44px 34px; }
+.slot { flex: 0 1 340px; display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+.slot:nth-child(3n+1) { transform: rotate(-1deg); }
+.slot:nth-child(3n+2) { transform: rotate(.8deg) translateY(8px); }
+.slot:nth-child(3n) { transform: rotate(-.4deg); }
+
+.card {
+  display: flex; flex-direction: column; color: inherit; text-decoration: none; overflow: hidden;
+  background: #fffaf0; border: 3px solid var(--ink); border-radius: 18px 26px 16px 28px / 26px 16px 28px 18px;
+  box-shadow: 5px 6px 0 var(--accent), 6px 8px 0 2px var(--ink);
+  transition: transform .2s cubic-bezier(.2,.8,.3,1.2), box-shadow .2s;
+}
+.card:hover { transform: translateY(-8px) rotate(1.2deg); box-shadow: 8px 12px 0 var(--accent), 9px 14px 0 2px var(--ink); }
+.card:focus-visible, .tag:focus-visible { outline: 4px solid #e0517a; outline-offset: 5px; }
+.art { position: relative; aspect-ratio: 320 / 190; background: linear-gradient(var(--sky-a), var(--sky-b)); border-bottom: 3px solid var(--ink); }
+.art svg { display: block; width: 100%; height: 100%; filter: url(#wobble); }
+.chip {
+  position: absolute; left: 12px; top: 12px; padding: 1px 12px 3px; font-size: 19px; background: #fffaf0;
+  border: 2.5px solid var(--ink); border-radius: 12px 6px 12px 7px; transform: rotate(-3deg); box-shadow: 2px 2px 0 var(--accent);
+}
+.body { padding: 14px 18px 18px; }
+.body h2 { margin: 0; font: 800 32px/1.05 'Baloo 2', sans-serif; color: var(--accent); filter: brightness(.82); }
+.city { margin: 6px 0 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; font-size: 22px; }
+.script { font-size: 25px; font-weight: 600; font-family: 'Kalam', serif; }
+.script.dv { font-family: 'Tiro Devanagari Hindi', 'Kalam', serif; font-weight: 400; }
+.script.kn { font-family: 'Baloo Tamma 2', 'Noto Sans Kannada', sans-serif; }
+.script.ta { font-family: 'Baloo Thambi 2', 'Noto Sans Tamil', sans-serif; }
+.script.te { font-family: 'Baloo Tammudu 2', 'Noto Sans Telugu', sans-serif; }
+.script.ml { font-family: 'Baloo Chettan 2', 'Noto Sans Malayalam', sans-serif; }
+.hero { margin: 8px 0 0; display: flex; align-items: center; gap: 8px; font-size: 20px; opacity: .8; }
+.hero i { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--ink); }
+
+.tag {
+  align-self: center; max-width: 100%; box-sizing: border-box; text-align: center; text-decoration: none; color: var(--ink);
+  padding: 6px 16px 8px; font-size: 20px; line-height: 1.25; background: #fff7dd; border: 2.5px solid var(--ink);
+  border-radius: 20px 10px 22px 10px / 10px 22px 10px 20px; box-shadow: 3px 3px 0 var(--accent);
+  transition: transform .15s, box-shadow .15s, background .15s;
+}
+.tag em { font-style: normal; font-weight: 700; color: var(--accent); filter: brightness(.82); }
+.tag span { display: inline-block; transition: transform .15s; }
+.tag:hover { transform: translateY(-3px) rotate(-1deg); background: #fff; box-shadow: 4px 6px 0 var(--accent); }
+.tag:hover span { transform: translateX(4px); }
+.slot:has(.card:hover) .tag { transform: translateY(-4px); }
+
+.slot.soft .card { border-style: dashed; box-shadow: 5px 6px 0 #f6c9d6, 6px 8px 0 2px var(--ink); }
+footer { margin-top: 48px; text-align: center; font-size: 20px; opacity: .65; }
+footer span { display: block; margin-top: 4px; }
+footer kbd { font: inherit; border: 2px solid var(--ink); border-radius: 6px; padding: 0 6px; background: #fff7dd; }
+
+@media (max-width: 700px) {
+  .home-page { padding: 36px 16px 28px; }
+  .slot { flex-basis: 100%; max-width: 380px; }
+  .cards { gap: 36px 0; }
+}
+@media (prefers-reduced-motion: reduce) { .card, .tag, .tag span { transition: none; } }

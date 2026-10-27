@@ -1,8 +1,5 @@
-// Boot: pick a world with ?world=<id> (default: mumbai; ?world=dozy-hollow for the stage-1 world) and start the engine.
-// To add a world, add one line to WORLDS. Worlds import from ./engine only; the engine never imports a world.
-import { createEngine } from './engine/engine.js';
-import { createMusic } from './game/audio/music.js';
-
+// Boot: no/unknown ?world= shows the home page (no engine, no music); ?world=<id> starts that world's engine.
+// To add a world, add one line to WORLDS (and a card in src/home/home.js). Worlds import from ./engine only; the engine never imports a world.
 const WORLDS = {
   'dozy-hollow': () => import('./worlds/dozy-hollow/index.js'),
   mumbai: () => import('./worlds/mumbai/index.js'),
@@ -12,13 +9,21 @@ const WORLDS = {
   delhi: () => import('./worlds/delhi/index.js'),
   kerala: () => import('./worlds/kerala/index.js'),
 };
-const DEFAULT_WORLD = 'mumbai';
 
-const id = new URLSearchParams(location.search).get('world') ?? DEFAULT_WORLD;
-const load = WORLDS[id] ?? WORLDS[DEFAULT_WORLD];
-const world = (await load()).default;
-document.title = world.name;
-createEngine(world).start();
+const id = new URLSearchParams(location.search).get('world');
+if (!Object.hasOwn(WORLDS, id ?? '')) {
+  (await import('./home/home.js')).mountHome();
+} else {
+  const [{ createEngine }, { createMusic }, { mountHomeButton }] = await Promise.all([
+    import('./engine/engine.js'),
+    import('./game/audio/music.js'),
+    import('./game/homeButton.js'),
+  ]);
+  const world = (await WORLDS[id]()).default;
+  document.title = world.name;
+  createEngine(world).start();
+  mountHomeButton();
 
-const music = createMusic(); // starts on the first key/click; M toggles; ducks on 'talkabit:conversation'
-if (import.meta.env.DEV) window.__music = music;
+  const music = createMusic(); // starts on the first key/click; M toggles; ducks on 'talkabit:conversation'
+  if (import.meta.env.DEV) window.__music = music;
+}
