@@ -9,114 +9,493 @@ import './home.css';
 const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&family=Baloo+Thambi+2:wght@400;600&family=Baloo+Tammudu+2:wght@400;600&family=Baloo+Chettan+2:wght@400;600&display=swap';
 const INK = '#2b2a33';
 
-// ---- landmark drawings (viewBox 320x190; the card's CSS supplies the sky gradient behind them) ----
-const S = (body) => `<svg viewBox="0 0 320 190" role="img" aria-hidden="true" preserveAspectRatio="xMidYMid slice" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">${body}</svg>`;
-const sun = (x, y, r, c) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`;
-const cloud = (x, y) => `<path d="M${x} ${y}h44a9 9 0 0 0 0-18 14 14 0 0 0-26-4 10 10 0 0 0-18 8 7 7 0 0 0 0 14z" fill="#fff8e6" stroke-width="2"/>`;
-const waves = (y, c) => `<path d="M0 ${y}q20-7 40 0t40 0 40 0 40 0 40 0 40 0 40 0 40 0V190H0z" fill="${c}"/>`;
+// ---- landmark drawings: storybook gouache, viewBox 640x380 (same 320:190 box). Gradients/shading, thin tonal lines, no heavy outlines.
+// Ids are prefixed per card (mum-, del-, ...) because every SVG shares one page. The paper grain is one shared CSS overlay (.art::after).
+const rng = (seed) => { let a = seed | 0; return () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+const f = (v) => Math.round(v * 10) / 10;
+const R = (x, y, w, h, fill, x2 = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" ${x2}/>`;
+const P = (d, fill, x2 = '') => `<path d="${d}" fill="${fill}" ${x2}/>`;
+const L = (d, c, w = 1, o = 1, x2 = '') => `<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" opacity="${o}" ${x2}/>`;
+const C = (x, y, r, fill, x2 = '') => `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" ${x2}/>`;
+const E = (x, y, rx, ry, fill, x2 = '') => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${fill}" ${x2}/>`;
+const G = (body, attrs = '') => `<g ${attrs}>${body}</g>`;
+const at = (x, y, s, body, x2 = '') => `<g transform="translate(${x} ${y}) scale(${s})" ${x2}>${body}</g>`;
+const stops = (st) => st.map(([o, c, a = 1]) => `<stop offset="${o}" stop-color="${c}" stop-opacity="${a}"/>`).join('');
+const lin = (id, st, d = [0, 0, 0, 1]) => `<linearGradient id="${id}" x1="${d[0]}" y1="${d[1]}" x2="${d[2]}" y2="${d[3]}">${stops(st)}</linearGradient>`;
+const rad = (id, cx, cy, r, st) => `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="${cx}" cy="${cy}" r="${r}">${stops(st)}</radialGradient>`;
+const SVG = (defs, body) => `<svg viewBox="0 0 640 380" role="img" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><defs>${defs}</defs>${body}</svg>`;
+const mirror = (body, y, o = 0.3) => `<g transform="matrix(1 0 0 -1 0 ${2 * y})" opacity="${o}">${body}</g>`;
 
-const ART = {
-  mumbai: S(`${sun(262, 42, 18, '#ffd36b')}${cloud(30, 40)}
-    <rect y="140" width="320" height="50" fill="#7cc4c9" stroke="none"/>${waves(142, '#5fb0b8')}
-    <path d="M70 150V100h30v50zM220 150V100h30v50z" fill="#d9a35a"/>
-    <rect x="100" y="72" width="120" height="78" fill="#e8b86b"/>
-    <path d="M100 72h120" /><path d="M110 82h100" stroke-width="1.6"/>
-    <path d="M134 150v-44a26 26 0 0 1 52 0v44z" fill="#4a3426"/>
-    <path d="M142 150v-42a18 18 0 0 1 36 0v42" fill="none" stroke="#e8b86b" stroke-width="2"/>
-    <path d="M128 72a32 28 0 0 1 64 0z" fill="#e8b86b"/><path d="M160 44v-12" /><circle cx="160" cy="30" r="3" fill="${INK}"/>
-    <path d="M100 72v-22h16v22zM204 72v-22h16v22z" fill="#d9a35a"/>
-    <path d="M100 50a8 8 0 0 1 16 0zM204 50a8 8 0 0 1 16 0z" fill="#e8b86b"/>
-    <path d="M70 100a15 12 0 0 1 30 0zM220 100a15 12 0 0 1 30 0z" fill="#e8b86b"/>
-    <path d="M30 168l14 10h34l12-10zM236 172l12 9h28l10-9z" fill="#c8513f"/><path d="M55 168v-18l14 14z" fill="#fff8e6" stroke-width="2"/>`),
-
-  delhi: S(`${sun(54, 44, 17, '#ffd36b')}${cloud(200, 48)}
-    <rect y="146" width="320" height="44" fill="#8fc07a" stroke="none"/>
-    <path d="M110 190l30-44h40l30 44z" fill="#d8b98c" stroke-width="2"/>
-    <rect x="102" y="46" width="116" height="102" fill="#d9916a"/>
-    <path d="M96 46h128v-10H96zM100 148h120v-8H100z" fill="#c4764f"/>
-    <path d="M136 148V96q0-30 24-30t24 30v52z" fill="#4a3426"/>
-    <path d="M102 62h116M102 74h116" stroke-width="1.6"/>
-    <g stroke-width="1.2" opacity=".7"><path d="M112 64h96M112 71h96"/></g>
-    <path d="M142 36l8-10h20l8 10z" fill="#c4764f"/><path d="M150 26q10-9 20 0" fill="#e8b86b"/>
-    <path d="M222 150v-30h-8v30zM98 150v-30h8v30z" stroke-width="2" fill="#c4764f"/>
-    <path d="M20 150q30-10 50 0M250 150q30-10 50 0" fill="none" stroke="#5e9a4e" stroke-width="3"/>`),
-
-  bengaluru: S(`${sun(268, 40, 17, '#ffe08a')}${cloud(24, 44)}
-    <rect y="148" width="320" height="42" fill="#9ccb85" stroke="none"/>
-    <path d="M60 190l24-42h152l24 42z" fill="#d9c9a8" stroke-width="2"/>
-    <rect x="44" y="104" width="232" height="44" fill="#a8a09a"/>
-    <rect x="116" y="82" width="88" height="22" fill="#b5ada6"/>
-    <path d="M108 82h104L160 62z" fill="#c9c1ba"/>
-    <rect x="140" y="44" width="40" height="22" fill="#b5ada6"/>
-    <path d="M144 44a16 18 0 0 1 32 0z" fill="#c9c1ba"/><path d="M160 26v-12" /><path d="M160 14h14l-3 4 3 4h-14z" fill="#e0517a" stroke-width="1.8"/>
-    <path d="M44 104h60M216 104h60" /><path d="M52 104a14 14 0 0 1 28 0zM240 104a14 14 0 0 1 28 0z" fill="#c9c1ba"/>
-    <g stroke-width="2.2"><path d="M124 104v44M138 104v44M152 104v44M168 104v44M182 104v44M196 104v44"/></g>
-    <g stroke-width="1.6" fill="#4a4a55"><path d="M62 118h14v14H62zM84 118h14v14H84zM222 118h14v14h-14zM244 118h14v14h-14z"/></g>
-    <path d="M148 148v-18q0-8 12-8t12 8v18z" fill="#4a3426"/>`),
-
-  chennai: (() => {
-    const cols = ['#e0517a', '#f2b84b', '#4fa3a5', '#e0517a', '#f2b84b', '#4fa3a5', '#e0517a'];
-    let t = '';
-    for (let i = 0; i < 7; i++) {
-      const w = 124 - i * 14, y = 150 - (i + 1) * 15.5, x = 160 - w / 2;
-      t += `<path d="M${x} ${y + 15.5}l5-15.5h${w - 10}l5 15.5z" fill="${cols[i]}"/>`;
-      for (let k = 1; k < 5; k++) t += `<path d="M${x + (w * k) / 5} ${y + 3}v9" stroke-width="1.6"/>`;
-    }
-    return S(`${sun(54, 42, 17, '#ffd36b')}${cloud(220, 44)}
-    <rect y="150" width="320" height="40" fill="#e9cf9a" stroke="none"/>
-    <path d="M30 150h260" stroke-width="2"/>
-    <rect x="52" y="124" width="216" height="26" fill="#f4e3c2"/><path d="M52 132h216" stroke-width="1.6"/>
-    ${t}
-    <path d="M118 42q0-14 42-14t42 14z" fill="#e0517a" transform="translate(0 6)"/>
-    <path d="M139 34v-10M160 32v-14M181 34v-10" /><circle cx="139" cy="22" r="3" fill="#f2b84b" stroke-width="1.8"/><circle cx="160" cy="16" r="3.5" fill="#f2b84b" stroke-width="1.8"/><circle cx="181" cy="22" r="3" fill="#f2b84b" stroke-width="1.8"/>
-    <path d="M146 150v-20q0-9 14-9t14 9v20z" fill="#4a3426"/>`);
-  })(),
-
-  hyderabad: S(`${sun(262, 44, 17, '#ffd36b')}${cloud(26, 50)}
-    <rect y="150" width="320" height="40" fill="#e3c394" stroke="none"/>
-    <rect x="96" y="92" width="128" height="58" fill="#f1dcc0"/>
-    <path d="M96 92h128" /><path d="M96 100h128" stroke-width="1.6"/>
-    <path d="M118 150v-26q0-12 12-12t12 12v26zM178 150v-26q0-12 12-12t12 12v26z" fill="#4a3426"/>
-    <path d="M142 150v-34q0-18 18-18t18 18v34z" fill="#4a3426"/>
-    <rect x="108" y="66" width="104" height="26" fill="#f1dcc0"/>
-    <path d="M118 92V80q0-7 7-7t7 7v12zM140 92V80q0-7 7-7t7 7v12zM166 92V80q0-7 7-7t7 7v12zM188 92V80q0-7 7-7t7 7v12z" fill="#7a5a44" stroke-width="1.8"/>
-    <path d="M122 66a10 10 0 0 1 20 0zM150 66a10 10 0 0 1 20 0zM178 66a10 10 0 0 1 20 0z" fill="#e8b86b"/>
-    <g fill="#f1dcc0"><rect x="82" y="46" width="14" height="104"/><rect x="224" y="46" width="14" height="104"/></g>
-    <g fill="#e8b86b"><rect x="78" y="82" width="22" height="6"/><rect x="220" y="82" width="22" height="6"/><rect x="78" y="46" width="22" height="6"/><rect x="220" y="46" width="22" height="6"/></g>
-    <path d="M82 46a7 11 0 0 1 14 0zM224 46a7 11 0 0 1 14 0z" fill="#e0517a"/><path d="M89 35v-9M231 35v-9" />
-    <path d="M86 118h6M86 100h6M228 118h6M228 100h6" stroke-width="1.6"/>
-    <path d="M20 150q16-12 34 0M266 150q16-12 34 0" fill="none" stroke-width="2"/>`),
-
-  kerala: (() => {
-    const net = (x, s) => `<g transform="translate(${x} 0) scale(${s})" transform-origin="0 0">
-      <path d="M-20 152L8 52M40 152L8 52" stroke-width="3.2" fill="none"/>
-      <path d="M-84 112L8 52" stroke-width="4" fill="none"/>
-      <path d="M-84 112L-104 124M-84 112L-56 126M-84 112L-96 134M-84 112L-68 136" stroke-width="1.6" fill="none"/>
-      <path d="M-108 124h56l12 14h-56z" fill="#e8d8b0" fill-opacity=".7" stroke-width="2.2"/>
-      <path d="M-94 124l12 14M-80 124l12 14M-66 124l12 14M-102 131h56" stroke-width="1.1" fill="none"/>
-      <path d="M8 52L40 120" stroke-width="1.8" fill="none"/><circle cx="40" cy="124" r="5" fill="#8a8a92" stroke-width="2"/>
-    </g>`;
-    return S(`<circle cx="214" cy="104" r="46" fill="#ffb25b" stroke="none"/><path d="M0 120h320" stroke-width="1.6" stroke="#b97a4a"/>
-    <path d="M0 120V190H320V120z" fill="#4fa9a5" stroke="none"/>${waves(124, '#3d9390')}
-    <path d="M0 160q20-6 40 0t40 0 40 0 40 0 40 0 40 0 40 0 40 0" fill="none" stroke="#2f7c7a" stroke-width="2"/>
-    ${net(150, 1)}${net(278, 0.8)}
-    <path d="M286 126q10-10 20-4" fill="none" stroke-width="1.8"/><path d="M24 54q6-6 12 0M44 44q6-6 12 0" fill="none" stroke-width="1.8"/>`);
-  })(),
-
-  'dozy-hollow': S(`<path d="M0 118q50-62 120-20t110-10q40-14 90 20V190H0z" fill="#b5dfc4"/>
-    <path d="M0 150q70-52 150-8t170-24V190H0z" fill="#c9e8b8"/>
-    <path d="M0 172q90-24 170-6t150-14V190H0z" fill="#e5f0b8" stroke="none"/>
-    <path d="M32 108q4-16 24-16t26 18v20H32z" fill="#cdbfe6" transform="translate(236 30)"/>
-    <path d="M30 168q0-18 20-18t20 18z" fill="#c8c0d8"/><path d="M42 160q4 3 8 0M54 160q4 3 8 0" fill="none" stroke-width="1.8"/><path d="M64 142l8 0-8 8h8M76 134h6l-6 7h6" fill="none" stroke-width="1.5"/>
-    <path d="M232 170q-2-22 24-22t24 22z" fill="#d2c8e0"/><path d="M247 160q4 3 8 0M260 160q4 3 8 0" fill="none" stroke-width="1.8"/>
-    <ellipse cx="148" cy="136" rx="40" ry="35" fill="#f6b9c8"/>
-    <path d="M148 101q-2-14 12-18 4 12-12 18z" fill="#8cc474" stroke-width="2.2"/>
-    <circle cx="134" cy="132" r="5.5" fill="${INK}"/><circle cx="162" cy="132" r="5.5" fill="${INK}"/>
-    <circle cx="136" cy="130" r="1.8" fill="#fff" stroke="none"/><circle cx="164" cy="130" r="1.8" fill="#fff" stroke="none"/>
-    <ellipse cx="124" cy="144" rx="7" ry="4" fill="#ee7f9b" stroke="none"/><ellipse cx="172" cy="144" rx="7" ry="4" fill="#ee7f9b" stroke="none"/>
-    <path d="M142 146q6 5 12 0" fill="none" stroke-width="2"/>
-    ${sun(268, 42, 16, '#ffe08a')}${cloud(24, 48)}${cloud(150, 36)}`),
+// soft cloud: shadowed underside, lit lobes
+const puff = (x, y, w, hi, lo, o = 1) => `<g opacity="${o}">${E(x, y + w * 0.07, w * 0.5, w * 0.09, lo)}${E(x - w * 0.18, y - w * 0.02, w * 0.2, w * 0.13, hi)}${E(x + w * 0.04, y - w * 0.09, w * 0.26, w * 0.19, hi)}${E(x + w * 0.27, y - w * 0.01, w * 0.18, w * 0.11, hi)}${E(x + w * 0.02, y + w * 0.01, w * 0.47, w * 0.075, hi)}</g>`;
+// long sunset streak
+const streak = (x, y, w, c, o = 0.6) => P(`M${x - w} ${y}Q${x} ${f(y - w * 0.07)} ${x + w} ${y}Q${x} ${f(y + w * 0.03)} ${x - w} ${y}Z`, c, `opacity="${o}"`);
+// gliding bird (V) and soaring kite silhouette
+const bird = (x, y, s = 1, c = '#4a3b4f', w = 1.2) => L(`M${f(x - 6 * s)} ${f(y - s)}Q${f(x - 3 * s)} ${f(y - 5 * s)} ${x} ${y}Q${f(x + 3 * s)} ${f(y - 5 * s)} ${f(x + 6 * s)} ${f(y - s)}`, c, w);
+const kite = (x, y, s, c, r = 0) => at(x, y, s, P('M-11 0Q-5-4.5 0-1.2Q5-4.5 11 0Q5-1.4 2.4 1.6L3.4 4.6 0 3-3.4 4.6-2.4 1.6Q-5-1.4-11 0Z', c), `transform-origin="0 0" ${r ? `style="rotate:${r}deg"` : ''}`);
+// tiny person, feet at (x, y); `s` scales (1 = ~14 units tall)
+const person = (x, y, s, c, o = {}) => at(x, y, s, `${E(0, 0.5, 4.5, 1.3, '#2a2030', 'opacity=".22"')}${L('M-1.3-6V0M1.3-6V0', o.legs || c, 1.7)}<rect x="-2.7" y="-12.2" width="5.4" height="7.2" rx="2.4" fill="${c}"/>${o.arm ? L('M2.4-10.5l2.4 4', c, 1.4) : ''}${C(0, -14.6, 2.3, o.skin || '#bf8760')}${P('M-2.4-14.8Q0-18.4 2.4-14.8Q0-16.2-2.4-14.8Z', o.hair || '#2d2228')}${o.hat ? P('M-3.6-15.6h7.2l-1-2h-5.2z', o.hat) : ''}`);
+// round foliage cluster in three tones (dark base, mid, sunlit highlights toward the light)
+const bush = (x, y, r, seed, [dk, md, lt], n = 10, lx = 1, accent = null) => {
+  const q = rng(seed); const pts = [];
+  for (let i = 0; i < n; i++) { const a = q() * 6.283, d = Math.sqrt(q()) * r * 0.62; pts.push([x + Math.cos(a) * d, y + Math.sin(a) * d * 0.72, r * (0.3 + q() * 0.22)]); }
+  let s = pts.map(([a, b, c]) => C(f(a), f(b), f(c), dk)).join('');
+  s += pts.map(([a, b, c]) => C(f(a + lx * c * 0.16), f(b - c * 0.18), f(c * 0.84), md)).join('');
+  s += pts.filter((_, i) => i % 2 === 0).map(([a, b, c]) => C(f(a + lx * c * 0.3), f(b - c * 0.4), f(c * 0.46), lt)).join('');
+  if (accent) s += pts.map(([a, b, c], i) => (i % 2 ? C(f(a + lx * c * 0.2), f(b - c * 0.25), f(c * 0.34), accent) : '')).join('');
+  return s;
 };
+// coconut palm: tapering curved trunk with rings, arching fronds
+const palm = (x, y, h, lean, seed, trunk, dk, lt, n = 9) => {
+  const q = rng(seed), tx = x + lean, ty = y - h, cx = x + lean * 0.1, cy = y - h * 0.55;
+  let s = P(`M${x - 3} ${y}Q${cx - 2} ${cy} ${tx - 1.3} ${ty}L${tx + 1.3} ${ty}Q${cx + 2.4} ${cy} ${x + 3} ${y}Z`, trunk);
+  s += L(`M${x} ${y}Q${cx} ${cy} ${tx} ${ty}`, '#2a1d22', 2.6, 0.28, 'stroke-dasharray="1.2 3.2"');
+  for (let k = 0; k < n; k++) {
+    const a = -Math.PI + 0.12 + (k / (n - 1)) * (Math.PI - 0.24) + (q() - 0.5) * 0.2, l = h * (0.34 + q() * 0.1) + 8;
+    const mx = tx + Math.cos(a) * l * 0.55, my = ty + Math.sin(a) * l * 0.5 - l * 0.2, ex = tx + Math.cos(a) * l, ey = ty + Math.sin(a) * l * 0.5 + l * 0.3;
+    s += P(`M${tx} ${ty}Q${f(mx)} ${f(my)} ${f(ex)} ${f(ey)}Q${f(mx + 1)} ${f(my + l * 0.2)} ${tx} ${ty}Z`, k % 2 ? dk : lt);
+  }
+  return s + C(tx - 1.5, ty + 2, 2.2, '#6b4a2e') + C(tx + 1.8, ty + 2.4, 2, '#6b4a2e');
+};
+// scattered ripple dashes (longer toward the viewer)
+const ripples = (x, y, w, h, c, n, seed, o = 0.5) => { const q = rng(seed); let d = ''; for (let i = 0; i < n; i++) { const yy = y + q() * h, len = 5 + ((yy - y) / h) * 20 * q() + q() * 6; d += `M${f(x + q() * w)} ${f(yy)}h${f(len)}`; } return L(d, c, 0.9, o); };
+// hazy skyline: random blocks, a few domes/spires
+const skyline = (seed, x0, x1, base, hmin, hmax, fill, o = 1, wmax = 22) => {
+  const q = rng(seed); let s = '', x = x0;
+  while (x < x1) { const w = 8 + q() * wmax, h = hmin + q() * (hmax - hmin); s += R(f(x), f(base - h), f(w), f(h + 2), fill); if (q() < 0.25) s += P(`M${f(x + 1)} ${f(base - h)}a${f(w / 2 - 1)} ${f(w / 2)} 0 0 1 ${f(w - 2)} 0z`, fill); else if (q() < 0.2) s += L(`M${f(x + w / 2)} ${f(base - h)}v-7`, fill, 1); x += w + q() * 3; }
+  return G(s, `opacity="${o}"`);
+};
+// rolling hills ridge
+const ridge = (seed, y, amp, fill, step = 70, o = 1) => { const q = rng(seed); let d = `M-10 380V${f(y)}`; for (let x = -10; x < 650; x += step) d += `Q${x + step / 2} ${f(y - q() * amp)} ${x + step} ${f(y - q() * amp * 0.45)}`; return P(`${d}V380Z`, fill, `opacity="${o}"`); };
+// masonry courses with staggered joints (call inside a clip group)
+const courses = (x, y, w, h, step, c, o = 0.12, seed = 1, jw = 14) => { const q = rng(seed); let d = '', r = 0; for (let yy = y; yy < y + h; yy += step, r++) { d += `M${x} ${f(yy)}h${w}`; for (let xx = x + (r % 2 ? jw / 2 : 0) + q() * 4; xx < x + w; xx += jw + q() * 5) d += `M${f(xx)} ${f(yy)}v${step}`; } return L(d, c, 0.6, o); };
+
+// Mumbai: Gateway of India at sunset on the harbour, ferries, gulls, the Taj hotel in haze.
+const mumbai = () => {
+  const k = 'mum', FRONT = 'M160 268V148H235V104H365V148H440V268ZM277 268V200A23 17 0 0 1 323 200V268Z';
+  const defs = lin(`${k}-sky`, [[0, '#5a67a3'], [0.3, '#b48cb0'], [0.58, '#f0a38a'], [0.8, '#fbc78f'], [1, '#fde4b0']])
+    + rad(`${k}-halo`, 470, 214, 200, [[0, '#ffe5a8', 0.95], [0.22, '#ffc182', 0.55], [0.6, '#f79b78', 0.16], [1, '#f79b78', 0]])
+    + lin(`${k}-sea`, [[0, '#f2ae88'], [0.1, '#cc8d98'], [0.3, '#5f7d9c'], [1, '#233f58']])
+    + lin(`${k}-st`, [[0, '#b4904f'], [0.5, '#d2ad66'], [1, '#e8c982']], [0, 0, 1, 0])
+    + lin(`${k}-shade`, [[0, '#3b2a3d', 0.5], [0.45, '#3b2a3d', 0.1], [1, '#3b2a3d', 0]], [0, 0, 1, 0])
+    + lin(`${k}-quay`, [[0, '#e6caa0'], [1, '#c9a778']])
+    + lin(`${k}-glit`, [[0, '#ffd88e', 0.6], [1, '#ffb070', 0]])
+    + lin(`${k}-hz`, [[0, '#fde4b0', 0], [0.5, '#fde4b0', 0.7], [1, '#fde4b0', 0]])
+    + `<clipPath id="${k}-front"><path clip-rule="evenodd" d="${FRONT}"/></clipPath>`;
+  const ST = '#5b432b', HI = '#f3d99a';
+  // sky, sun, clouds, gulls
+  let b = R(0, 0, 640, 242, `url(#${k}-sky)`) + C(470, 214, 200, `url(#${k}-halo)`) + C(470, 214, 21, '#fff0c2') + C(470, 214, 21, 'none', 'stroke="#ffd58a" stroke-width="3" opacity=".5"')
+    + streak(150, 70, 120, '#f7b3b0', 0.45) + streak(560, 56, 90, '#f9c4a4', 0.5) + streak(300, 132, 150, '#f6b49a', 0.5) + streak(520, 160, 110, '#ffd29a', 0.65) + streak(90, 168, 90, '#f6c0a0', 0.5)
+    + puff(396, 98, 110, '#f6b6b4', '#b888b0', 0.7) + puff(60, 112, 90, '#f1a9a8', '#a97fae', 0.6);
+  // hazy Taj hotel (left) and far hills/ships (right)
+  b += R(0, 226, 640, 16, `url(#${k}-hz)`);
+  b += G(R(14, 213, 118, 26, '#a98aa8') + P('M62 213Q62 188 80 186Q98 188 98 213Z', '#a98aa8') + L('M80 186v-9', '#a98aa8', 1.4) + P('M20 213Q20 200 28 198Q36 200 36 213Z M112 213Q112 200 120 198Q128 200 128 213Z', '#a98aa8') + R(110, 196, 30, 44, '#a68ba7') + P('M112 196Q125 180 138 196Z', '#a68ba7') + R(40, 203, 14, 10, '#a98aa8'), 'opacity=".55"')
+    + ridge(4, 240, 18, '#b99cae', 60, 0.45).replace('V380Z', 'V242Z') + R(300, 232, 38, 5, '#b49aaa', 'opacity=".5"') + R(306, 226, 10, 7, '#b49aaa', 'opacity=".5"');
+  // sea + sunset path
+  b += R(0, 234, 640, 146, `url(#${k}-sea)`) + [0, 1, 2, 3].map((i) => P(`M${456 + i * 4} 234H${484 - i * 4}L${560 - i * 26} 380H${380 + i * 26}Z`, `url(#${k}-glit)`, 'opacity=".55"')).join('');
+  const q = rng(7); let gl = ''; for (let i = 0; i < 80; i++) { const y = 236 + q() * q() * 144, sp = 14 + (y - 234) * 0.45; gl += `M${f(470 + (q() - 0.5) * sp * 2)} ${f(y)}h${f(3 + (y - 234) * 0.07 * q() + q() * 5)}`; }
+  b += L(gl, '#ffe6b0', 1.2, 0.8) + ripples(0, 240, 640, 140, '#9fb5cd', 60, 3, 0.35);
+  // far ferry + a dhow sail on the horizon
+  const ferry = (c1) => `${P('M-58-2Q-60-12-52-14H54Q62-12 60-2Q54 4 40 4H-40Q-54 4-58-2Z', '#f6ecd6')}${R(-58, -3, 118, 3.5, '#2b5a70')}${R(-58, -8, 118, 3, c1)}${R(-48, -27, 96, 13, '#f0dfc0')}${R(-48, -27, 96, 13, `url(#${k}-shade)`, 'opacity=".6"')}${Array.from({ length: 12 }, (_, i) => R(-44 + i * 7.6, -23, 4.6, 5.5, i % 4 === 1 ? '#ffd98a' : '#4c6c86')).join('')}${R(-52, -30, 104, 4, c1)}${R(-38, -41, 76, 11, '#f3e4c8')}${Array.from({ length: 9 }, (_, i) => R(-34 + i * 8, -38, 5, 5, i % 3 === 1 ? '#ffd98a' : '#4c6c86')).join('')}${R(-40, -44, 80, 3.5, c1)}${R(-5, -56, 9, 12, '#2f5068')}${R(-5, -52, 9, 2.4, '#f2b04e')}${L('M30-44V-64', '#5a4a50', 1.2)}${P('M30-64h13v2.8H30z', '#f59a3a')}${P('M30-61.2h13v2.8H30z', '#fff6e6')}${P('M30-58.4h13v2.8H30z', '#4fa36c')}${L('M-50-14.5H50M-50-30.5H-38', '#8a6a5a', 0.8, 0.8)}`;
+  b += G(at(585, 252, 0.42, ferry('#e46f3f')), 'opacity=".8"') + G(L('M500 243l8 0M504 242V230l8 12z', '#fbe8c8', 1) + P('M504 241V229l8 12z', '#fdecd0'), 'opacity=".75"');
+  // quay: cast shadow, top, wall
+  b += P('M-10 268H156L96 284H-10Z', '#3b2a3d', 'opacity=".3"') + P('M-10 268H466L500 282V301H-10Z', `url(#${k}-quay)`) + P('M-10 284H500V301H-10Z', '#a98760') + R(-10, 284, 510, 2.4, '#ecd3a4', 'opacity=".7"')
+    + G(courses(-10, 286, 510, 15, 5, '#5b432b', 0.18, 5, 18), '') + R(-10, 299, 510, 3, '#2d2440', 'opacity=".35"') + L('M-10 268.4H468', HI, 1, 0.8);
+  // Gateway of India: dome behind, front face with the great arch, details clipped to the face, then turrets
+  b += P('M277 106Q277 84 300 80Q323 84 323 106Z', '#cfae70') + P('M300 80Q313 86 314 106H300Z', '#e6c885', 'opacity=".6"') + L('M283 104Q287 88 300 80M292 104Q295 90 300 80', '#8a6b41', 0.7, 0.5) + R(296, 70, 8, 11, '#cfae70') + C(300, 69, 2.2, '#cfae70') + L('M300 66v-9', '#7a5d38', 1.2);
+  b += P(FRONT, `url(#${k}-st)`, 'fill-rule="evenodd"');
+  const win = (cx) => `${P(`M${cx - 14.5} 232V208Q${cx - 14.5} 197 ${cx} 197Q${cx + 14.5} 197 ${cx + 14.5} 208V232Z`, '#6b5033', 'opacity=".85"')}${L(`M${cx - 7.5} 200V232M${cx} 198V232M${cx + 7.5} 200V232M${cx - 14} 212H${cx + 14}M${cx - 14} 222H${cx + 14}`, '#dcbb7a', 0.7, 0.55)}${L(`M${cx - 15.5} 232V208Q${cx - 15.5} 195 ${cx} 195Q${cx + 15.5} 195 ${cx + 15.5} 208V232`, HI, 1, 0.75)}${P(`M${cx - 8.5} 268V247Q${cx - 8.5} 239 ${cx} 239Q${cx + 8.5} 239 ${cx + 8.5} 247V268Z`, '#3d2c20')}${L(`M${cx - 10} 268V247Q${cx - 10} 237 ${cx} 237Q${cx + 10} 237 ${cx + 10} 247V268`, '#7a5d38', 1, 0.6)}`;
+  let cols = ''; for (let x = 264; x <= 336; x += 9) cols += `M${x} 135V146`;
+  b += G(courses(160, 104, 280, 164, 6, ST, 0.1, 11, 16) + R(156, 100, 290, 172, `url(#${k}-shade)`)
+    + R(150, 140, 100, 8, '#a98750') + R(350, 140, 100, 8, '#a98750') + L('M156 140.6H244M356 140.6H444', HI, 1, 0.9)
+    + R(160, 153, 75, 9, '#8e6f45', 'opacity=".45"') + R(365, 153, 75, 9, '#8e6f45', 'opacity=".45"') + L('M164 157.5H232M368 157.5H436', '#4b3721', 6, 0.35, 'stroke-dasharray="1.6 2.6"')
+    + R(156, 172, 84, 5, '#b08e53') + R(360, 172, 84, 5, '#b08e53') + L('M158 181H238M362 181H442', ST, 3, 0.5, 'stroke-dasharray="2 2.6"') + L('M156 172.5H240M360 172.5H444', HI, 0.8, 0.9)
+    + win(213.5) + win(386.5)
+    + R(233, 100, 134, 9, '#a98750') + L('M233 100.6H367', HI, 1, 1) + L('M236 106H364', ST, 3, 0.5, 'stroke-dasharray="3 3"')
+    + R(262, 113, 76, 17, '#8e6f45', 'opacity=".5"') + L('M268 118.5H332M270 123H330M273 127H327', ST, 1.2, 0.5)
+    + R(236, 134, 128, 12, '#8a6b41', 'opacity=".4"') + L(cols, ST, 2.2, 0.65) + L('M262 135.5H338', HI, 0.8, 0.7) + R(232, 146, 136, 5, '#a98750') + L('M232 146.5H368', HI, 0.8, 0.9)
+    + L('M242 152V268M268 152V268M332 152V268M358 152V268', '#7a5d38', 0.8, 0.45)
+    + L('M270 268V200A30 24 0 0 1 330 200V268', ST, 1.3, 0.7) + L('M268.5 268V200A31.5 25 0 0 1 331.5 200V268', HI, 0.7, 0.55)
+    + P('M312 268V200.5A23 17 0 0 1 323 200V268Z', '#5a4128', 'opacity=".55"') + P('M277 200A23 17 0 0 1 323 200A23 17 0 0 0 277 200Z', '#3b2a3d', 'opacity=".25"'), `clip-path="url(#${k}-front)"`);
+  const tur = (cx) => `${R(cx - 12, 76, 24, 72, `url(#${k}-st)`)}${R(cx - 12, 76, 24, 72, `url(#${k}-shade)`)}${R(cx - 14, 71, 28, 6, '#a98750')}${R(cx - 14, 110, 28, 4.5, '#a98750')}${R(cx - 14, 134, 28, 4, '#a98750')}${P(`M${cx - 5} 100V92Q${cx} 86 ${cx + 5} 92V100Z`, '#3d2c20')}${P(`M${cx - 5} 124V117Q${cx} 112 ${cx + 5} 117V124Z`, '#4a3626')}${L(`M${cx - 6} 94V100M${cx + 6} 94V100`, HI, 0.8, 0.5)}${P(`M${cx - 13} 71Q${cx - 12} 64 ${cx - 6} 60Q${cx - 2} 56 ${cx} 50Q${cx + 2} 56 ${cx + 6} 60Q${cx + 12} 64 ${cx + 13} 71Z`, '#d2ad66')}${P(`M${cx} 50Q${cx + 2} 56 ${cx + 6} 60Q${cx + 12} 64 ${cx + 13} 71H${cx}Z`, '#e8c982', 'opacity=".55"')}${L(`M${cx} 51V71M${cx - 6} 61Q${cx - 5} 67 ${cx - 7} 71M${cx + 6} 61Q${cx + 5} 67 ${cx + 7} 71`, '#7a5d38', 0.8, 0.55)}${C(cx, 48.5, 1.8, '#d2ad66')}${L(`M${cx} 47V41`, '#7a5d38', 1.1)}${L(`M${cx - 12} 76V148`, '#3b2a3d', 3, 0.25)}${L(`M${cx - 14} 71.5H${cx + 14}`, HI, 0.8, 0.9)}`;
+  b += tur(250) + tur(350);
+  // lamp posts, people on the quay
+  const lamp = (x) => L(`M${x} 270V240`, '#3a2b3d', 1.6) + L(`M${x - 6} 246Q${x} 252 ${x + 6} 246M${x} 240v-5`, '#3a2b3d', 1.2) + C(x, 233, 2.6, '#ffe2a0') + C(x - 6, 244, 2, '#ffe2a0') + C(x + 6, 244, 2, '#ffe2a0') + C(x, 238, 11, '#ffd58a', 'opacity=".22"');
+  b += lamp(112) + lamp(482) + person(236, 280, 1.15, '#c6564a') + person(247, 281, 1.0, '#f1e6d6') + person(258, 279, 0.6, '#e9c56a') + person(344, 281, 1.1, '#3f6e86') + person(358, 280, 1.0, '#8a5aa0', { arm: 1 }) + person(398, 282, 1.15, '#f1e6d6') + person(421, 280, 1.0, '#c6564a') + person(60, 283, 1.15, '#e9c56a') + person(74, 282, 1.05, '#3f6e86')
+    + person(190, 283, 1.1, '#6b8e5a') + person(444, 283, 1.0, '#e9c56a', { hat: '#f1e6d6' });
+  // main ferry + reflection, gulls near the water
+  const waterTop = 308, fx = 540, fy = 330;
+  b += mirror(at(fx, fy, 1.05, ferry('#e46f3f')), fy, 0.28) + ripples(470, fy, 140, 40, '#2b4e6a', 26, 9, 0.5) + at(fx, fy, 1.05, ferry('#e46f3f')) + ripples(480, fy - 1, 120, 6, '#fff2d0', 7, 4, 0.7);
+  // foreground dhow: lateen sail, hull, reflection
+  const dhow = `${P('M-52-10Q-48 6-14 8H30Q54 6 60-17Q38-6 4-8Q-28-9-52-10Z', '#5a392c')}${L('M-48-9Q-30-7 4-7Q40-5 58-16', '#e3b574', 1.2, 0.9)}${L('M0-8V-74', '#3a2a22', 1.8)}${P('M1-72L-36-12H24Z', '#f4e2c0')}${P('M1-72L24-12H8Z', '#d9b88f', 'opacity=".65"')}${P('M3-62L44-14H6Z', '#f0a06a')}${L('M3-62L44-14', '#e1824f', 0.8)}${L('M-14-40Q-10-30-12-14M-3-50V-12', '#c9a27a', 0.6, 0.7)}${person(-26, -5, 0.9, '#c6564a')}`;
+  b += mirror(at(120, 354, 1.05, dhow), 354, 0.26) + ripples(50, 354, 150, 26, '#18304a', 22, 13, 0.55) + at(120, 354, 1.05, dhow) + ripples(60, 352, 130, 6, '#ffd9a0', 8, 21, 0.6);
+  // gulls
+  b += [[366, 120, 1.3], [392, 108, 1], [410, 132, 1.1], [330, 86, 0.9], [596, 112, 1.2], [575, 96, 0.9], [220, 98, 1], [520, 170, 0.8], [300, 330, 1], [330, 316, 0.8]].map(([x, y, s], i) => bird(x, y, s, i % 3 === 0 ? '#6a4a5c' : '#fff3e2', 1.3)).join('');
+  return SVG(defs, b);
+};
+
+// Delhi: India Gate on a hazy morning, the avenue and canals in perspective, the canopy far behind, kites and strollers.
+const delhi = () => {
+  const k = 'del', VX = 300, HZ = 262;
+  const FRONT = 'M202 300L211 144H199V127H213V102H222V88H240V76H262V69H338V76H360V88H378V102H387V127H401V144H389L398 300ZM273 300V203A27 27 0 0 1 327 203V300Z';
+  const defs = lin(`${k}-sky`, [[0, '#f3c79b'], [0.55, '#fadcb7'], [1, '#fff0d6']])
+    + rad(`${k}-halo`, 480, 84, 190, [[0, '#fff6d6', 0.95], [0.3, '#ffe6b8', 0.5], [1, '#ffe6b8', 0]])
+    + lin(`${k}-lawn`, [[0, '#c7d597'], [0.4, '#9db96b'], [1, '#73994a']])
+    + lin(`${k}-road`, [[0, '#ecd2a8'], [1, '#d3a574']])
+    + lin(`${k}-water`, [[0, '#f7e3c4'], [1, '#a9c4cf']])
+    + lin(`${k}-st`, [[0, '#cf935f'], [0.55, '#e0a874'], [1, '#efc08d']], [0, 0, 1, 0])
+    + lin(`${k}-shade`, [[0, '#5a3426', 0.5], [0.5, '#5a3426', 0.12], [1, '#5a3426', 0]], [0, 0, 1, 0])
+    + lin(`${k}-ov`, [[0, '#5a3426', 0.35], [1, '#5a3426', 0]])
+    + `<clipPath id="${k}-front"><path clip-rule="evenodd" d="${FRONT}"/></clipPath>`;
+  const rx = (a, y) => f(VX + (a * (y - HZ)) / 38);
+  const ST = '#74442a', HI = '#f6d3a2';
+  // sky, glowing sun, haze, kites
+  let b = R(0, 0, 640, 272, `url(#${k}-sky)`) + C(480, 84, 190, `url(#${k}-halo)`) + C(480, 84, 22, '#fff7da', 'opacity=".95"')
+    + puff(120, 128, 120, '#fff1de', '#f0cfae', 0.8) + puff(540, 160, 100, '#fff1de', '#f0cfae', 0.75) + streak(330, 60, 140, '#fff0d6', 0.7) + streak(90, 200, 100, '#fff3dc', 0.7);
+  const pk = (x, y, c1, c2, rot) => `<g transform="translate(${x} ${y}) rotate(${rot})">${P('M0-10L7 0L0 12L-7 0Z', c1)}${P('M0-10L7 0H0Z M0 12L-7 0H0Z', c2, 'opacity=".9"')}${L('M0-10V12M-7 0H7', '#7a4a3a', 0.6, 0.7)}${L('M0 12q-4 5 0 9t0 9t0 8', '#7a4a3a', 0.8)}${P('M-2 17h4l-2 2zM-2 26h4l-2 2z', c1)}</g>`;
+  b += pk(520, 142, '#e0607a', '#f5b6a0', 18) + pk(150, 112, '#4fa3a5', '#f2d27a', -14) + L('M432 322Q480 230 521 153', '#7a5a4a', 0.6, 0.7);
+  // far haze: tree line and a faint Rashtrapati Bhavan dome behind the avenue
+  b += R(0, 258, 640, 6, '#d6d8b0', 'opacity=".7"');
+  const hz = ['#b9c795', '#c9d3a6', '#dbe0bb'];
+  for (let x = -10; x < 660; x += 30) if (x < 150 || x > 440) b += bush(x, 266 + ((x * 7) % 5), 22 + ((x * 3) % 9), x + 3, hz, 6, 1);
+  b += G(R(120, 252, 90, 12, '#d6c3a0') + P('M150 252Q150 236 165 234Q180 236 180 252Z', '#d6c3a0') + R(224, 256, 42, 8, '#d6c3a0'), 'opacity=".5"');
+  // ground: lawn with mown bands, canals and the avenue converging on the arch
+  b += R(0, HZ, 640, 118, `url(#${k}-lawn)`);
+  const yb = [262, 266, 272, 281, 293, 310, 332, 360, 380]; for (let i = 0; i < yb.length - 1; i += 2) b += R(0, yb[i], 640, yb[i + 1] - yb[i], '#5f8a3d', 'opacity=".13"');
+  const strip = (a1, a2, fill, x2 = '') => P(`M${VX} ${HZ}L${rx(a2, 380)} 380L${rx(a1, 380)} 380Z`, fill, x2);
+  b += strip(-46, 46, `url(#${k}-road)`) + strip(-64, -49, `url(#${k}-water)`) + strip(49, 64, `url(#${k}-water)`) + strip(-49, -46, '#c99a6c') + strip(46, 49, '#c99a6c') + strip(-66, -64, '#c99a6c') + strip(64, 66, '#c99a6c')
+    + L(`M${VX} ${HZ}L${rx(-12, 380)} 380M${VX} ${HZ}L${rx(12, 380)} 380`, '#f2dcb6', 1, 0.5, 'stroke-dasharray="6 5"');
+  // canopy (chhatri) framed by the arch, avenue trees in haze
+  b += G(R(293, 257, 14, 5, '#e6c9a2') + R(294.5, 249, 1.8, 8, '#e6c9a2') + R(297.2, 249, 1.8, 8, '#e6c9a2') + R(300.8, 249, 1.8, 8, '#e6c9a2') + R(303.6, 249, 1.8, 8, '#e6c9a2') + P('M292 249Q300 238 308 249Z', '#e9cfa8') + L('M300 238v-4', '#d7b78e', 1) + L('M285 262V248M315 262V248', '#c9b090', 1), 'opacity=".9"')
+    + L('M285 248h6l-1 4h-5zM309 248h6l-1 4h-5z', '#d87a5a', 1.2, 0.5);
+  // India Gate: attic with stepped corners, bowl, cornice, great arch, roundels, panels
+  b += P(`M${VX - 100} 300L${VX + 98} 300L${VX + 30} 336L${VX - 160} 336Z`, '#5a3a5a', 'opacity=".14"');
+  b += P(FRONT, `url(#${k}-st)`, 'fill-rule="evenodd"');
+  let fan = ''; for (let x = 210; x < 392; x += 9) fan += `M${x} 143.5a3.6 3.6 0 0 1 7.2 0`;
+  b += G(courses(199, 69, 202, 232, 5.6, ST, 0.15, 3, 12) + R(196, 62, 210, 240, `url(#${k}-shade)`)
+    + R(199, 127, 202, 17, '#c88c5a', 'opacity=".55"') + L(fan, ST, 1, 0.55) + L('M199 127.6H401', HI, 1.1, 0.95) + R(203, 144, 194, 7, `url(#${k}-ov)`) + L('M205 133.5H395', ST, 3, 0.4, 'stroke-dasharray="1.5 2.5"')
+    + L('M222 102.6H378M240 88.6H360M262 76.6H338', HI, 0.9, 0.8)
+    + `<text x="300" y="98" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="8.5" letter-spacing="2" fill="#6b3f26" opacity=".72">INDIA</text>`
+    + C(263, 92, 6.4, '#bf8458', 'opacity=".6"') + C(263, 92, 4.2, 'none', `stroke="${ST}" stroke-width=".8" opacity=".55"`) + C(337, 92, 6.4, '#bf8458', 'opacity=".6"') + C(337, 92, 4.2, 'none', `stroke="${ST}" stroke-width=".8" opacity=".55"`)
+    + L('M233 107h134M229 112h142M233 117h134M241 122h118', ST, 1, 0.38, 'stroke-dasharray="3 1.4 6 1.6"')
+    + C(235, 160, 9.5, '#c88c5a', 'opacity=".6"') + C(235, 160, 6.5, 'none', `stroke="${ST}" stroke-width=".9" opacity=".6"`) + C(365, 160, 9.5, '#c88c5a', 'opacity=".6"') + C(365, 160, 6.5, 'none', `stroke="${ST}" stroke-width=".9" opacity=".6"`)
+    + L('M229 160h12M235 154v12M359 160h12M365 154v12', ST, 0.6, 0.4)
+    + R(218, 174, 34, 36, '#a86a40', 'opacity=".28"') + R(221, 177, 28, 30, 'none', `stroke="${ST}" stroke-width=".8" opacity=".5"`) + R(348, 174, 34, 36, '#a86a40', 'opacity=".28"') + R(351, 177, 28, 30, 'none', `stroke="${ST}" stroke-width=".8" opacity=".5"`)
+    + R(201, 217, 198, 6, '#c98d5b') + L('M201 217.6H399', HI, 0.9, 0.9) + R(201, 223, 198, 3, `url(#${k}-ov)`)
+    + L('M269 300V203A31 31 0 0 1 331 203V300', '#e9b987', 6, 0.55) + L('M265.5 300V203A34.5 34.5 0 0 1 334.5 203V300', ST, 1.1, 0.7) + R(294, 168, 12, 9, '#c88c5a') + L('M294 168.6h12', HI, 0.8)
+    + R(205, 236, 190, 2, '#7a4a2c', 'opacity=".22"'), `clip-path="url(#${k}-front)"`);
+  b += P('M273 300V203A27 27 0 0 1 285 180Q280 195 279.5 203V300Z', '#6f4228', 'opacity=".55"') + L('M273 203A27 27 0 0 1 327 203', '#6f4228', 4, 0.35)
+    + R(196, 291, 208, 9, '#b87c50') + R(196, 291, 208, 1.6, HI, 'opacity=".8"') + R(192, 299, 216, 5, '#9a6340') + R(192, 299, 216, 1.2, '#d49a6a', 'opacity=".7"')
+    + P('M279 69Q300 50 321 69Z', '#d9a06c') + P('M300 52.5Q312 58 321 69H300Z', '#efc08d', 'opacity=".6"') + L('M285 65Q290 56 300 53', '#f9dbb0', 1.2, 0.8) + R(277, 67, 46, 3.2, '#b87c50') + R(277, 67, 46, 1, HI, 'opacity=".7"')
+    + bird(246, 60, 0.7, '#5a4040', 1) + bird(250, 66, 0.55, '#5a4040', 1);
+  // avenue trees (mid) framing the gate
+  b += bush(168, 292, 26, 31, ['#587f45', '#76a252', '#a9c96e'], 8) + R(165, 290, 4, 12, '#5d4636') + bush(432, 292, 26, 32, ['#587f45', '#76a252', '#a9c96e'], 8) + R(430, 290, 4, 12, '#5d4636')
+    + bush(86, 296, 44, 33, ['#4d7440', '#6f9a4f', '#a5c46c'], 11) + R(83, 292, 6, 18, '#5d4636') + bush(520, 298, 46, 34, ['#4d7440', '#6f9a4f', '#a5c46c'], 11) + R(517, 294, 6, 18, '#5d4636');
+  // people strolling, balloon seller, child with kite, lamp posts
+  const lamp = (x, y, s) => at(x, y, s, `${L('M0 0V-30', '#4a3a3e', 1.6)}${L('M-5-27Q0-22 5-27', '#4a3a3e', 1.2)}${C(0, -33, 2.8, '#fff0c0')}${C(-5, -26, 2, '#fff0c0')}${C(5, -26, 2, '#fff0c0')}${L('M0-30v-3', '#4a3a3e', 1.4)}`);
+  b += lamp(rx(-56, 318), 318, 1) + lamp(rx(56, 318), 318, 1) + lamp(rx(-56, 358), 358, 1.5) + lamp(rx(56, 358), 358, 1.5)
+    + person(rx(-20, 326), 326, 1.0, '#d86a6a') + person(rx(-12, 327), 327, 0.55, '#f2c04e') + person(rx(10, 330), 330, 1.05, '#4fa3a5', { arm: 1 }) + person(rx(26, 334), 334, 1.1, '#f1e6d6')
+    + person(262, 349, 1.6, '#8a5aa0') + person(280, 353, 1.5, '#f1e6d6', { arm: 1 }) + person(342, 356, 1.6, '#e9a44f') + person(322, 372, 1.9, '#3f6e86')
+    + person(430, 340, 1.0, '#e0607a') + person(150, 336, 1.2, '#3f6e86') + person(560, 352, 1.5, '#d86a6a') + person(80, 346, 1.4, '#e9c56a');
+  const balloons = (x, y) => L(`M${x} ${y}L${x - 8} ${y - 34}M${x} ${y}L${x + 1} ${y - 38}M${x} ${y}L${x + 9} ${y - 33}`, '#6a5a60', 0.6) + C(x - 8, y - 39, 5, '#e0607a') + C(x + 1, y - 44, 5, '#f2c04e') + C(x + 10, y - 38, 5, '#4fa3a5') + C(x - 9.5, y - 41, 1.5, '#fff', 'opacity=".6"') + C(x + 0.5, y - 46, 1.5, '#fff', 'opacity=".6"');
+  b += person(214, 340, 1.3, '#f1e6d6') + balloons(217, 326);
+  // big framing trees at the edges, kites (black) and a few birds
+  b += R(30, 215, 9, 60, '#5d4636') + bush(34, 235, 74, 41, ['#46703d', '#6a9a4a', '#b0cf72'], 13) + R(605, 205, 10, 70, '#5d4636') + bush(610, 218, 82, 42, ['#46703d', '#6a9a4a', '#b0cf72'], 14, 1, '#e8905a');
+  b += kite(380, 54, 1.1, '#5a4040') + kite(420, 36, 0.9, '#5a4040') + kite(344, 30, 0.8, '#5a4040') + kite(250, 40, 0.9, '#6a5050') + bird(560, 100, 1, '#6a5050') + bird(580, 92, 0.8, '#6a5050') + bird(150, 70, 1, '#6a5050');
+  return SVG(defs, b);
+};
+
+// Bengaluru: Vidhana Soudha (colonnade, golden domes, emblem dome) under a soft blue sky, rain tree + gulmohar, a lake edge.
+const bengaluru = () => {
+  const k = 'blr', B = 300, Y = (h) => f(B - h);
+  const defs = lin(`${k}-sky`, [[0, '#86bce2'], [0.55, '#bddcee'], [1, '#e8f2ee']])
+    + rad(`${k}-halo`, 90, 70, 200, [[0, '#fffbe6', 0.9], [0.4, '#fff3cc', 0.35], [1, '#fff3cc', 0]])
+    + lin(`${k}-st`, [[0, '#ece3d6'], [0.6, '#d9cdc0'], [1, '#bdb0a8']], [0, 0, 1, 0])
+    + lin(`${k}-gold`, [[0, '#f0d9a8'], [0.55, '#d7b27a'], [1, '#a98153']], [0, 0, 1, 0])
+    + lin(`${k}-lawn`, [[0, '#a8d28a'], [1, '#7fb470']])
+    + lin(`${k}-lake`, [[0, '#9ad0d0'], [1, '#4a8f9c']])
+    + lin(`${k}-rs`, [[0, '#4b4455', 0], [1, '#4b4455', 0.32]], [0, 0, 1, 0]) + lin(`${k}-dark`, [[0, '#4b4455', 0.5], [1, '#4b4455', 0]], [0, 0, 1, 0]);
+  const ST = '#8a7c74', REC = '#625a68', DK = ['#3b7050', '#5a9c64', '#9bd088'];
+  // sky, clouds, far city + hills, birds
+  let b = R(0, 0, 640, 300, `url(#${k}-sky)`) + C(90, 70, 200, `url(#${k}-halo)`)
+    + puff(160, 92, 170, '#ffffff', '#bcd3ec', 0.95) + puff(470, 60, 130, '#ffffff', '#bcd3ec', 0.9) + puff(330, 34, 90, '#ffffff', '#c3d8ee', 0.8) + puff(620, 150, 100, '#ffffff', '#bcd3ec', 0.7) + puff(40, 160, 90, '#ffffff', '#bcd3ec', 0.7);
+  b += ridge(21, 262, 18, '#b4d1c6', 80, 0.7).replace('V380Z', 'V300Z') + skyline(5, 0, 640, 280, 14, 60, '#b7cfe3', 0.7, 16) + ridge(22, 276, 8, '#a9cbb8', 60, 0.8).replace('V380Z', 'V300Z');
+  // wings: two-storey arcades with a teal tile band and a balustrade
+  const arcade = (x0, x1, h0, h1, n) => { const w = (x1 - x0) / n, hh = h1 - h0; let s = ''; for (let i = 0; i < n; i++) { const x = x0 + i * w; s += P(`M${f(x + 1.6)} ${Y(h0)}V${Y(h0 + hh * 0.62)}A${f((w - 3.2) / 2)} ${f(hh * 0.38)} 0 0 1 ${f(x + w - 1.6)} ${Y(h0 + hh * 0.62)}V${Y(h0)}Z`, REC) + R(f(x + w - 1.6), Y(h0 + hh * 0.62), 1.6, f(hh * 0.62), '#3e3848', 'opacity=".55"'); } return s + R(x0, Y(h0 + 1), x1 - x0, 1.6, '#f4ecdf', 'opacity=".7"'); };
+  const wing = (x0, x1) => R(x0, Y(74), x1 - x0, 74, `url(#${k}-st)`) + R(x0, Y(78), x1 - x0, 5, '#cbbfb2') + L(`M${x0} ${Y(79)}H${x1}`, '#f8f1e6', 1, 0.9) + L(`M${x0 + 2} ${Y(81)}H${x1 - 2}`, '#a39489', 5, 0.8, 'stroke-dasharray="1.5 2.1"')
+    + arcade(x0 + 2, x1 - 2, 40, 68, Math.round((x1 - x0) / 10)) + arcade(x0 + 2, x1 - 2, 6, 34, Math.round((x1 - x0) / 10)) + R(x0, Y(40), x1 - x0, 5, '#78bdb2', 'opacity=".85"') + R(x0, Y(35), x1 - x0, 2, '#d9cdc0') + L(`M${x0 + 2} ${Y(81.5)}${Array.from({ length: Math.round((x1 - x0) / 11) }, (_, i) => `m11 0v-3`).join('')}`, '#c6b9ac', 1.2);
+  b += wing(100, 199) + wing(389, 488) + R(100, Y(74), 99, 74, `url(#${k}-rs)`) + R(389, Y(74), 99, 74, `url(#${k}-rs)`);
+  // corner pavilions with golden domes and clocks
+  const pav = (cx) => `${R(cx - 22, Y(104), 44, 104, `url(#${k}-st)`)}${R(cx - 24, Y(106), 48, 4, '#cfc3b6')}${L(`M${cx - 24} ${Y(106.6)}h48`, '#fbf5ea', 1, 0.9)}${C(cx, Y(84), 6, '#f4ecdf')}${C(cx, Y(84), 6, 'none', 'stroke="#7a6c62" stroke-width=".8"')}${L(`M${cx} ${Y(84)}v-3.4M${cx} ${Y(84)}l2.6 1`, '#5a4c46', 0.8)}${[0, 1, 2].map((i) => P(`M${cx - 12 + i * 8.4} ${Y(60)}v-16q4-7 8 0v16z`, REC)).join('')}${[0, 1, 2].map((i) => P(`M${cx - 12 + i * 8.4} ${Y(26)}v-16q4-7 8 0v16z`, REC)).join('')}${R(cx - 24, Y(40), 48, 3, '#78bdb2', 'opacity=".8"')}${R(cx - 17, Y(112), 34, 8, '#d3c7ba')}${P(`M${cx - 17} ${Y(112)}Q${cx - 17} ${Y(140)} ${cx} ${Y(143)}Q${cx + 17} ${Y(140)} ${cx + 17} ${Y(112)}Z`, `url(#${k}-gold)`)}${P(`M${cx - 6} ${Y(116)}Q${cx - 11} ${Y(132)} ${cx - 2} ${Y(139)}Q${cx - 6} ${Y(130)} ${cx - 6} ${Y(116)}Z`, '#fff1cd', 'opacity=".55"')}${L(`M${cx} ${Y(143)}v-9`, '#8a6b41', 1.4)}${C(cx, Y(153), 1.8, '#d7b27a')}${L(`M${cx - 20} ${Y(104)}v-8M${cx + 20} ${Y(104)}v-8`, '#bcb0a4', 3)}`;
+  b += pav(219) + pav(369);
+  // central block: recess with teal panels, drum, ribbed dome, lantern, lion
+  b += R(235, Y(70), 118, 70, REC) + R(235, Y(70), 118, 70, `url(#${k}-dark)`) + R(235, Y(30), 118, 14, '#4a9d94', 'opacity=".5"');
+  b += R(247, Y(131), 94, 26, `url(#${k}-st)`) + R(251, Y(131), 86, 4, '#cfc3b6') + L(`M247 ${Y(104.6)}h94`, '#fbf5ea', 1, 0.9) + L(`M251 ${Y(112)}h86`, '#a3948a', 5, 0.8, 'stroke-dasharray="1.5 2"')
+    + R(256, Y(148), 76, 17, `url(#${k}-st)`) + Array.from({ length: 8 }, (_, i) => P(`M${259 + i * 9.2} ${Y(123)}v-8q2.4-4 4.8 0v8z`, REC)).join('') + R(254, Y(149), 80, 3, '#d3c7ba')
+    + P(`M260 ${Y(149)}Q258 ${Y(178)} 294 ${Y(184)}Q330 ${Y(178)} 328 ${Y(149)}Z`, `url(#${k}-gold)`) + P(`M268 ${Y(153)}Q264 ${Y(172)} 282 ${Y(180)}Q272 ${Y(168)} 272 ${Y(153)}Z`, '#fff1cd', 'opacity=".5"')
+    + L(`M270 ${Y(150)}Q268 ${Y(172)} 294 ${Y(184)}M282 ${Y(150)}Q282 ${Y(172)} 294 ${Y(184)}M306 ${Y(150)}Q306 ${Y(172)} 294 ${Y(184)}M318 ${Y(150)}Q320 ${Y(172)} 294 ${Y(184)}`, '#8a6b41', 0.7, 0.45)
+    + R(288, Y(197), 12, 14, '#d3c7ba') + R(286, Y(186), 16, 3.5, '#cfc3b6') + P(`M286 ${Y(197)}q8-9 16 0z`, `url(#${k}-gold)`)
+    + R(284, Y(206), 20, 4, '#cfc3b6') + P(`M286 ${Y(206)}q-1-8 3-11l2 2q1-6 4-8l1 6q2-1 4 1l1-4q3 3 3 8l2 2q1 4-2 6z`, '#d8bf94') + C(293, Y(218), 3, '#d8bf94') + C(299, Y(219), 3, '#d8bf94') + L(`M300 ${Y(198)}V${Y(236)}`, '#6a5c56', 1)
+    + P(`M300 ${Y(236)}h13v-2.6h-13z`, '#f59a3a') + P(`M300 ${Y(233.4)}h13v-2.6h-13z`, '#fffaf0') + P(`M300 ${Y(230.8)}h13v-2.6h-13z`, '#4fa36c');
+  // portico: entablature with lettering, emblem, eight columns with shaded sides, steps
+  b += R(210, Y(95), 168, 26, `url(#${k}-st)`) + R(206, Y(97), 176, 4, '#d3c7ba') + L(`M206 ${Y(97.6)}h176`, '#fbf5ea', 1, 0.9) + R(210, Y(70), 168, 3, '#bdb0a6') + L('M226 219h136', '#7a6c62', 2.2, 0.55, 'stroke-dasharray="1.2 1.5"') + R(210, Y(95), 168, 26, `url(#${k}-dark)`, 'opacity=".4"')
+    + L(`M232 ${Y(100.6)}H356`, '#a3948a', 6, 0.85, 'stroke-dasharray="1.5 2"') + R(284, Y(118), 20, 17, '#c9a05a') + P(`M286 ${Y(116)}h16v8q-8 7-16 0z`, '#d9573a') + C(294, Y(110.5), 4, '#f6d98a') + P(`M287 ${Y(124)}q7-6 14 0z`, '#f6d98a');
+  for (let i = 0; i < 8; i++) { const x = 228 + i * 20; b += R(x - 3.2, Y(68), 6.4, 62, '#e6dccf') + R(x + 0.4, Y(68), 2.8, 62, '#9e9189', 'opacity=".5"') + R(x - 4.4, Y(70), 8.8, 3, '#cfc3b6') + R(x - 4.4, Y(9), 8.8, 3, '#cfc3b6') + L(`M${x - 1.5} ${Y(66)}V${Y(10)}`, '#fff8ec', 0.8, 0.8); }
+  b += R(222, Y(6), 146, 4, '#d3c7ba') + R(218, Y(2.4), 154, 3, '#c4b8ac') + R(214, Y(-0.6), 162, 3.4, '#b3a59a') + R(100, Y(-3.6), 388, 4, '#8f8a8a', 'opacity=".5"');
+  // lawn, flower beds, railing, clipped shrubs
+  b += R(0, 303, 640, 36, `url(#${k}-lawn)`) + P('M0 330Q160 320 330 326T640 322V340H0Z', '#8cc07a', 'opacity=".9"');
+  const q = rng(17); let fl = ''; ['#e8607a', '#f6d062', '#ffffff', '#f2954a', '#c07ad0'].forEach((c, ci) => { for (let i = 0; i < 26; i++) fl += C(f(120 + q() * 360), f(310 + q() * 12), 1.5, c); });
+  b += L('M104 316H484', '#3d4a52', 7, 0.6, 'stroke-dasharray="1 3.3"') + L('M104 316H484', '#d8b25a', 1.4, 0.9, 'stroke-dasharray="1 3.3" transform="translate(0 -4.2)"') + L('M104 312H484M104 320H484', '#3d4a52', 0.8, 0.8)
+    + P('M104 320H484V334H104Z', '#6aa764', 'opacity=".5"') + fl + bush(236, 326, 14, 51, ['#3f7a50', '#5fa35f', '#9fd08c'], 6) + bush(352, 326, 14, 52, ['#3f7a50', '#5fa35f', '#9fd08c'], 6) + bush(150, 327, 12, 53, ['#3f7a50', '#5fa35f', '#9fd08c'], 5) + bush(440, 327, 12, 54, ['#3f7a50', '#5fa35f', '#9fd08c'], 5);
+  // lake with reflections, lotus pads, swan pedalo, ducks
+  b += P('M0 338Q120 330 250 337T500 333T640 338V380H0Z', `url(#${k}-lake)`) + R(0, 338, 640, 42, `url(#${k}-lake)`) + P('M0 338Q120 330 250 337T500 333T640 338V344H0Z', '#bfe0b8', 'opacity=".5"')
+    + mirror(P('M104 300h384v-60H104z', '#5a5460', 'opacity=".5"') + R(100, 262, 388, 40, '#8b8190'), 336, 0.28) + P('M0 338Q120 330 250 337T500 333T640 338V380H0Z', 'none')
+    + ripples(0, 342, 640, 38, '#e8f6f0', 44, 23, 0.6) + ripples(0, 342, 640, 38, '#2f6f7e', 34, 24, 0.4)
+    + [[200, 358], [236, 366], [330, 364], [520, 356]].map(([x, y], i) => E(x, y, 8, 2.8, '#4e9a58') + (i % 2 ? '' : C(x + 2, y - 2.2, 2.2, '#f4a0b4'))).join('');
+  const swan = `${E(0, -2, 15, 5.5, '#fffaf0')}${E(0, -4, 12, 3.2, '#ffffff', 'opacity=".9"')}${P('M-8-5Q-15-6-14-12Q-12-20-9-26Q-6-31-9-33Q-5-36-3-32Q-2-28-6-24Q-9-18-9-12Q-8-8-6-5Z', '#fffaf0')}${P('M-9-33L-13-31.5L-9-30.5Z', '#f2954a')}${C(-6.6, -32.6, 0.7, '#333')}${R(2, -14, 7, 6, '#e8607a', 'opacity=".9"')}${R(0, -17, 11, 3, '#4fa3a5')}${L('M-12 0H12', '#bcd8de', 1, 0.7)}`;
+  b += mirror(at(430, 362, 1, swan), 362, 0.3) + at(430, 362, 1, swan) + at(120, 364, 1, `${E(0, 0, 6, 3, '#9b6a44')}${C(-5, -3, 2.4, '#2f6e4a')}${P('M-7-3L-10-2L-7-1z', '#f2b04e')}`) + at(134, 360, 0.8, `${E(0, 0, 6, 3, '#f4ecdf')}${C(-5, -3, 2.4, '#7a5a3a')}${P('M-7-3L-10-2L-7-1z', '#f2b04e')}`);
+  // rain tree (right), gulmohar in bloom (left), floating petals, birds
+  b += P('M580 342Q584 300 578 262Q574 236 560 214L574 216Q586 238 592 262Q600 300 598 342Z', '#6a4a3a') + P('M578 250Q548 232 520 214L526 208Q556 226 584 240Z', '#6a4a3a') + P('M590 244Q618 224 640 208L640 214Q616 234 594 254Z', '#6a4a3a')
+    + L('M586 340Q590 300 584 262', '#8a6a52', 1.5, 0.5) + mirror(P('M580 342Q584 300 578 262L592 262Q600 300 598 342Z', '#6a4a3a'), 340, 0.3)
+    + bush(530, 150, 74, 61, DK, 10) + bush(600, 128, 86, 62, DK, 12) + bush(640, 176, 64, 63, DK, 9) + bush(560, 196, 56, 64, DK, 8)
+    + Array.from({ length: 14 }, (_, i) => `${L(`M${500 + i * 11} ${204 + (i % 3) * 5}v${10 + (i % 4) * 4}`, '#4a8a5a', 1.1, 0.7)}`).join('');
+  b += P('M46 342Q40 296 52 262Q56 236 44 206L58 204Q66 236 62 266Q58 300 64 342Z', '#6a4a3a') + bush(34, 170, 66, 71, ['#3d7a4f', '#5da562', '#a6d78a'], 12, 1, '#e0502f') + bush(70, 150, 44, 72, ['#3d7a4f', '#5da562', '#a6d78a'], 8, 1, '#f08a3c') + bush(0, 210, 40, 73, ['#3d7a4f', '#5da562', '#a6d78a'], 7, 1, '#e0502f');
+  const q2 = rng(31); let pet = ''; for (let i = 0; i < 26; i++) pet += C(f(20 + q2() * 140), f(318 + q2() * 58), 1.3, i % 3 ? '#e0502f' : '#f08a3c', 'opacity=".85"');
+  b += pet + person(300, 321, 0.85, '#d86a6a') + person(311, 322, 0.8, '#4fa3a5', { arm: 1 }) + person(180, 322, 0.8, '#e9c56a')
+    + [[330, 86, 1, '#ffffff'], [346, 78, 0.9, '#ffffff'], [362, 92, 1, '#ffffff'], [404, 60, 0.8, '#ffffff'], [212, 60, 0.9, '#6a7a8e']].map(([x, y, s, c]) => bird(x, y, s, c, 1.2)).join('') + kite(260, 40, 0.9, '#6a5a60');
+  return SVG(defs, b);
+};
+
+// Chennai: the Kapaleeshwarar gopuram (stepped, painted, sculpted tiers + barrel roof) over the temple tank, palms, afternoon light.
+const gopuram = (k, cols, tiers = 7) => {
+  const cream = '#fbf0d8', ink = '#3a2a3a'; let s = '', y = 0;
+  // ground tier: granite plinth with the doorway
+  s += R(-70, -40, 140, 40, '#d8c3a2') + R(-70, -40, 140, 40, `url(#${k}-sh)`) + R(-74, -4, 148, 4, '#bfa684') + R(-72, -43, 144, 4, cream) + L('M-72-42.6h144', '#fff', 0.8, 0.8)
+    + P('M-11 0V-24Q-11-30-5-31H5Q11-30 11-24V0Z', '#2a2226') + L('M-13 0V-24Q-13-33-5-33H5Q13-33 13-24V0', '#b8975f', 1.3) + R(-22, -36, 44, 3.2, '#c9a05a') + L('M-8-14h16M-8-8h16', '#6a5040', 0.6, 0.6)
+    + [-56, -42, 42, 56].map((x) => R(x - 4, -36, 8, 32, '#e7d4b2') + R(x - 4, -36, 8, 32, `url(#${k}-sh)`) + L(`M${x} -34v28`, '#a88f6a', 0.6, 0.6)).join('');
+  y = -40;
+  for (let i = 0; i < tiers; i++) {
+    const w = 128 - i * 11, h = 20.5 - i * 0.8, x = -w / 2, yt = y - h, c = cols[i % cols.length], n = Math.round(w / 11);
+    s += R(x, yt, w, h, c) + R(x, yt, w, h, `url(#${k}-sh)`) + R(x - 3, y - 3, w + 6, 3.4, cream) + R(x - 3, y - 0.6, w + 6, 1.4, ink, 'opacity=".3"') + R(x - 2, yt - 2.4, w + 4, 2.6, cream) + L(`M${x - 2} ${f(yt - 2.2)}h${w + 4}`, '#fff', 0.7, 0.9);
+    let fr = ''; for (let j = 0; j * 5 < w - 4; j++) fr += `M${f(x + 2 + j * 5)} ${f(yt - 0.2)}a2.5 2.7 0 0 1 5 0`;
+    s += L(fr, ink, 0.6, 0.45);
+    // sculpted niches with tiny figures between pilasters
+    for (let j = 0; j < n; j++) {
+      const cw = (w - 14) / n, cx = x + 7 + j * cw + cw / 2;
+      s += P(`M${f(cx - 2.8)} ${f(y - 4)}V${f(yt + 7)}Q${f(cx)} ${f(yt + 3)} ${f(cx + 2.8)} ${f(yt + 7)}V${f(y - 4)}Z`, ink, 'opacity=".3"') + C(f(cx), f(yt + h * 0.55), 1.5, j % 2 ? '#f6d46a' : cream) + R(f(cx - 1), f(yt + h * 0.55 + 1.2), 2, 3.4, j % 2 ? '#f6d46a' : cream) + L(`M${f(cx - cw / 2)} ${f(yt + 3)}V${f(y - 4)}`, cream, 0.9, 0.7);
+    }
+    // corner aedicules (little shrines) with vaulted roofs
+    [x + 4, x + w - 4].forEach((ex) => { s += R(ex - 3.4, yt + 3, 6.8, h - 7, cream, 'opacity=".95"') + P(`M${f(ex - 4.4)} ${f(yt + 3.4)}Q${f(ex)} ${f(yt - 5)} ${f(ex + 4.4)} ${f(yt + 3.4)}Z`, c === '#efbd4f' ? '#d9625a' : '#efbd4f') + C(ex, f(yt - 4.6), 0.9, '#efbd4f') + R(ex - 1.4, yt + 7, 2.8, h - 12, ink, 'opacity=".4"'); });
+    y = yt - 2.4;
+  }
+  // barrel vault (shalakara) with its row of golden kalasams and end finials
+  s += P(`M-23 ${f(y)}Q-24 ${f(y - 19)} -13 ${f(y - 23)}H13Q24 ${f(y - 19)} 23 ${f(y)}Z`, '#d9625a') + P(`M-23 ${f(y)}Q-24 ${f(y - 19)} -13 ${f(y - 23)}H13Q24 ${f(y - 19)} 23 ${f(y)}Z`, `url(#${k}-sh)`) + R(-24, y - 3, 48, 3, cream)
+    + L(`M-16 ${f(y - 2)}V${f(y - 19)}M-8 ${f(y - 2)}V${f(y - 22)}M0 ${f(y - 2)}V${f(y - 23)}M8 ${f(y - 2)}V${f(y - 22)}M16 ${f(y - 2)}V${f(y - 19)}`, '#fbe3c0', 0.8, 0.55) + R(-15, y - 25.6, 30, 3, '#efbd4f') + C(-23, f(y - 12), 3.6, '#efbd4f') + C(23, f(y - 12), 3.6, '#efbd4f') + C(-23, f(y - 12), 1.3, ink, 'opacity=".5"') + C(23, f(y - 12), 1.3, ink, 'opacity=".5"');
+  for (let j = 0; j < 7; j++) { const kx = -12 + j * 4, big = j === 3; s += E(kx, f(y - 29), big ? 2.2 : 1.5, big ? 3.6 : 2.6, '#f2c24f') + L(`M${kx} ${f(y - 25.6)}v-1.6`, '#c8962f', 0.8) + (big ? L(`M${kx} ${f(y - 33)}v-4`, '#c8962f', 0.9) : ''); }
+  return s;
+};
+
+const chennai = () => {
+  const k = 'chn';
+  const defs = lin(`${k}-sky`, [[0, '#76aed6'], [0.5, '#b4d8e6'], [1, '#fce8bc']]) + rad(`${k}-halo`, 120, 90, 230, [[0, '#fff3c8', 0.95], [0.35, '#ffe2a0', 0.4], [1, '#ffe2a0', 0]])
+    + lin(`${k}-sh`, [[0, '#fff3d0', 0.18], [0.45, '#3a2a3a', 0], [1, '#3a2a3a', 0.38]], [0, 0, 1, 0])
+    + lin(`${k}-tank`, [[0, '#b6dbe0'], [0.4, '#6faab0'], [1, '#3f7a8a']]);
+  const gop = gopuram(k, ['#d9625a', '#3f9ea3', '#efbd4f', '#7d8dd2', '#d9625a', '#5db08e', '#efbd4f']);
+  const TREE = ['#3f7a4a', '#5c9a58', '#a0cf7c'], HZ = 296;
+  let b = R(0, 0, 640, 300, `url(#${k}-sky)`) + C(120, 90, 230, `url(#${k}-halo)`) + C(120, 90, 20, '#fff8dc', 'opacity=".9"')
+    + puff(480, 70, 130, '#ffffff', '#cfe0ee', 0.85) + puff(250, 40, 90, '#ffffff', '#cfe0ee', 0.7) + puff(580, 140, 80, '#ffffff', '#d6e4ee', 0.7) + streak(180, 150, 110, '#fff3d6', 0.6);
+  // hazy town behind: pastel houses and a second, fainter gopuram
+  const house = (x, yb, w, h, c, o = 1) => G(R(x, yb - h, w, h, c) + R(x - 2, yb - h - 3, w + 4, 3.4, '#f6efe0') + Array.from({ length: Math.floor(w / 12) }, (_, i) => R(x + 4 + i * 12, yb - h + 6, 5, 7, '#6a7a98', 'opacity=".55"')).join('') + R(x, yb - h, w, h, '#fce8bc', 'opacity=".18"'), `opacity="${o}"`);
+  b += house(176, 284, 38, 34, '#f4d28c', 0.8) + house(150, 284, 28, 26, '#f6f0e2', 0.8) + house(420, 284, 46, 38, '#f1a8a2', 0.85) + house(462, 284, 38, 26, '#f6f0e2', 0.85) + house(520, 284, 40, 30, '#f2d08a', 0.8) + house(96, 284, 40, 22, '#f1a8a2', 0.75)
+    + G(at(88, 284, 0.42, gopuram(k, ['#c8828a', '#6aa6b0', '#d9b26a', '#8d98cc', '#c8828a', '#7ab89a', '#d9b26a'], 6)), 'opacity=".75"')
+    + bush(300, 270, 24, 81, ['#6a9a6a', '#86b078', '#b4d4a0'], 7, 1) + bush(180, 276, 30, 82, ['#4f8452', '#6fa268', '#a6d088'], 8) + bush(470, 274, 34, 83, ['#4f8452', '#6fa268', '#a6d088'], 8) + bush(560, 272, 28, 84, ['#4f8452', '#6fa268', '#a6d088'], 7);
+  // palms behind, the great gopuram, tank wall with painted stripes
+  b += palm(120, 292, 150, -16, 91, '#7a5a42', '#3d7a4a', '#7cb35c') + palm(150, 292, 106, 16, 92, '#7a5a42', '#3d7a4a', '#7cb35c') + palm(568, 292, 120, 14, 93, '#7a5a42', '#3d7a4a', '#7cb35c') + palm(596, 292, 86, -8, 94, '#7a5a42', '#3d7a4a', '#7cb35c');
+  b += at(331, 289, 1, gop);
+  b += R(0, 284, 640, 14, '#f6ecd6') + L('M0 291.5H640', '#d6644a', 13, 1, 'stroke-dasharray="9 9"') + R(0, 281, 640, 3.6, '#d9c7a0') + L('M0 281.6H640', '#fff8e6', 1, 0.9) + R(0, 296, 640, 2.4, '#4a3a4a', 'opacity=".25"');
+  // temple tank: sky reflection, mirrored gopuram, ripples, the shrine on the water
+  b += R(0, 298, 640, 82, `url(#${k}-tank)`) + mirror(at(331, 289, 1, gop), 297, 0.34) + R(0, 298, 640, 82, `url(#${k}-tank)`, 'opacity=".28"');
+  const shrine = `${R(-27, -6, 54, 6, '#d6644a')}${R(-23, -12, 46, 6, '#f5ecdc')}${R(-19, -17, 38, 5, '#d6644a')}${R(-15, -37, 30, 20, '#2c2a34', 'opacity=".7"')}${L('M-12-36V-18M-8-36V-18M-4-36V-18M0-36V-18M4-36V-18M8-36V-18M12-36V-18', '#b9a98a', 1, 0.7)}${R(-19, -41, 38, 4.6, '#cdb98f')}${R(-19, -41, 38, 1.2, '#fff2cf')}`;
+  const mini = at(0, -42, 0.3, gopuram(k, ['#d9625a', '#efbd4f', '#3f9ea3', '#7d8dd2', '#d9625a'], 4));
+  b += mirror(at(468, 338, 1, shrine + mini), 338, 0.3) + ripples(0, 300, 640, 80, '#d6eaee', 46, 41, 0.45) + ripples(0, 300, 640, 80, '#2c5f70', 40, 42, 0.4) + at(468, 338, 1, shrine + mini) + L('M436 338H500', '#e8f6f4', 1, 0.7);
+  // stone steps (ghat) bottom-left with stripes, people and pigeons
+  const steps = [[0, 330, 166], [0, 340, 130], [0, 351, 96], [0, 363, 60]];
+  steps.forEach(([x, y, w], i) => { b += P(`M0 ${y}H${w}L${w - 14} ${y + 11}H0Z`, i % 2 ? '#e9d7b3' : '#f1e2c0') + P(`M0 ${y + 8}H${w - 8}L${w - 14} ${y + 11}H0Z`, '#cbb48a', 'opacity=".6"') + L(`M0 ${y + 1}H${w}`, '#fff8e6', 1, 0.8) + L(`M0 ${y + 4}H${w - 3}`, '#d6644a', 3.6, 0.9, 'stroke-dasharray="8 8"'); });
+  b += person(34, 342, 1.8, '#d1447a', { hair: '#2a1a22' }) + person(54, 346, 1.15, '#3f9ea3') + person(112, 335, 1.5, '#f1e6d6', { hat: null });
+  const pig = (x, y, c = '#8c8a9a') => E(x, y, 3.6, 2.2, c) + C(x - 3, y - 2, 1.5, c) + P(`M${x - 4.6} ${y - 2}l-1.4 0.6z`, '#e8a040') + L(`M${x + 3} ${y}l3 1.4`, c, 1);
+  b += pig(80, 350) + pig(92, 354, '#a8a6b4') + pig(104, 349) + pig(130, 361, '#a8a6b4');
+  // coconut palm framing the right, flock of crows/pigeons
+  b += P('M470 380Q540 352 640 346V380Z', '#cdb98c') + P('M500 380Q560 360 640 354V380Z', '#7fae62') + palm(626, 354, 200, -56, 95, '#6a4a36', '#2f6a42', '#6ea852', 10) + palm(596, 358, 90, 18, 96, '#6a4a36', '#2f6a42', '#6ea852');
+  b += [[300, 52, 1, '#4a3b4f'], [320, 44, 1, '#4a3b4f'], [250, 80, 0.9, '#4a3b4f'], [200, 52, 0.8, '#4a3b4f'], [410, 120, 0.9, '#4a3b4f']].map(([x, y, s, c]) => bird(x, y, s, c, 1.2)).join('') + kite(375, 38, 0.9, '#5a4a50');
+  return SVG(defs, b);
+};
+
+// Hyderabad: Charminar at dusk, four fluted minarets with balconies and cupolas, bangle-stall lights, an auto, pigeons, a crescent moon.
+const minaret = (k, cx, o = 1) => {
+  const segs = [[0, -118, 30, 26], [-124, -178, 24, 20], [-186, -216, 18, 15]]; let s = '';
+  segs.forEach(([y0, y1, w0, w1], i) => {
+    s += P(`M${cx - w0 / 2} ${y0}L${cx - w1 / 2} ${y1}H${cx + w1 / 2}L${cx + w0 / 2} ${y0}Z`, `url(#${k}-cyl)`) + L(`M${f(cx - w0 / 6)} ${y0}L${f(cx - w1 / 6)} ${y1}M${f(cx + w0 / 6)} ${y0}L${f(cx + w1 / 6)} ${y1}`, '#7a5a4a', 0.6, 0.35);
+    if (i === 0) s += L(`M${cx - 14} -60h28M${cx - 13.6} -90h27`, '#c9a574', 1.4, 0.6) + P(`M${cx - 3} -30V-40Q${cx} -45 ${cx + 3} -40V-30Z`, '#6a4a48', 'opacity=".55"');
+    else s += [-1, 1].map((m) => P(`M${cx + m * 6 - 1.6} ${y0 - 14}V${y0 - 22}Q${cx + m * 6} ${y0 - 26} ${cx + m * 6 + 1.6} ${y0 - 22}V${y0 - 14}Z`, '#5a3e44', 'opacity=".6"')).join('');
+  });
+  [[-118, 38], [-178, 30], [-216, 24]].forEach(([y, w], i) => {
+    s += R(cx - w / 2, y - 2, w, 4.4, '#ecd3a0') + L(`M${cx - w / 2} ${y - 1.6}h${w}`, '#fff1c8', 0.8, 0.8) + L(`M${cx - w / 2 + 1} ${y + 4}h${w - 2}`, '#8a6a4a', 2.4, 0.5, 'stroke-dasharray="1.6 1.4"')
+      + R(cx - w / 2 + 1, y - 8, w - 2, 6.4, '#ead19e') + L(`M${cx - w / 2 + 2} ${y - 5}h${w - 4}`, '#8a6a4a', 4, 0.55, 'stroke-dasharray="1.4 1.4"') + L(`M${cx - w / 2} ${y - 8.4}h${w}`, '#fff1c8', 0.7, 0.8);
+    if (i === 0) s += R(cx - 17, y - 12, 34, 4, '#ecd3a0');
+  });
+  s += R(cx - 8, -233, 1.8, 14, '#d9bd8c') + R(cx - 3.4, -233, 1.8, 14, '#d9bd8c') + R(cx + 1.6, -233, 1.8, 14, '#d9bd8c') + R(cx + 6.2, -233, 1.8, 14, '#d9bd8c') + R(cx - 10, -236, 20, 3.4, '#ecd3a0')
+    + P(`M${cx - 9} -236Q${cx - 11} -248 ${cx} -254Q${cx + 11} -248 ${cx + 9} -236Z`, '#e4c68a') + P(`M${cx - 6} -239Q${cx - 8} -247 ${cx - 2} -251Q${cx - 5} -245 ${cx - 5} -239Z`, '#fff0c4', 'opacity=".7"') + L(`M${cx} -254V-263`, '#b9955c', 1.3) + C(cx, -255.6, 1.8, '#e4c68a') + C(cx, -264, 1.5, '#e4c68a');
+  return G(s, `opacity="${o}"`);
+};
+
+const hyderabad = () => {
+  const k = 'hyd';
+  const defs = lin(`${k}-sky`, [[0, '#4a4b92'], [0.3, '#8a6fa8'], [0.55, '#d98fa4'], [0.8, '#f5b98a'], [1, '#fcd9a4']])
+    + rad(`${k}-halo`, 320, 270, 280, [[0, '#ffc98a', 0.75], [0.4, '#ffa98a', 0.3], [1, '#ffa98a', 0]])
+    + lin(`${k}-st`, [[0, '#f6dcae'], [0.55, '#e3c08c'], [1, '#b8967a']], [0, 0, 1, 0])
+    + lin(`${k}-cyl`, [[0, '#f7e0b4'], [0.45, '#e6c590'], [1, '#a98a78']], [0, 0, 1, 0])
+    + lin(`${k}-arch`, [[0, '#5a3d50'], [1, '#f0a65a']])
+    + lin(`${k}-road`, [[0, '#7b6288'], [1, '#3e3354']])
+    + lin(`${k}-vio`, [[0, '#4a3a6a', 0], [1, '#4a3a6a', 0.45]], [0, 0, 1, 0])
+    + rad(`${k}-mh`, 500, 80, 50, [[0, '#ffe6b0', 0.3], [1, '#ffe6b0', 0]]) + `<mask id="${k}-moon"><rect x="470" y="50" width="60" height="60" fill="#fff"/><circle cx="508" cy="73" r="13.5" fill="#000"/></mask><radialGradient id="${k}-bulb">${stops([[0, '#ffe29a', 0.9], [1, '#ffcf6a', 0]])}</radialGradient>`;
+  const ST = '#9a7a56', HI = '#fff1c8';
+  // sky: stars, crescent moon, haze glow, far old city
+  const q = rng(11); let stars = ''; for (let i = 0; i < 26; i++) stars += C(f(q() * 640), f(q() * 120), f(0.5 + q() * 0.8), '#fff6dc', `opacity="${f(0.4 + q() * 0.5)}"`);
+  let b = R(0, 0, 640, 300, `url(#${k}-sky)`) + stars + C(320, 270, 280, `url(#${k}-halo)`) + C(500, 80, 50, `url(#${k}-mh)`) + C(500, 80, 16, '#fff2cc', `mask="url(#${k}-moon)"`)
+    + puff(120, 100, 110, '#c58fb0', '#8a6aa6', 0.7) + puff(540, 150, 100, '#e7a0a8', '#a577a8', 0.6) + streak(300, 60, 130, '#c79ac0', 0.5) + streak(150, 190, 120, '#f5a89a', 0.5);
+  b += skyline(15, 0, 640, 282, 14, 46, '#9f7fa8', 0.55, 20) + G(P('M20 282Q20 252 46 248Q72 252 72 282Z M560 282Q560 256 584 250Q608 256 608 282Z', '#9a7ba6') + R(8, 270, 78, 14, '#9a7ba6') + R(548, 272, 72, 12, '#9a7ba6') + L('M46 248v-12M584 250v-12', '#9a7ba6', 1.5), 'opacity=".6"')
+    + ridge(16, 286, 10, '#7f648f', 50, 0.7).replace('V380Z', 'V300Z');
+  // paper-lantern strings
+  const lights = (x0, y0, cx, cy, x1, y1, n, cols) => { let s = L(`M${x0} ${y0}Q${cx} ${cy} ${x1} ${y1}`, '#5a4658', 0.8, 0.8); for (let i = 0; i <= n; i++) { const t = i / n, x = (1 - t) * (1 - t) * x0 + 2 * t * (1 - t) * cx + t * t * x1, y = (1 - t) * (1 - t) * y0 + 2 * t * (1 - t) * cy + t * t * y1; s += at(f(x), f(y), 5.5, C(0, 0, 1, `url(#${k}-bulb)`)) + C(f(x), f(y + 1.6), 1.7, cols[i % cols.length]) + C(f(x - 0.4), f(y + 1), 0.6, '#fffbe8'); } return s; };
+  b += lights(-4, 118, 90, 190, 232, 178, 12, ['#ffe29a', '#ffb877', '#ffe29a', '#ff9a8a']) + lights(408, 178, 540, 190, 646, 112, 12, ['#ffe29a', '#ff9a8a', '#ffe29a', '#ffb877']);
+  const lantern = (x, y, c) => L(`M${x} ${y - 14}V${y}`, '#5a4658', 0.7) + P(`M${x - 4} ${y}Q${x - 6} ${y + 7} ${x} ${y + 12}Q${x + 6} ${y + 7} ${x + 4} ${y}Z`, c) + R(x - 3, y - 1.6, 6, 2, '#4a3a4a') + R(x - 2.4, y + 11, 4.8, 1.6, '#4a3a4a') + C(x, y + 6, 8, `url(#${k}-bulb)`);
+  b += lantern(40, 150, '#ef6a5a') + lantern(122, 168, '#f2b84e') + lantern(560, 156, '#3f9ea3') + lantern(612, 138, '#ef6a5a');
+  // Charminar group (local origin = centre of base, y up is negative)
+  const stoneB = `${R(-88, -150, 176, 150, `url(#${k}-st)`)}`;
+  let arc = ''; for (let i = 0; i < 9; i++) { const x = -76 + i * 19, lit = i === 1 || i === 4 || i === 7; arc += P(`M${x} -86V-103Q${x + 4.5} -111 ${x + 9} -103V-86Z`, lit ? '#f5b868' : '#5a3d50', `opacity="${lit ? 0.9 : 0.8}"`) + L(`M${x - 1.6} -86V-103Q${x + 4.5} -113 ${x + 10.6} -103V-86`, '#fff1c8', 0.8, 0.55); }
+  const body = `${stoneB}${R(-88, -150, 176, 150, `url(#${k}-vio)`)}${courses(-88, -150, 176, 150, 7, '#7a5a40', 0.1, 4, 18)}`
+    + R(-92, -8, 184, 8, '#cdae7c') + L('M-92-7.4h184', HI, 0.8, 0.7)
+    + [-76, -44, 33, 65].map((x) => P(`M${x} -12V-38Q${x + 5.5} -48 ${x + 11} -38V-12Z`, '#3a2a36', 'opacity=".45"') + P(`M${x + 1.6} -52V-62Q${x + 5.5} -68 ${x + 9.4} -62V-52Z`, '#3a2a36', 'opacity=".4"') + L(`M${x - 1.4} -12V-38Q${x + 5.5} -50 ${x + 12.4} -38V-12`, '#fff1c8', 0.8, 0.5)).join('')
+    + C(-52, -62, 7, '#d8b782') + C(-52, -62, 5, 'none', 'stroke="#8a6a4a" stroke-width=".8" opacity=".6"') + C(52, -62, 7, '#d8b782') + C(52, -62, 5, 'none', 'stroke="#8a6a4a" stroke-width=".8" opacity=".6"')
+    + P('M-31 0V-50Q-30-68 0-82Q30-68 31-50V0Z', `url(#${k}-arch)`) + P('M-20 0V-44Q-19-56 0-66Q19-56 20-44V0Z', '#f1b06e', 'opacity=".8"') + P('M-8 0V-30Q0-38 8-30V0Z', '#ffd38a', 'opacity=".75"') + P('M-31 0V-50Q-30-68 0-82Q-14-66-20-44V0Z', '#2e2240', 'opacity=".5"')
+    + L('M-35 0V-50Q-33-71 0-88Q33-71 35-50V0', '#f9e5b4', 4.4, 0.95) + L('M-35 0V-50Q-33-71 0-88Q33-71 35-50V0', '#8a6a4a', 0.8, 0.6) + L('M-31 0V-50Q-30-68 0-82Q30-68 31-50V0', '#8a6a4a', 0.8, 0.6) + C(0, -88, 2, '#e8cf9c')
+    + R(-92, -84, 184, 5, '#ecd3a0') + L('M-92-83.4h184', HI, 0.8, 0.9) + L('M-90-78h180', '#8a6a4a', 3, 0.5, 'stroke-dasharray="1.5 2"')
+    + R(-90, -124, 180, 40, '#e8cd98', 'opacity=".5"') + arc + C(0, -103, 7, '#f7ecd4') + C(0, -103, 7, 'none', 'stroke="#8a6a4a" stroke-width="1.2"') + L('M0-103v-4M0-103l3 1.8', '#4a3a3a', 0.9)
+    + R(-94, -126, 188, 4.6, '#ecd3a0') + L('M-94-125.6h188', HI, 0.8, 0.9) + R(-92, -138, 184, 12, '#e9cf9c') + L('M-90-132h180', '#8a6a4a', 7, 0.55, 'stroke-dasharray="2 2"') + R(-94, -141, 188, 4, '#f3dcaa') + L('M-94-140.6h188', HI, 0.8, 0.9);
+  const cupola = (x) => `${R(x - 7, -151, 1.6, 10, '#d9bd8c')}${R(x + 5.4, -151, 1.6, 10, '#d9bd8c')}${P(`M${x - 8} -151Q${x - 9} -160 ${x} -164Q${x + 9} -160 ${x + 8} -151Z`, '#e4c68a')}${L(`M${x} -164v-6`, '#b9955c', 1)}${C(x, -170.6, 1.3, '#e4c68a')}`;
+  const group = minaret(k, -62, 0.8) + minaret(k, 62, 0.8) + cupola(-30) + cupola(30) + cupola(0) + body + minaret(k, -84) + minaret(k, 84)
+    + P('M-88-150H-96V0H-88Z', '#3a2a50', 'opacity=".06"') + R(70, -140, 18, 140, '#3a2a50', 'opacity=".08"');
+  b += at(320, 298, 1, group);
+  // street, glow pools, cobbles
+  b += R(0, 298, 640, 82, `url(#${k}-road)`) + R(0, 296, 640, 3, '#3a2a50', 'opacity=".35"') + E(320, 304, 150, 8, '#ffb877', 'opacity=".22"') + E(320, 306, 70, 4, '#ffd38a', 'opacity=".3"') + ripples(0, 302, 640, 78, '#a88ab8', 30, 71, 0.3) + ripples(0, 302, 640, 78, '#2a2040', 24, 72, 0.4);
+  // bangle stall (left) with awning, stacks of bangles, bulbs
+  const stack = (x, y, c1, c2) => R(x, y, 4.2, 9, c1) + L(`M${x} ${y + 3}h4.2M${x} ${y + 6}h4.2`, c2, 0.8, 0.8);
+  const bcol = ['#e8607a', '#f2c04e', '#4fb3a5', '#8a6ac8', '#f08a3c', '#5aa0e0'];
+  let bg = ''; for (let i = 0; i < 17; i++) bg += stack(32 + i * 6.2, 314 + (i % 2), bcol[i % 6], bcol[(i + 2) % 6]) + stack(32 + i * 6.2, 324 + (i % 2), bcol[(i + 3) % 6], bcol[(i + 1) % 6]);
+  let aw = ''; for (let i = 0; i < 9; i++) aw += P(`M${24 + i * 13} 292L${37 + i * 13} 292L${37 + i * 13} 308Q${30.5 + i * 13} 313 ${24 + i * 13} 308Z`, i % 2 ? '#fbf0d8' : '#e8607a');
+  b += R(26, 336, 118, 28, '#4a3550') + R(22, 334, 126, 4, '#6a4a5a') + P('M20 292H150L142 286H28Z', '#f4e4c4') + aw + R(24, 308, 124, 18, '#2e2240', 'opacity=".55"') + bg + L('M24 292H148', '#4a3550', 1.2)
+    + Array.from({ length: 10 }, (_, i) => C(30 + i * 13, 311, 2, '#ffe29a') + C(30 + i * 13, 311, 8, `url(#${k}-bulb)`, 'opacity=".6"')).join('') + person(160, 352, 1.5, '#2e2240', { skin: '#a8765a', hair: '#1a1424' }) + person(174, 353, 1.2, '#4a2f55', { skin: '#a8765a', hair: '#1a1424' });
+  // auto-rickshaw (right) with headlamp glow, reflection
+  const auto = `${E(0, 3, 34, 4, '#1a1424', 'opacity=".35"')}${P('M-30-2Q-32-14-24-18L-6-34Q0-38 8-36L24-30Q34-26 34-16V-2Z', '#f2c230')}${P('M-30-2Q-32-14-24-18L-6-34Q0-38 8-36L24-30Q34-26 34-16Z', '#fff', 'opacity=".12"')}${P('M-26-20L-8-37Q0-41 10-38L26-32L24-30L8-35Q0-37-6-33L-24-18Z', '#2a2432')}${P('M-8-30L6-33V-18H-8Z', '#8ec0d6', 'opacity=".75"')}${R(-30, -6, 64, 5, '#2a2432')}${C(-18, 0, 7, '#2a2432')}${C(-18, 0, 3, '#8a8494')}${C(24, 0, 7, '#2a2432')}${C(24, 0, 3, '#8a8494')}${C(34, -16, 2.6, '#fff6c8')}${C(34, -16, 14, `url(#${k}-bulb)`)}${L('M-28-10H30', '#2a2432', 1, 0.5)}${R(-2, -28, 8, 8, '#2a2432', 'opacity=".5"')}`;
+  b += mirror(at(530, 340, 1.15, auto), 340, 0.22) + at(530, 340, 1.15, auto) + E(560, 342, 40, 6, '#ffd38a', 'opacity=".16"');
+  // pigeons on the street, small flock in the air, people in backlit silhouette
+  const pig = (x, y, s = 1, c = '#cfc4d8') => at(x, y, s, `${E(0, 0, 4, 2.4, c)}${C(-3.6, -2.4, 1.6, c)}${P('M-5.4-2.6l-1.6 0.8z', '#f0a040')}${P('M3 -1.4l5 1.2-5 1z', '#b9aecb')}${L('M-1 2.4v2M1 2.4v2', '#d89a60', 0.6)}`);
+  b += pig(246, 336, 1.2) + pig(262, 342, 1.3, '#b9aecb') + pig(284, 334, 1.1) + pig(300, 348, 1.5) + pig(328, 340, 1.2, '#b9aecb') + pig(352, 350, 1.4) + pig(372, 336, 1.1, '#b9aecb');
+  b += person(210, 322, 1.0, '#3a2c50', { skin: '#8a6a58', hair: '#1a1424' }) + person(222, 323, 0.95, '#4a3560', { skin: '#8a6a58', hair: '#1a1424' }) + person(420, 322, 1.0, '#3a2c50', { skin: '#8a6a58', hair: '#1a1424' }) + person(436, 321, 0.6, '#c05a6a', { skin: '#8a6a58', hair: '#1a1424' }) + person(470, 324, 1.05, '#4a3560', { skin: '#8a6a58', hair: '#1a1424' });
+  b += [[210, 70, 1.2], [226, 56, 1], [244, 88, 1.1], [412, 64, 1.2], [430, 80, 1], [448, 52, 0.9], [388, 100, 0.9], [196, 110, 0.9]].map(([x, y, s]) => bird(x, y, s, '#d6cbe0', 1.3)).join('') + bird(350, 20, 0.8, '#d6cbe0', 1.2);
+  return SVG(defs, b);
+};
+
+// Kerala: Chinese fishing nets at Fort Kochi, silhouetted against a sunset over the backwater, a country boat, palms.
+const chinaNet = (c = '#2c2036') => {
+  let s = '';
+  s += L('M-48 -3H24', c, 4) + [-44, -30, -14, 2, 18].map((x) => L(`M${x} -3V26`, c, 2.2)).join('') + L('M-16-3L6-65M24-3L6-65', c, 4.2) + L('M-2-30L16-30', c, 1.6)
+    + L('M-44-36L122-132', c, 4.6) + L('M-44-31L122-127', c, 2, 0.8) + L('M-44-37L122-133', '#ffa66a', 0.8, 0.6)
+    + L('M122-132L113-98M113-98L70-6M113-98L140-6M113-98L86-16M113-98L156-16', c, 1.5, 0.95)
+    + P('M70-6Q105 6 140-6L156-16Q121-5 86-16Z', c, 'opacity=".5"');
+  const bz = (p0, p1, p2, t) => (1 - t) * (1 - t) * p0 + 2 * t * (1 - t) * p1 + t * t * p2; let mesh = '';
+  for (let i = 1; i < 6; i++) { const t = i / 6; mesh += `M${f(70 + 16 * t)} ${f(-6 - 10 * t)}Q${f(105 + 16 * t)} ${f(6 - 11 * t)} ${f(140 + 16 * t)} ${f(-6 - 10 * t)}`; }
+  for (let i = 1; i < 14; i++) { const t = i / 14; mesh += `M${f(70 + 70 * t)} ${f(bz(-6, 6, -6, t))}L${f(86 + 70 * t)} ${f(bz(-16, -5, -16, t))}`; }
+  s += L(mesh, c, 0.8, 0.85) + L('M70-6Q105 6 140-6L156-16Q121-5 86-16Z', c, 1.6, 0.95)
+    + L('M-44-36L-52-14M-44-36L-45-7M-44-36L-38-13', c, 0.9) + [[-52, -12], [-45, -5], [-38, -11]].map(([x, y]) => E(x, y, 3.4, 4, c)).join('') + L('M-44-36L-30-3', c, 0.8, 0.8)
+    + person(-24, -3, 0.95, c, { skin: c, hair: c, legs: c });
+  return s;
+};
+const boatK = (c = '#2c2036') => `${P('M-46 0Q-48-8-56-13Q-32-4 0-4Q32-4 56-13Q48-8 46 0Q30 6 0 6Q-30 6-46 0Z', c)}${L('M-52-11Q-30-3 0-3Q30-3 52-11', '#ffa66a', 0.9, 0.6)}${person(8, -3, 1.05, c, { skin: c, hair: c, legs: c })}${L('M-26 -4L38 16', c, 1.3)}${P('M-30-4q-5 4-6 8l6-3z', c)}${C(-40, -5, 1.6, '#ffd58a')}${C(-40, -5, 8, '#ffcf80', 'opacity=".25"')}`;
+
+const kerala = () => {
+  const k = 'ker', HZ = 228;
+  const defs = lin(`${k}-sky`, [[0, '#6a62a0'], [0.28, '#b57bab'], [0.55, '#f0908f'], [0.78, '#ffb272'], [1, '#ffdca4']])
+    + rad(`${k}-halo`, 320, 198, 240, [[0, '#ffe6a8', 0.95], [0.2, '#ffc47e', 0.6], [0.55, '#ff9a7e', 0.2], [1, '#ff9a7e', 0]])
+    + lin(`${k}-sea`, [[0, '#f8aa7c'], [0.12, '#cc8590'], [0.4, '#6a6a98'], [1, '#2b4766']])
+    + lin(`${k}-glit`, [[0, '#ffe0a0', 0.7], [1, '#ffb27a', 0]]);
+  const DK = '#2c2036', FAR = '#6e5486';
+  let b = R(0, 0, 640, 236, `url(#${k}-sky)`) + C(320, 198, 240, `url(#${k}-halo)`) + C(320, 198, 34, '#fff1c4') + C(320, 198, 34, 'none', 'stroke="#ffd58a" stroke-width="5" opacity=".4"')
+    + streak(120, 70, 120, '#f6a8b4', 0.5) + streak(520, 90, 110, '#f9b8a8', 0.55) + streak(200, 150, 140, '#ffc08a', 0.6) + streak(470, 176, 120, '#ffc88e', 0.7) + puff(70, 130, 100, '#f7a9b3', '#b07aa8', 0.7) + puff(590, 60, 100, '#e9a0b2', '#9a74a8', 0.6);
+  // far shore with palm silhouettes, a cargo crane and a ship in haze
+  b += P(`M-10 ${HZ + 4}Q40 ${HZ - 10} 120 ${HZ - 4}T250 ${HZ - 2}V${HZ + 6}H-10Z`, FAR, 'opacity=".75"') + P(`M520 ${HZ + 6}Q560 ${HZ - 8} 600 ${HZ - 4}T660 ${HZ - 8}V${HZ + 6}Z`, FAR, 'opacity=".75"') + [[20, 22], [48, 28], [78, 20], [110, 26], [150, 20], [196, 24], [560, 24], [590, 28], [620, 22]].map(([x, h], i) => palm(x, HZ - 2, h, i % 2 ? 3 : -3, 100 + i, FAR, '#5a4472', '#6e5486', 6)).join('')
+    + G(L('M470 232V200l8-12l8 12V232M470 205h16M478 188v-8M456 232l6-30h28l6 30', '#7a5f92', 1.3, 0.9) + R(430, 226, 70, 5, '#7a5f92') + R(440, 221, 30, 5, '#8a6fa0'), 'opacity=".6"');
+  // sea, sunset path and glitter
+  b += R(0, HZ, 640, 152, `url(#${k}-sea)`) + [0, 1, 2, 3].map((i) => P(`M${298 + i * 5} ${HZ}H${342 - i * 5}L${440 - i * 30} 380H${200 + i * 30}Z`, `url(#${k}-glit)`, 'opacity=".55"')).join('');
+  const q = rng(5); let gl = ''; for (let i = 0; i < 110; i++) { const y = HZ + 2 + q() * q() * 148, sp = 18 + (y - HZ) * 0.55; gl += `M${f(320 + (q() - 0.5) * sp * 2)} ${f(y)}h${f(3 + (y - HZ) * 0.06 * q() + q() * 6)}`; }
+  b += L(gl, '#ffe8b8', 1.3, 0.85) + ripples(0, HZ + 6, 640, 146, '#b88ab0', 50, 3, 0.35) + ripples(0, HZ + 6, 640, 146, '#20344f', 40, 4, 0.4);
+  // far net, jetty, the big net crossing the sun, mid and far nets
+  b += G(at(150, 246, 0.4, chinaNet('#5a4472')), 'opacity=".8"')
+    + mirror(at(560, 252, 0.5, chinaNet('#4a3a60')), 252, 0.22) + G(at(560, 252, 0.5, chinaNet('#4a3a60')), 'opacity=".9"')
+    + mirror(at(452, 266, 0.74, chinaNet()), 266, 0.25) + at(452, 266, 0.74, chinaNet())
+    + R(-4, 285, 254, 4, DK) + [20, 70, 120, 170, 220].map((x) => L(`M${x} 287V310`, DK, 2.4)).join('') + mirror(R(-4, 285, 254, 4, DK) + [20, 70, 120, 170, 220].map((x) => L(`M${x} 287V310`, DK, 2.4)).join(''), 288, 0.25)
+    + mirror(at(236, 288, 1.35, chinaNet()), 288, 0.28) + ripples(180, 290, 280, 70, '#20344f', 24, 8, 0.5) + at(236, 288, 1.35, chinaNet()) + ripples(200, 292, 250, 6, '#ffd39a', 10, 6, 0.6);
+  // country boat + tiny far boat
+  b += mirror(at(536, 304, 1, boatK()), 304, 0.26) + ripples(480, 304, 110, 20, '#20344f', 14, 17, 0.5) + at(536, 304, 1, boatK()) + ripples(488, 303, 100, 4, '#ffd39a', 7, 18, 0.7)
+    + G(at(392, 244, 0.38, boatK('#4a3a60')), 'opacity=".8"');
+  // dark palm-lined banks left and right
+  b += P('M0 380V320Q60 312 130 338Q172 356 196 380Z', '#3a2a48') + P('M0 322Q60 314 130 340', 'none', 'stroke="#ff9a62" stroke-width="1.4" opacity=".5"')
+    + P('M640 380V334Q596 334 564 356Q548 368 530 380Z', '#3a2a48') + P('M640 336Q596 335 566 356', 'none', 'stroke="#ff9a62" stroke-width="1.4" opacity=".5"')
+    + palm(34, 336, 178, 22, 111, '#2c2036', '#2c2236', '#4a3a62', 10) + palm(92, 344, 122, -22, 112, '#2c2036', '#2c2236', '#4a3a62', 9) + palm(158, 366, 56, 10, 113, '#2c2036', '#2c2236', '#4a3a62', 8)
+    + palm(612, 344, 150, -20, 114, '#2c2036', '#2c2236', '#4a3a62', 9) + palm(584, 360, 96, 12, 115, '#2c2036', '#2c2236', '#4a3a62', 8)
+    + R(56, 354, 22, 14, '#3a2a48') + P('M52 354L67 342L82 354Z', '#2c2036') + L('M20 372Q40 366 60 372M560 374Q580 368 600 374', '#ffa66a', 0.8, 0.4);
+  // birds crossing the sun
+  b += [[352, 134, 1.3], [374, 124, 1.1], [396, 140, 1.2], [418, 128, 0.9], [300, 108, 1], [262, 130, 0.9], [150, 90, 0.9], [168, 80, 0.8], [500, 120, 0.9], [570, 150, 0.8]].map(([x, y, s]) => bird(x, y, s, '#3a2a48', 1.4)).join('');
+  return SVG(defs, b);
+};
+
+// Dozy Hollow: a dreamy pastel meadow at dawn, layered hills, sleepy rocks (closed eyes, zzz), flowers and the pink blob.
+const flower = (x, y, s, c, mid = '#ffe9a0', petals = 5) => at(x, y, s, `${L('M0 0Q1-6 0-11', '#6aa07a', 1.1)}${P('M0-4q4-3 6-1q-3 3-6 1z', '#8cc09a')}${Array.from({ length: petals }, (_, i) => E(0, -4.2, 2.2, 3.6, c, `transform="translate(0 -11) rotate(${i * (360 / petals)})"`)).join('')}${C(0, -11, 2.1, mid)}`);
+const sleepyRock = (x, y, s, a, b2) => at(x, y, s, `${E(2, 1, 32, 5, '#6a8a7a', 'opacity=".25"')}${P('M-28 0Q-31-30 0-33Q31-30 28 0Q14 4 0 4Q-14 4-28 0Z', a)}${P('M-28 0Q-31-30 0-33Q-14-20-12 4Q-20 4-28 0Z', b2, 'opacity=".5"')}${P('M-18-20Q-12-27-2-28', 'none', 'stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".6"')}${L('M-14-12q4 3 8 0M6-12q4 3 8 0', '#5a4a6a', 1.5)}${E(-17, -7, 4.4, 2.4, '#f59ab4', 'opacity=".55"')}${E(17, -7, 4.4, 2.4, '#f59ab4', 'opacity=".55"')}${L('M-3-6q3 2.4 6 0', '#5a4a6a', 1.2)}${L('M20-26h6l-6 7h6M29-33h5l-5 6h5M37-39h4l-4 5h4', '#8a78b8', 1.4, 0.85)}`);
+
+const dozy = () => {
+  const k = 'doz';
+  const defs = lin(`${k}-sky`, [[0, '#c4b8e8'], [0.45, '#f2c4da'], [0.8, '#ffe1c6'], [1, '#fff0d4']])
+    + rad(`${k}-halo`, 470, 196, 190, [[0, '#fff3c8', 0.95], [0.3, '#ffe2b0', 0.5], [1, '#ffe2b0', 0]])
+    + lin(`${k}-h1`, [[0, '#d6c8ee'], [1, '#e8d8ee']]) + lin(`${k}-h2`, [[0, '#b4dcc8'], [1, '#d2ecd0']]) + lin(`${k}-h3`, [[0, '#9fd2a6'], [1, '#c5e6a8']]) + lin(`${k}-h4`, [[0, '#c9e6a2'], [1, '#e8f2b8']])
+    + lin(`${k}-mist`, [[0, '#fff1e4', 0], [0.5, '#fff1e4', 0.75], [1, '#fff1e4', 0]])
+    + lin(`${k}-blob`, [[0, '#ffd0de'], [1, '#f08cb0']], [0.2, 0, 0.7, 1]);
+  const q = rng(23); let stars = ''; for (let i = 0; i < 16; i++) stars += C(f(q() * 300), f(8 + q() * 70), f(0.6 + q() * 0.9), '#fff8f0', `opacity="${f(0.5 + q() * 0.4)}"`);
+  let b = R(0, 0, 640, 300, `url(#${k}-sky)`) + stars + C(470, 196, 190, `url(#${k}-halo)`) + C(470, 200, 26, '#fff6d6', 'opacity=".95"') + P('M120 58A13 13 0 1 0 134 82A10.5 10.5 0 1 1 120 58Z', '#fffaf0', 'opacity=".75"')
+    + puff(150, 120, 130, '#fff6f2', '#f0c4d8', 0.95) + puff(400, 70, 110, '#fff6f2', '#f0c4d8', 0.9) + puff(580, 120, 90, '#fff6f2', '#f0c4d8', 0.85) + puff(290, 40, 70, '#fff6f2', '#f2cadc', 0.8);
+  // hills in four hazy layers with mist between them
+  b += ridge(31, 214, 34, `url(#${k}-h1)`, 90).replace('V380Z', 'V300Z') + P('M0 206Q80 196 150 204T300 198', 'none', 'stroke="#fff" stroke-width="1.5" opacity=".4"') + R(0, 214, 640, 26, `url(#${k}-mist)`)
+    + ridge(32, 250, 34, `url(#${k}-h2)`, 100) + R(0, 244, 640, 28, `url(#${k}-mist)`, 'opacity=".45"') + ridge(33, 282, 30, `url(#${k}-h3)`, 120) + ridge(34, 322, 26, `url(#${k}-h4)`, 140)
+    + P('M-10 262Q120 236 250 258T470 250T650 246', 'none', 'stroke="#f2fff0" stroke-width="1.6" opacity=".45"') + P('M-10 296Q140 270 300 292T650 280', 'none', 'stroke="#f6ffe0" stroke-width="1.6" opacity=".5"');
+  // round pastel trees on the mid hills, a path winding to the hollow
+  const TREE = ['#7fbf9c', '#9bd3ae', '#c6ecc0'];
+  b += R(527, 246, 3, 12, '#9a8a8a') + bush(528, 240, 16, 41, TREE, 6) + R(582, 262, 3, 10, '#9a8a8a') + bush(584, 256, 13, 42, TREE, 6) + R(86, 262, 3, 10, '#9a8a8a') + bush(88, 256, 14, 43, TREE, 6) + R(190, 268, 3, 8, '#9a8a8a') + bush(192, 263, 10, 44, TREE, 5)
+    + P('M312 380Q290 350 330 336Q370 322 340 300Q320 288 350 280', 'none', 'stroke="#f6ecc8" stroke-width="12" stroke-linecap="round" opacity=".7"') + P('M312 380Q290 350 330 336Q370 322 340 300Q320 288 350 280', 'none', 'stroke="#fff8e0" stroke-width="3" stroke-linecap="round" opacity=".6" stroke-dasharray="1 9"');
+  // sleepy rocks
+  b += sleepyRock(84, 338, 1.45, '#cfc6e4', '#a89ccc') + sleepyRock(540, 334, 1.1, '#d6cde8', '#b0a4d2') + sleepyRock(592, 356, 0.6, '#cfc6e4', '#a89ccc');
+  // flowers scattered in the foreground, grass tufts
+  const cols = ['#ffffff', '#f7a1bb', '#ffd36e', '#c8a8f0', '#ff9a8a']; let fl = '', gr = '';
+  for (let i = 0; i < 46; i++) { const x = 10 + q() * 620, y = 330 + q() * 48; if ((Math.abs(x - 322) < 100 && y < 372) || (Math.abs(x - 84) < 52 && y < 366) || (Math.abs(x - 540) < 40 && y < 362)) continue; fl += flower(f(x), f(y), f(0.8 + (y - 330) / 48 * 0.7), cols[i % 5], i % 5 === 0 ? '#ffd36e' : '#fff3b0', i % 3 === 0 ? 6 : 5); }
+  for (let i = 0; i < 30; i++) { const x = q() * 640, y = 322 + q() * 56; gr += `M${f(x)} ${f(y)}q-2-5-4-8M${f(x)} ${f(y)}q1-6 3-9`; }
+  b += L(gr, '#7fb27a', 1.2, 0.8) + fl;
+  // the pink blob hero with a leaf sprout, soft shadow, little butterfly
+  const blob = `${E(2, 8, 50, 7, '#5a7a6a', 'opacity=".25"')}${P('M-46 2Q-50-42 0-46Q50-42 46 2Q30 10 0 10Q-30 10-46 2Z', `url(#${k}-blob)`)}${P('M-34-26Q-26-40-8-42Q-24-34-26-16Z', '#fff', 'opacity=".4"')}${E(-22, -14, 4.4, 2.8, '#ee7f9b', 'opacity=".55"')}${E(22, -14, 4.4, 2.8, '#ee7f9b', 'opacity=".55"')}${E(-14, -22, 5, 6.4, '#3a2a3a')}${E(14, -22, 5, 6.4, '#3a2a3a')}${C(-12.6, -24.4, 1.9, '#fff')}${C(15.4, -24.4, 1.9, '#fff')}${C(-15.4, -19.8, 0.9, '#fff', 'opacity=".8"')}${L('M-4-12q4 4.4 8 0', '#3a2a3a', 1.6)}${P('M0-45Q-2-56 -12-60Q-14-50 0-45Z', '#6fb06a')}${P('M0-45Q4-58 14-58Q14-48 0-45Z', '#86c47c')}${L('M0-45V-48', '#6aa060', 1.2)}${E(-24, 8, 7, 3, '#f08cb0')}${E(24, 8, 7, 3, '#f08cb0')}`;
+  b += at(322, 356, 1.5, blob) + at(404, 262, 1, `${E(-4, 0, 4, 5.4, '#f7a1bb', 'transform="rotate(-24 -4 0)"')}${E(4, 0, 4, 5.4, '#c8a8f0', 'transform="rotate(24 4 0)"')}${L('M0-3v6', '#5a4a6a', 1)}`)
+    + [[250, 300], [418, 292], [180, 318], [470, 322], [372, 306]].map(([x, y]) => C(x, y, 1.6, '#fff8c8', 'opacity=".9"') + C(x, y, 5, '#fff3b0', 'opacity=".25"')).join('') + bird(560, 70, 1, '#9a88b8', 1.2) + bird(580, 62, 0.8, '#9a88b8', 1.2);
+  return SVG(defs, b);
+};
+
+const ART = { mumbai: mumbai(), delhi: typeof delhi === 'function' ? delhi() : '', bengaluru: typeof bengaluru === 'function' ? bengaluru() : '', chennai: typeof chennai === 'function' ? chennai() : '', hyderabad: typeof hyderabad === 'function' ? hyderabad() : '', kerala: typeof kerala === 'function' ? kerala() : '', 'dozy-hollow': typeof dozy === 'function' ? dozy() : '' };
 
 // ---- worlds: order = card order. `sky` / `accent` colour each card. ----
 const WORLDS = [
@@ -150,8 +529,7 @@ export function mountHome() {
   link.href = FONT_HREF;
   document.head.append(link);
   document.body.innerHTML = `
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="3"/></filter></svg>
-  <main class="home-page">
+    <main class="home-page">
     <header class="hero-head">
       <p class="kicker">a small game for shy talkers</p>
       <h1>Talk<span>-a-</span>bit</h1>
