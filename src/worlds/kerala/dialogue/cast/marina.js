@@ -1,0 +1,218 @@
+// Marine Drive walkway: the benches, the parapet, the peanut baskets and the backwater boats.
+import { dialogue as D, step as S } from '../kit.js';
+
+export const student = D('marine-walk-student', {
+  name: 'Midhun', role: 'college student', site: 'Marine Drive walkway', diff: 2,
+  voice: { rate: 1.1, pitch: 1.0 },
+  persona: 'Student in a sand T-shirt with earphones in, strolling the walkway and glancing at his phone.',
+  goal: 'Ask the way to the water-metro jetty and say you like the breeze.',
+  steps: [
+    S('jetty', ['ഇയർഫോൺ ഊരി... ക്ഷമിക്കണം, എന്തെങ്കിലും പറഞ്ഞോ?', 'Earphone oori... kshamikkanam, enthenkilum paranjo?', 'Taking out my earphones... sorry, did you say something?'],
+      'Ask where the water-metro jetty is.', ['Water metro jetty evideyaanu?', 'വാട്ടർ മെട്രോ ജെട്ടി എവിടെയാണ്?'],
+      ['jetty evide', 'water metro evide chetta', 'boat jetty evideyaa', 'metro boat evide', 'jetty ethu vazhi', 'വാട്ടർ മെട്രോ എവിടെ'],
+      'ask_water_metro_jetty', ['Ask where the jetty is.', '"Evideyaanu?" = where is it?'],
+      ['ദാ ആ പാലത്തിന്റെ അപ്പുറത്ത്, വലത്തോട്ട്.', 'Daa aa paalathinte appurathu, valatthottu.', 'There, beyond that bridge, to the right.'],
+      ['എന്ത് ജെട്ടി?', 'Enthu jetty?', 'Which jetty?']),
+    S('breeze', ['ഇവിടെ എന്നും വൈകിട്ട് വരും, നല്ല കാറ്റാ.', 'Ivide ennum vaikittu varum, nalla kaattaa.', 'I come here every evening, the breeze is lovely.'],
+      'Say you like the breeze too.', ['Enikkum ee kaattu ishtamaanu.', 'എനിക്കും ഈ കാറ്റ് ഇഷ്ടമാണ്.'],
+      ['kaattu nalla ishtamaanu', 'enikkum ishtamaayi', 'kaattu nannaayittundu', 'nalla kaattaanu', 'njaanum kaattu ishtappedunnu', 'എനിക്കും ഇഷ്ടമാണ്'],
+      'say_you_like_breeze', ['Agree about the breeze.', '"Kaattu" = wind, breeze.'],
+      ['അതെ! ഇവിടെ ഇരുന്നാൽ ടെൻഷൻ പോകും.', 'Athe! Ivide irunnaal tension pokum.', 'Yes! Sitting here makes tension go away.'],
+      ['കാറ്റ് ഇഷ്ടമായോ?', 'Kaattu ishtamaayo?', 'Do you like the breeze?']),
+  ],
+  outro: ['കായൽ കാഴ്ച കണ്ടിട്ട് പോകൂ.', 'Kaayal kaazhcha kandittu pokoo.', 'Enjoy the backwater view before you go.'],
+  learned: [['water metro jetty evideyaanu?', 'where is the water-metro jetty?'], ['enikkum ee kaattu ishtamaanu', 'I like this breeze too']],
+  again: ['പാട്ട് കേൾക്കട്ടെ, പിന്നെ കാണാം.', 'Paattu kelkkatte, pinne kaanaam.', 'Let me listen to my song, see you later.'],
+});
+
+export const benchMan = D('marine-bench-man', {
+  name: 'Thomas Chettan', role: 'man on a walkway bench', site: 'Marine Drive walkway, bench', diff: 2,
+  voice: { rate: 0.9, pitch: 0.85 },
+  persona: 'Thin man with specs and a folded newspaper, watching the backwater and the boats.',
+  goal: 'Ask how many boats he has counted, then ask where the tea shop is.',
+  steps: [
+    S('boats', ['കായലിലെ ബോട്ടുകൾ എണ്ണുകയാ ഞാൻ.', 'Kaayalile bottukal ennukayaa njaan.', 'I am counting the boats on the backwater.'],
+      'Ask how many boats he has counted.', ['Ethra bottukal ennikazhinju?', 'എത്ര ബോട്ടുകൾ എണ്ണിക്കഴിഞ്ഞു?'],
+      ['ethra boat aayi', 'boat ethra undu', 'ethra ennam aayi', 'ethra boat kandu', 'chetta ethra boat', 'എത്ര ബോട്ട് ആയി'],
+      'ask_boat_count', ['Ask how many.', '"Ethra?" = how many?'],
+      ['പന്ത്രണ്ട്! ഇന്ന് ഒരുപാടുണ്ട്.', 'Panthrandu! Innu orupaadundu.', 'Twelve! Plenty today.'],
+      ['ഏത് ബോട്ട്?', 'Ethu boat?', 'Which boat?']),
+    S('tea', ['ചായ കുടിച്ചോ? അവിടെ ഒരു നല്ല ചായക്കട ഉണ്ട്.', 'Chaya kudicho? Avide oru nalla chayakkada undu.', 'Had your tea? There is a good tea shop there.'],
+      'Say not yet, ask where the shop is.', ['Illa, aa kada evideyaanu?', 'ഇല്ല, ആ കട എവിടെയാണ്?'],
+      ['kada evide chetta', 'chayakkada evide', 'ethu kada', 'illa evideyaa kada', 'kada evide parayamo', 'ആ കട എവിടെ'],
+      'ask_where_tea_shop', ['Say no, ask where.', '"Kada" = shop.'],
+      ['ആ മരത്തിന്റെ അടുത്ത്, നീല ബോർഡ്.', 'Aa maratthinte aduthu, neela board.', 'Near that tree, a blue board.'],
+      ['ചായ വേണോ?', 'Chaya veno?', 'Want tea?']),
+  ],
+  outro: ['ചായ കുടിച്ചിട്ട് ബോട്ട് എണ്ണാൻ വരൂ.', 'Chaya kudichittu boat ennaan varoo.', 'Have your tea then come count boats.'],
+  learned: [['ethra bottukal?', 'how many boats?'], ['aa kada evideyaanu?', 'where is that shop?']],
+  again: ['പതിമൂന്നാമത്തെ ബോട്ട് വരുന്നു!', 'Pathimoonnaamathe boat varunnu!', 'The thirteenth boat is coming!'],
+});
+
+export const seaWallCouple = D('marine-couple', {
+  name: 'Ajay and Neethu', role: 'seated couple', site: 'Marine Drive walkway, parapet', diff: 2,
+  voice: { rate: 1.05, pitch: 1.1 },
+  persona: 'Young couple sitting close on the parapet sharing a phone; she nibbles banana chips from a paper cone.',
+  goal: 'Say their photo is beautiful, then take a banana chip.',
+  steps: [
+    S('photo', ['ഹായ്! ഇത് ഞങ്ങളുടെ ആദ്യ യാത്രയുടെ ഫോട്ടോ!', 'Haai! Ithu njangalude aadya yaathrayude photo!', 'Hi! This is a photo from our first trip!'],
+      'Say it is a beautiful photo.', ['Ithu nalla bhangiyulla photo aanu.', 'ഇത് നല്ല ഭംഗിയുള്ള ഫോട്ടോ ആണ്.'],
+      ['photo bhangiyundu', 'nalla photo', 'valare nalla photo', 'photo super aanu', 'nalla photo aanu chetta', 'ഫോട്ടോ ഭംഗിയുണ്ട്'],
+      'praise_their_photo', ['Compliment the photo.', '"Bhangi" = beauty.'],
+      ['താങ്ക്സ്! ഇത് മൂന്നാറിൽ വെച്ചാണ്.', 'Thanks! Ithu Munnaaril vechaanu.', 'Thanks! This was taken in Munnar.'],
+      ['ഫോട്ടോ ഇഷ്ടമായോ?', 'Photo ishtamaayo?', 'Did you like the photo?']),
+    S('chips', ['ബനാന ചിപ്സ് വേണോ? ഞങ്ങളുടെ കൂടെ കഴിക്കൂ.', 'Banana chips veno? Njangalude koode kazhikkoo.', 'Want banana chips? Eat with us.'],
+      'Take one chip and say thanks.', ['Nanni, onnu edukkaam.', 'നന്ദി, ഒന്ന് എടുക്കാം.'],
+      ['nanni onnu edukkatte', 'thanks njaan edukkaam', 'oru chips edukkaam', 'nanni chips ruchiyundu', 'shari onnu tharoo', 'നന്ദി ഒന്ന് എടുക്കാം'],
+      'take_a_chip', ['Accept politely.', '"Edukkaam" = I will take.'],
+      ['എടുത്തോളൂ, ധാരാളമുണ്ട്! രുചി എങ്ങനെ?', 'Edutholoo, dhaaraalamundu! Ruchi engane?', 'Help yourself, plenty! How is the taste?'],
+      ['ചിപ്സ് വേണോ വേണ്ടയോ?', 'Chips veno vendayo?', 'Chips, yes or no?']),
+  ],
+  outro: ['ഇവിടെ ഇരുന്ന് ഒരുപാട് സംസാരിക്കാം.', 'Ivide irunnu orupaadu samsaarikkaam.', 'We can sit here and talk a lot.'],
+  learned: [['nalla bhangiyulla photo', 'a beautiful photo'], ['nanni, onnu edukkaam', 'thanks, I will take one']],
+  again: ['ചിപ്സ് ഇനിയും ബാക്കിയുണ്ട്!', 'Chips iniyum baakkiyundu!', 'There are chips left!'],
+});
+
+export const sundalMan = D('marine-chana-seller', {
+  name: 'Kunjumon', role: 'peanut seller', site: 'Marine Drive walkway', diff: 2,
+  voice: { rate: 1.1, pitch: 0.9 },
+  persona: 'Thin man in a cream vest and white cap scooping peanuts into paper cones with a squeeze of lemon.',
+  goal: 'Ask for one cone of peanuts and say you will peel them yourself.',
+  steps: [
+    S('order', ['കടല, കടല! നാരങ്ങ പിഴിഞ്ഞ കടല!', 'Kadala, kadala! Naaranja pizhinja kadala!', 'Peanuts, peanuts! With a squeeze of lime!'],
+      'Ask for one paper cone of peanuts.', ['Oru kone kadala tharoo chetta.', 'ഒരു കോൺ കടല തരൂ ചേട്ടാ.'],
+      ['oru cone kadala venam', 'kadala tharamo chetta', 'oru paper cone kadala', 'chetta oru cone', 'kadala oru cone mathi', 'ഒരു കോൺ കടല വേണം'],
+      'order_peanut_cone', ['Ask for a cone.', '"Kadala" = peanuts.'],
+      ['ഇതാ, ചൂടോടെ വറുത്തത്. നാരങ്ങയും ചേർത്തിട്ടുണ്ട്.', 'Ithaa, choodote varuthathu. Naaranjayum chertthittundu.', 'Here, freshly roasted. Lime added too.'],
+      ['കടല വേണോ?', 'Kadala veno?', 'Want peanuts?']),
+    S('peel', ['പത്ത് രൂപ. തൊലി കളഞ്ഞ് തരണോ?', 'Pathu roopa. Tholi kalanju tharano?', 'Ten rupees. Shall I peel them for you?'],
+      'Say no, you will peel them yourself.', ['Venda chetta, njaan thanne thozhikkaam.', 'വേണ്ട ചേട്ടാ, ഞാൻ തന്നെ തൊലി കളയാം.'],
+      ['njaan thanne peel cheyyaam', 'venda thanne kalayaam', 'thanne cheythu kollaam', 'tholi njaan kalayaam', 'venda chetta nanni', 'ഞാൻ തന്നെ കളയാം'],
+      'peel_peanuts_myself', ['Say you will do it.', '"Njaan thanne" = I myself.'],
+      ['ശരി, ഇതാ കടലാസ് കോൺ.', 'Shari, ithaa kadalaas cone.', 'Okay, here is the paper cone.'],
+      ['തൊലി കളയണോ?', 'Tholi kalayano?', 'Peel them?']),
+  ],
+  outro: ['ബെഞ്ചിൽ ഇരുന്ന് കഴിക്കൂ, കായൽ കാണാം.', 'Benchil irunnu kazhikkoo, kaayal kaanaam.', 'Eat sitting on a bench, you can see the backwater.'],
+  learned: [['oru kone kadala tharoo', 'give me a cone of peanuts'], ['njaan thanne thozhikkaam', 'I will peel them myself']],
+  again: ['കടല തീരാറായി, വേഗം വരൂ!', 'Kadala theeraaraayi, vegam varoo!', 'The peanuts are nearly gone, hurry!'],
+});
+
+export const jogger1 = D('marine-jogger', {
+  name: 'Ranjith', role: 'walkway jogger', site: 'Marine Drive walkway', diff: 1,
+  voice: { rate: 1.2, pitch: 1.0 },
+  persona: 'Jogger in a lilac sleeveless tee and headband, breathing hard as he jogs the walkway at dawn.',
+  goal: 'Encourage him to keep running.',
+  steps: [
+    S('run', ['ഹൊ... ഹൊ... രാവിലെ ഓടാൻ എന്ത് സുഖം!', 'Ho... ho... raavile odaan enthu sukham!', 'Huff... huff... what joy to run in the morning!'],
+      'Tell him well done, keep running.', ['Kollaam, odikkonde irikku!', 'കൊള്ളാം, ഓടിക്കൊണ്ടേ ഇരിക്ക്!'],
+      ['keep going chetta', 'nannaayi odunnu', 'all the best chetta', 'odikkoo chetta', 'super running chetta', 'ഓടിക്കോ ചേട്ടാ'],
+      'encourage_the_jogger', ['Cheer him on.', '"Odikkoo" = keep running.'],
+      ['താങ്ക്സ്! മൂന്ന് റൗണ്ട് കൂടി ബാക്കി.', 'Thanks! Moonnu round koodi baakki.', 'Thanks! Three more rounds left.'],
+      ['ശ്വാസം പോകുന്നു, ഒന്നൂടെ പറയൂ.', 'Shwaasam pokunnu, onnoode parayoo.', 'Out of breath, say it once more.']),
+  ],
+  outro: ['രാവിലെ വരൂ, ഒരുമിച്ച് ഓടാം.', 'Raavile varoo, orumichu odaam.', 'Come in the morning, let us run together.'],
+  learned: [['odikkonde irikku', 'keep running']],
+  again: ['ഒരു റൗണ്ട് കൂടി!', 'Oru round koodi!', 'One more round!'],
+});
+
+export const benchAunty = D('marine-bench-aunty', {
+  name: 'Rosamma Chechi', role: 'chechi on a bench', site: 'Marine Drive walkway, bench', diff: 2,
+  voice: { rate: 0.95, pitch: 1.15 },
+  persona: 'Chechi in a cream set-saree with a shopping bag, resting on the bench and watching the backwater.',
+  goal: 'Ask to sit beside her, then say you will visit Bolgatty tomorrow.',
+  steps: [
+    S('sit', ['കായലിലേക്ക് നോക്കി ഇരിക്കാൻ എന്ത് രസം!', 'Kaayalilekku nokki irikkaan enthu rasam!', 'What a joy to sit looking at the backwater!'],
+      'Ask if you can sit beside her.', ['Njaan koodi ivide irikkatte?', 'ഞാൻ കൂടി ഇവിടെ ഇരിക്കട്ടെ?'],
+      ['irikkaamo chechi', 'njaanum irikkatte', 'ivide irikkaamo', 'oru sthalam undo', 'chechi njaan irikkatte', 'ഇരിക്കാമോ ചേച്ചി'],
+      'ask_to_sit_beside', ['Ask politely.', '"Irikkatte?" = may I sit?'],
+      ['ഇരിക്ക് മോളേ. ഇത് എന്റെ പതിവ് സ്ഥലമാ.', 'Irikku mole. Ithu ente pathivu sthalamaa.', 'Sit, dear. This is my regular spot.'],
+      ['ഇരിക്കണോ?', 'Irikkano?', 'Do you want to sit?']),
+    S('bolgatty', ['ഇവിടെ നിന്ന് ബോൾഗാട്ടി കാണാം. പോയിട്ടുണ്ടോ?', 'Ivide ninnu Bolgatty kaanaam. Poyittundo?', 'You can see Bolgatty from here. Have you been?'],
+      'Say not yet, you will go tomorrow.', ['Illa, naale pokaam.', 'ഇല്ല, നാളെ പോകാം.'],
+      ['pokanam naale', 'naale pokum', 'illa pokanam', 'pinne pokaam chechi', 'poyittilla naale', 'ഇല്ല പോകണം'],
+      'plan_visit_bolgatty', ['Say you will go tomorrow.', '"Naale" = tomorrow.'],
+      ['നല്ലത്! ദ്വീപിലെ കൊട്ടാരം കണ്ടിട്ട് വരൂ.', 'Nallathu! Dweepile kottaaram kandittu varoo.', 'Good! Go and see the palace on the island.'],
+      ['പോയിട്ടുണ്ടോ ഇല്ലയോ?', 'Poyittundo illayo?', 'Have you been or not?']),
+  ],
+  outro: ['വൈകുന്നേരം കായൽ സ്വർണ്ണ നിറമാകും.', 'Vaikunneram kaayal swarnna niramaakum.', 'In the evening the backwater turns golden.'],
+  learned: [['njaan ivide irikkatte?', 'may I sit here?'], ['illa, naale pokaam', 'not yet, I will go tomorrow']],
+  again: ['മോളേ, ഒരു ഇടം തരാം.', 'Mole, oru idam tharaam.', 'Dear, I will make a little room.'],
+});
+
+export const benchReader = D('marine-bench-reader', {
+  name: 'Sivan Chettan', role: 'old man with newspaper', site: 'Marine Drive walkway, same bench', diff: 2,
+  voice: { rate: 0.9, pitch: 0.8 },
+  persona: 'Bald old man with specs and a thick moustache, reading the newspaper on the bench.',
+  goal: 'Say you read a Malayalam paper too, to learn.',
+  steps: [
+    S('paper', ['ഇന്ന് പത്രത്തിൽ ഒന്നുമില്ല, എല്ലാം പഴയ വാർത്ത.', 'Innu pathrathil onnumilla, ellaam pazhaya vaartha.', 'Nothing in the paper today, all old news.'],
+      'Say you read a Malayalam paper too, to learn.', ['Njaanum padikkaan pathram vaayikkaarundu.', 'ഞാനും പഠിക്കാൻ പത്രം വായിക്കാറുണ്ട്.'],
+      ['pathram vaayikkaarundu', 'njaan malayalam pathram vaayikkum', 'padikkaan vaayikkum', 'njaanum vaayikkunnu', 'pathram vaayichu padikkunnu', 'പത്രം വായിക്കാറുണ്ട്'],
+      'say_you_read_malayalam_paper', ['Say you read it too.', '"Vaayikkaarundu" = I read (habitually).'],
+      ['ആഹാ! അതാണ് നല്ല വഴി, ഓരോ വാക്കായി.', 'Aahaa! Athaanu nalla vazhi, oro vaakkaayi.', 'Ah! That is the way, word by word.'],
+      ['പത്രം വായിക്കുമോ?', 'Pathram vaayikkumo?', 'Will you read the paper?']),
+  ],
+  outro: ['വാർത്ത പഴയതായാലും ഭാഷ പുതിയതാകട്ടെ.', 'Vaartha pazhayathaayaalum bhaasha puthiyathaakatte.', 'Old news, but may the language be new.'],
+  learned: [['pathram vaayikkaarundu', 'I read the paper']],
+  again: ['ഇന്നത്തെ തലക്കെട്ട് വായിച്ചോ?', 'Innathe thalakkettu vaayicho?', 'Did you read today\'s headline?'],
+});
+
+export const couple2 = D('marine-couple-2', {
+  name: 'Nikhil and Reshma', role: 'seated couple', site: 'Marine Drive walkway, parapet', diff: 2,
+  voice: { rate: 1.05, pitch: 1.05 },
+  persona: 'Young couple in pastel clothes sitting close on the parapet, chatting, one glancing at a phone.',
+  goal: 'Say that you are travelling alone.',
+  steps: [
+    S('alone', ['ഞങ്ങൾക്ക് ഈ സ്ഥലം വളരെ ഇഷ്ടമാ. ചേച്ചി ഒറ്റയ്ക്കാണോ?', 'Njangalkku ee sthalam valare ishtamaa. Chechi ottaykkaano?', 'We love this place. Are you alone, chechi?'],
+      'Say yes, you are travelling alone.', ['Athe, njaan ottaykku yaathra cheyyunnu.', 'അതെ, ഞാൻ ഒറ്റയ്ക്ക് യാത്ര ചെയ്യുന്നു.'],
+      ['ottaykkaanu', 'njaan ottaykku aanu', 'solo travel aanu', 'ottaykku yaathra', 'athe ottaykkaanu', 'ഒറ്റയ്ക്കാണ്'],
+      'say_travelling_alone', ['Say you are alone.', '"Ottaykku" = alone.'],
+      ['ധൈര്യമുണ്ട്! കേരളം സുരക്ഷിതമാ, ധൈര്യമായി പൊയ്ക്കോ.', 'Dhairyamundu! Keralam surakshithamaa, dhairyamaayi poykko.', 'Brave! Kerala is safe, go on without worry.'],
+      ['ഒറ്റയ്ക്കാണോ അല്ലയോ?', 'Ottaykkaano allayo?', 'Alone or not?']),
+  ],
+  outro: ['ഒറ്റയ്ക്ക് വന്നെങ്കിലും ഇവിടെ എല്ലാവരും കൂട്ടാ.', 'Ottaykku vannenkilum ivide ellaavarum koottaa.', 'Though you came alone, everybody here is your company.'],
+  learned: [['njaan ottaykku yaathra cheyyunnu', 'I am travelling alone']],
+  again: ['ചേച്ചി, ഞങ്ങളുടെ കൂടെ ഇരിക്കൂ.', 'Chechi, njangalude koode irikkoo.', 'Chechi, sit with us.'],
+});
+
+export const jogger2 = D('marine-jogger-2', {
+  name: 'Anil', role: 'jogger', site: 'Marine Drive walkway, the opposite way', diff: 1,
+  voice: { rate: 1.2, pitch: 0.95 },
+  persona: 'Jogger in a sleeveless sky-blue top and running shoes, coming from the opposite direction.',
+  goal: 'Step aside and tell him to go ahead.',
+  steps: [
+    S('way', ['എതിർദിശയിൽ നിന്ന് ഓടിവരുന്നു, വഴി ഒതുക്കൂ!', 'Ethirdishayil ninnu odivarunnu, vazhi othukkoo!', 'Running from the opposite side, give me a little way!'],
+      'Step aside and say go ahead.', ['Pokoo, njaan maaraam.', 'പോകൂ, ഞാൻ മാറാം.'],
+      ['maaraam chetta', 'pokoo chetta', 'vazhi tharaam', 'njaan maari nilkkaam', 'poyikkoo', 'ഞാൻ മാറാം'],
+      'step_aside_for_jogger', ['Tell him to go ahead.', '"Maaraam" = I will move.'],
+      ['താങ്ക്സ്! ഇന്ന് റെക്കോർഡ് ഇടണം.', 'Thanks! Innu record idanam.', 'Thanks! I must set a record today.'],
+      ['വഴി തരുമോ?', 'Vazhi tharumo?', 'Will you give way?']),
+  ],
+  outro: ['വഴി ഒതുക്കിയതിന് നന്ദി!', 'Vazhi othukkiyathinu nanni!', 'Thanks for giving way!'],
+  learned: [['pokoo, njaan maaraam', 'go ahead, I will move']],
+  again: ['അടുത്ത റൗണ്ട് ഇതിലും വേഗം!', 'Adutha round ithilum vegam!', 'The next round will be even faster!'],
+});
+
+export const morningWalker = D('marine-morning-walker', {
+  name: 'Kurian Chettan', role: 'elderly morning walker', site: 'Marine Drive walkway', diff: 2,
+  voice: { rate: 0.9, pitch: 0.85 },
+  persona: 'Elderly man in a white cap with a closed black umbrella, strolling slowly and enjoying the backwater breeze.',
+  goal: 'Say good morning, then ask how many years he has walked here.',
+  steps: [
+    S('morning', ['രാവിലെ കായൽക്കാറ്റ് ആരോഗ്യത്തിന് നല്ലതാ.', 'Raavile kaayalkkaattu aarogyathinu nallathaa.', 'The morning backwater breeze is good for health.'],
+      'Say good morning and agree.', ['Suprabhaatham, athe valare nallathaanu.', 'സുപ്രഭാതം, അതെ വളരെ നല്ലതാണ്.'],
+      ['suprabhaatham chetta', 'good morning chetta', 'athe nalla kaattu', 'raavile nalla kaattaanu', 'nalla kaattu aanu', 'സുപ്രഭാതം'],
+      'say_good_morning', ['Greet him: Suprabhaatham.', '"Suprabhaatham" = good morning.'],
+      ['സുപ്രഭാതം മോളേ! ഇന്ന് നല്ല തെളിഞ്ഞ ദിവസം.', 'Suprabhaatham mole! Innu nalla thelinja divasam.', 'Good morning dear! A nice clear day today.'],
+      ['സുപ്രഭാതം പറഞ്ഞില്ലല്ലോ.', 'Suprabhaatham paranjillallo.', 'You did not say good morning.']),
+    S('years', ['അൻപത് വർഷമായി ഞാൻ ഈ നഗരത്തിലുണ്ട്.', 'Anpathu varshamaayi njaan ee nagarathilundu.', 'I have lived in this city for fifty years.'],
+      'Ask how many years he has walked here.', ['Ethra varshamaayi ivide nadakkunnu?', 'എത്ര വർഷമായി ഇവിടെ നടക്കുന്നു?'],
+      ['ethra varsham aayi', 'ethra kaalamaayi nadakkunnu', 'ivide ethra kaalam', 'varshangalaayo nadakkunnu', 'chetta ethra varsham', 'എത്ര വർഷമായി'],
+      'ask_years_walking', ['Ask how long.', '"Ethra varsham?" = how many years?'],
+      ['ഇരുപത്തഞ്ച് വർഷം! മഴയാണെങ്കിലും നടക്കും.', 'Irupathanchu varsham! Mazhayaanenkilum nadakkum.', 'Twenty-five years! I walk even in the rain.'],
+      ['എത്ര വർഷമെന്നാണോ?', 'Ethra varshamennaano?', 'How many years, you mean?']),
+  ],
+  outro: ['കുട കരുതണം, മഴ വരും.', 'Kuda karuthanam, mazha varum.', 'Carry an umbrella, it will rain.'],
+  learned: [['suprabhaatham', 'good morning'], ['ethra varshamaayi?', 'for how many years?']],
+  again: ['നാളെ രാവിലെ വീണ്ടും കാണാം.', 'Naale raavile veendum kaanaam.', 'See you again tomorrow morning.'],
+});

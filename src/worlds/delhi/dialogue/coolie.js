@@ -1,0 +1,38 @@
+// Old Delhi station porter on the forecourt.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('coolie', {
+  name: 'Ramkishan', role: 'station porter', site: 'Old Delhi railway station forecourt', diff: 3,
+  voice: { rate: 1.0, pitch: 0.85 },
+  persona: 'Proud red-shirted porter with a brass armband and a licence badge, who knows every platform and carries a trunk on his head.',
+  goal: 'Ask for the platform of the Patna train, where it is, the porter charge, and say thanks.',
+  steps: [
+    S('platform', ['कुली चाहिए, बाबू? कौन-सी गाड़ी पकड़नी है?', 'Kuli chahiye, babu? Kaun-si gaadi pakadni hai?', 'Need a porter, babu? Which train are you taking?'],
+      'Ask which platform the Patna train leaves from.', ['Bhaiya, Patna wali train kis platform par aayegi?', 'भैया, पटना वाली ट्रेन किस प्लेटफ़ॉर्म पर आएगी?'],
+      ['patna wali train kis platform par aayegi', 'bhaiya patna ki gaadi kaunse platform pe hai', 'patna jaane wali train kis platform par aati hai', 'paaji patna ki train kidhar lagti hai', 'patna train ka platform kaun sa hai', 'kaunse platform se jaati hai patna train', 'पटना वाली ट्रेन किस प्लेटफ़ॉर्म पर आएगी'],
+      ['Ask about the Patna train.', 'Which platform = "kis platform par". Will come = "aayegi".'],
+      ['पटना वाली? प्लेटफ़ॉर्म नौ पर लगती है, बाबू।', 'Patna wali? Platform nau par lagti hai, babu.', 'The Patna one? It arrives on platform nine, babu.'],
+      ['कहाँ की गाड़ी बोला, बाबू? फिर बोलो।', 'Kahaan ki gaadi bola, babu? Phir bolo.', 'Which train did you say, babu? Say again.']),
+    S('where', ['प्लेटफ़ॉर्म नौ पुल पार करके है। देख लो, सीढ़ियाँ हैं।', 'Platform nau pul paar karke hai. Dekh lo, seedhiyaan hain.', 'Platform nine is across the bridge. Mind it, there are stairs.'],
+      'Ask where platform nine is.', ['Platform nau kahaan hai?', 'प्लेटफ़ॉर्म नौ कहाँ है?'],
+      ['platform nau kahaan hai', 'platform nau kidhar hai bhaiya', 'paaji platform nau kis taraf hai', 'nau number platform kahaan hai', 'platform nau ka raasta bata do', 'bhaiya nau number kahaan padega', 'प्लेटफ़ॉर्म नौ कहाँ है'],
+      ['Ask where that platform is.', 'Where = "kahaan". Nine = "nau".'],
+      ['वो सामने वाला पुल है। मेरे पीछे-पीछे आ जाओ।', 'Wo saamne wala pul hai. Mere peeche-peeche aa jao.', 'That bridge in front. Just follow behind me.'],
+      ['कौन-सा प्लेटफ़ॉर्म पूछ रहे हो, बाबू?', 'Kaun-sa platform puchh rahe ho, babu?', 'Which platform are you asking about, babu?']),
+    S('charge', ['सामान मैं उठा लूँगा। ये दो बैग हैं ना?', 'Saaman main utha lunga. Ye do bag hain na?', 'I will lift the luggage. These are two bags, right?'],
+      'Ask how much he charges.', ['Saaman ka kitna loge bhaiya?', 'सामान का कितना लोगे भैया?'],
+      ['saaman ka kitna loge bhaiya', 'bhaiya bag uthane ke kitne paise', 'kitna charge hoga saaman ka', 'paaji bag ka kya loge', 'kitne rupaye loge bhaiya', 'saaman uthane ka rate kya hai', 'सामान का कितना लोगे'],
+      ['Ask the charge.', 'How much will you take = "kitna loge". Luggage = "saaman".'],
+      ['दो बैग के सौ रुपये। सरकारी रेट है, बाबू।', 'Do bag ke sau rupaye. Sarkaari rate hai, babu.', 'A hundred for two bags. It is the official rate, babu.'],
+      ['पैसे का पूछ रहे हो? ज़रा साफ़ बोलो।', 'Paise ka puchh rahe ho? Zara saaf bolo.', 'Asking about money? Speak clearly.']),
+    S('thanks', ['लो, प्लेटफ़ॉर्म नौ आ गया। गाड़ी भी लगने वाली है।', 'Lo, platform nau aa gaya. Gaadi bhi lagne wali hai.', 'Here, platform nine. The train is about to arrive.'],
+      'Thank him for the help.', ['Bahut shukriya bhaiya, aapne bahut madad ki.', 'बहुत शुक्रिया भैया, आपने बहुत मदद की।'],
+      ['bahut shukriya bhaiya', 'bhaiya aapne bahut madad ki shukriya', 'thank you bhaiya bahut madad hui', 'paaji bahut meharbani', 'dhanyavaad bhaiya madad ke liye', 'shukriya bhaiya aapka', 'बहुत शुक्रिया भैया'],
+      ['Thank him for helping.', 'Very much = "bahut". You helped = "aapne madad ki".'],
+      ['अरे बाबू, ये तो मेरा काम है। सफ़र मंगलमय हो!', 'Arre babu, ye toh mera kaam hai. Safar mangalmay ho!', 'Oh babu, this is my job. Have a happy journey!'],
+      ['कुछ तो बोल दो बाबू, एक शुक्रिया ही सही।', 'Kuch toh bol do babu, ek shukriya hi sahi.', 'Say something babu, even a simple thanks.']),
+  ],
+  outro: ['जाओ बाबू, पटना में सबको मेरा राम-राम कहना।', 'Jao babu, Patna mein sabko mera Ram-Ram kehna.', 'Go, babu, give everyone in Patna my Ram-Ram.'],
+  learned: [['kis platform par aayegi?', 'which platform will it come on?'], ['saaman ka kitna loge?', 'how much for the luggage?'], ['bahut shukriya bhaiya', 'thank you very much, brother']],
+  again: ['बाबू फिर आ गए? इस बार कौन-सी गाड़ी?', 'Babu phir aa gaye? Is baar kaun-si gaadi?', 'Babu, back again? Which train this time?'],
+});

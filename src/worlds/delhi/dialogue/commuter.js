@@ -1,0 +1,38 @@
+// Metro commuter reading the map board.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('commuter', {
+  name: 'Neha', role: 'metro commuter', site: 'Delhi Metro station, platform map board', diff: 3,
+  voice: 'f',
+  persona: 'Helpful office-goer with a smart card and a lanyard, studying the metro map, who knows interchanges and the women-only first coach.',
+  goal: 'Ask if the train goes to Rajiv Chowk, which platform, when the next train is, and how to recharge a smart card.',
+  steps: [
+    S('goes', ['लाइन तो यही है। आप कहाँ जा रहे हैं?', 'Line toh yahi hai. Aap kahaan ja rahe hain?', 'This is the line. Where are you going?'],
+      'Ask if this metro goes to Rajiv Chowk.', ['Excuse me, ye metro Rajiv Chowk jaati hai?', 'एक्सक्यूज़ मी, ये मेट्रो राजीव चौक जाती है?'],
+      ['ye metro rajiv chowk jaati hai', 'kya ye train rajiv chowk jaayegi', 'rajiv chowk is taraf se jaayenge kya', 'didi ye metro rajiv chowk ki hai', 'rajiv chowk ke liye yahi metro hai', 'kya rajiv chowk jaane ke liye yahi line hai', 'ये मेट्रो राजीव चौक जाती है'],
+      ['Ask if the metro goes to Rajiv Chowk.', 'Does it go = "jaati hai". This metro = "ye metro".'],
+      ['हाँ जी, सीधी जाएगी। वहाँ से आगे बदलना पड़ेगा।', 'Haan ji, seedhi jaayegi. Wahaan se aage badalna padega.', 'Yes, it goes straight. You will need to change there.'],
+      ['माफ़ कीजिए, मैंने ठीक से सुना नहीं। फिर से?', 'Maaf kijiye, maine theek se suna nahi. Phir se?', 'Sorry, I did not catch it. Again?']),
+    S('platform', ['राजीव चौक के लिए आगे प्लेटफ़ॉर्म दो पर आइए।', 'Rajiv Chowk ke liye aage platform do par aaiye.', 'For Rajiv Chowk, come ahead to platform two.'],
+      'Ask which platform to stand on.', ['Mujhe kis platform par khade hona hai?', 'मुझे किस प्लेटफ़ॉर्म पर खड़े होना है?'],
+      ['mujhe kis platform par khade hona hai', 'kaunse platform par jaun', 'platform kaunsa hoga didi', 'kis platform se train milegi', 'kaunse platform par khada rahun', 'platform number kya hai', 'किस प्लेटफ़ॉर्म पर खड़े होना है'],
+      ['Ask which platform.', 'Which platform = "kis platform par". I have to stand = "khade hona hai".'],
+      ['नीचे वाला, दो नंबर। पहला डिब्बा सिर्फ़ महिलाओं का है, याद रखिए।', 'Neeche wala, do number. Pehla dibba sirf mahilaon ka hai, yaad rakhiye.', 'The lower one, number two. The first coach is only for women, remember.'],
+      ['प्लेटफ़ॉर्म नंबर पूछ रहे हैं ना? दोबारा बोलिए।', 'Platform number puchh rahe hain na? Dobara boliye.', 'You are asking the platform number, right? Please say it again.']),
+    S('next', ['यहीं खड़े रहिए। भीड़ में अपना बैग सँभालकर रखिए।', 'Yahin khade rahiye. Bheed mein apna bag sambhalkar rakhiye.', 'Stand right here. Keep your bag safe in the crowd.'],
+      'Ask when the next train comes.', ['Agli train kitni der mein aayegi?', 'अगली ट्रेन कितनी देर में आएगी?'],
+      ['agli train kitni der mein aayegi', 'next train kab aayegi', 'agli metro kitne minute mein hai', 'kitne minute mein aayegi next train', 'didi agli train kab tak aayegi', 'next metro kitni der mein hai', 'अगली ट्रेन कितनी देर में आएगी'],
+      ['Ask about the next train.', 'Next = "agli". In how long = "kitni der mein".'],
+      ['स्क्रीन पर देखिए, तीन मिनट में आ रही है।', 'Screen par dekhiye, teen minute mein aa rahi hai.', 'Look at the screen, it arrives in three minutes.'],
+      ['अगली ट्रेन के बारे में पूछ रहे हैं? फिर से बोलिए।', 'Agli train ke baare mein puchh rahe hain? Phir se boliye.', 'Are you asking about the next train? Say it again.']),
+    S('card', ['चलिए, तैयार रहिए। स्मार्ट कार्ड में पैसे हैं ना?', 'Chaliye, taiyaar rahiye. Smart card mein paise hain na?', 'Okay, be ready. Is there money in your smart card?'],
+      'Ask where you can recharge your smart card.', ['Smart card recharge kahaan hota hai?', 'स्मार्ट कार्ड रिचार्ज कहाँ होता है?'],
+      ['smart card recharge kahaan hota hai', 'card recharge karne kahaan jaun', 'recharge counter kidhar hai didi', 'smart card ka top up kahaan milega', 'card mein paise kahaan daalun', 'recharge kahaan se karwaun', 'स्मार्ट कार्ड रिचार्ज कहाँ होता है'],
+      ['Ask where to recharge.', 'Recharge = "recharge". Where does it happen = "kahaan hota hai".'],
+      ['टिकट खिड़की पर या मशीन से। वो सामने वाली खिड़की।', 'Ticket khidki par ya machine se. Wo saamne wali khidki.', 'At the ticket window or the machine. The window in front.'],
+      ['कार्ड रिचार्ज के बारे में पूछिए, साफ़ बोलिए।', 'Card recharge ke baare mein puchhiye, saaf boliye.', 'Ask about the card recharge, speak clearly.']),
+  ],
+  outro: ['ट्रेन आ गई! चलिए, ऑल द बेस्ट आपकी तैयारी के लिए।', 'Train aa gayi! Chaliye, all the best aapki taiyaari ke liye.', 'The train is here! Come, all the best for your preparation.'],
+  learned: [['ye metro Rajiv Chowk jaati hai?', 'does this metro go to Rajiv Chowk?'], ['agli train kitni der mein aayegi?', 'when does the next train come?'], ['smart card recharge kahaan hota hai?', 'where can I recharge the smart card?']],
+  again: ['अरे आप फिर? इस बार सही प्लेटफ़ॉर्म पर हैं ना?', 'Arre aap phir? Is baar sahi platform par hain na?', 'You again? You are on the right platform this time, right?'],
+});

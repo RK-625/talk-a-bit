@@ -1,7 +1,7 @@
 /**
  * game/talk/ui.js: the conversation overlay (HTML/CSS, ballpoint-on-paper style, no image files).
  *   createTalkUI() -> {
- *     showBubble(x, y, { difficulty, tutorial, lang }) / hideBubble()   the "बात करो / Talk [E]" prompt (lang 'kn': "ಮಾತಾಡಿ / Talk [E]", 'ta': "பேசுங்க / Talk [E]", 'te': "మాట్లాడండి / Talk [E]") over an NPC (screen px)
+ *     showBubble(x, y, { difficulty, tutorial, lang }) / hideBubble()   the "बात करो / Talk [E]" prompt (lang 'ml': "സംസാരിക്കൂ / Talk [E]", 'kn': "ಮಾತಾಡಿ / Talk [E]", 'ta': "பேசுங்க / Talk [E]", 'te': "మాట్లాడండి / Talk [E]") over an NPC (screen px)
  *     showSpeech(x, y, line) / hideSpeech()             a short spoken greeting bubble
  *     openCard({ name, lang }) / closeCard()            the dialogue card
  *     setNpc(line, { react }) , setStep({ instruction, suggest, attempt, max }) , setHint(text, n) , setBusy(b)
@@ -11,12 +11,12 @@
  *   }
  *   Lines are { text (Devanagari or English), roman, en }.
  */
-const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&family=Baloo+Thambi+2:wght@400;600&family=Baloo+Tammudu+2:wght@400;600&display=swap';
+const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&family=Baloo+Thambi+2:wght@400;600&family=Baloo+Tammudu+2:wght@400;600&family=Baloo+Chettan+2:wght@400;600&display=swap';
 const INK = '#2b2a33';
-const KN_RE = /[\u0C80-\u0CFF]/, TA_RE = /[\u0B80-\u0BFF]/, TE_RE = /[\u0C00-\u0C7F]/;
-/** which Indic script class a string needs ('kn' | 'ta' | 'te' | '') */
-const scriptCls = (s) => (KN_RE.test(s ?? '') ? 'kn' : TA_RE.test(s ?? '') ? 'ta' : TE_RE.test(s ?? '') ? 'te' : '');
-const TALK_LABEL = { kn: 'ಮಾತಾಡಿ', ta: 'பேசுங்க', te: 'మాట్లాడండి' };
+const KN_RE = /[\u0C80-\u0CFF]/, TA_RE = /[\u0B80-\u0BFF]/, TE_RE = /[\u0C00-\u0C7F]/, ML_RE = /[\u0D00-\u0D7F]/;
+/** which Indic script class a string needs ('kn' | 'ta' | 'te' | 'ml' | '') */
+const scriptCls = (s) => (KN_RE.test(s ?? '') ? 'kn' : TA_RE.test(s ?? '') ? 'ta' : TE_RE.test(s ?? '') ? 'te' : ML_RE.test(s ?? '') ? 'ml' : '');
+const TALK_LABEL = { kn: 'ಮಾತಾಡಿ', ta: 'பேசுங்க', te: 'మాట్లాడండి', ml: 'സംസാരിക്കൂ' };
 
 const CSS = `
 #talk-ui{position:fixed;inset:0;pointer-events:none;z-index:20;font-family:'Patrick Hand','Bradley Hand','Segoe Print','Comic Sans MS',cursive;color:${INK}}
@@ -29,10 +29,11 @@ const CSS = `
 #talk-ui .kn{font-family:'Baloo Tamma 2','Noto Sans Kannada','Nirmala UI',sans-serif !important}
 #talk-ui .ta{font-family:'Baloo Thambi 2','Noto Sans Tamil','Nirmala UI',sans-serif !important}
 #talk-ui .te{font-family:'Baloo Tammudu 2','Noto Sans Telugu','Nirmala UI',sans-serif !important}
-.t-npc .dv.kn,.t-npc .dv.ta,.t-npc .dv.te{font-size:26px;line-height:1.5}
-.t-speech .dv.kn,.t-speech .dv.ta,.t-speech .dv.te{font-size:19px;line-height:1.45}
-.t-sug .dv.kn,.t-sug .dv.ta,.t-sug .dv.te{font-size:17px}
-.t-bubble .dv.kn,.t-bubble .dv.ta,.t-bubble .dv.te{font-size:18px}
+#talk-ui .ml{font-family:'Baloo Chettan 2','Noto Sans Malayalam','Nirmala UI',sans-serif !important}
+.t-npc .dv.kn,.t-npc .dv.ta,.t-npc .dv.te,.t-npc .dv.ml{font-size:26px;line-height:1.5}
+.t-speech .dv.kn,.t-speech .dv.ta,.t-speech .dv.te,.t-speech .dv.ml{font-size:19px;line-height:1.45}
+.t-sug .dv.kn,.t-sug .dv.ta,.t-sug .dv.te,.t-sug .dv.ml{font-size:17px}
+.t-bubble .dv.kn,.t-bubble .dv.ta,.t-bubble .dv.te,.t-bubble .dv.ml{font-size:18px}
 .t-bubble kbd{font-family:inherit;border:2px solid ${INK};border-radius:6px;padding:0 6px;background:#fff7dd;margin-left:2px}
 @keyframes t-bob{0%,100%{margin-top:0}50%{margin-top:-4px}}
 .t-speech{transform:translate(-50%,-100%);padding:8px 14px;display:none;max-width:260px;text-align:center}
@@ -64,7 +65,7 @@ const CSS = `
 .t-btn{font-family:inherit;font-size:15px;background:#fff7dd;border:2px solid ${INK};border-radius:8px;padding:1px 9px;cursor:pointer;color:${INK}}
 .t-btn:hover{background:#ffe9a8}
 .t-row{display:flex;align-items:center;gap:10px;margin-top:10px}
-.t-input{flex:1;font-family:'Patrick Hand','Kalam','Baloo Tamma 2','Baloo Thambi 2','Baloo Tammudu 2','Noto Sans Kannada','Noto Sans Tamil','Noto Sans Telugu',cursive;font-size:24px;color:${INK};border:none;outline:none;padding:5px 8px 3px;background:repeating-linear-gradient(transparent 0 30px,rgba(80,120,190,.55) 30px 32px),#fffdf3;border-bottom:3px solid ${INK};border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px rgba(43,42,51,.1)}
+.t-input{flex:1;font-family:'Patrick Hand','Kalam','Baloo Tamma 2','Baloo Thambi 2','Baloo Tammudu 2','Noto Sans Kannada','Noto Sans Tamil','Noto Sans Telugu','Baloo Chettan 2','Noto Sans Malayalam',cursive;font-size:24px;color:${INK};border:none;outline:none;padding:5px 8px 3px;background:repeating-linear-gradient(transparent 0 30px,rgba(80,120,190,.55) 30px 32px),#fffdf3;border-bottom:3px solid ${INK};border-radius:4px 4px 0 0;box-shadow:inset 0 0 0 1px rgba(43,42,51,.1)}
 .t-input:disabled{opacity:.55}
 .t-input::placeholder{opacity:.45}
 .t-go{font-size:20px;padding:3px 14px}
@@ -120,9 +121,9 @@ function wobblyRect(w, h, seed, amp = 2.4, step = 34) {
   return d + ' Z';
 }
 
-/** escaped text, wrapped so Kannada / Tamil / Telugu script gets its own font */
+/** escaped text, wrapped so Kannada / Tamil / Telugu / Malayalam script gets its own font */
 const sp = (s) => { const c = scriptCls(s); return c ? `<span class="${c}">${esc(s)}</span>` : esc(s); };
-const setText = (el, s) => { const c = scriptCls(s); for (const k of ['kn', 'ta', 'te']) el.classList.toggle(k, k === c); el.textContent = s ?? ''; };
+const setText = (el, s) => { const c = scriptCls(s); for (const k of ['kn', 'ta', 'te', 'ml']) el.classList.toggle(k, k === c); el.textContent = s ?? ''; };
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 export function createTalkUI() {

@@ -1,0 +1,38 @@
+// Infopark security guard at the gate booth.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('securityGuard', {
+  name: 'Haridas Saar', role: 'Infopark security guard', site: 'Infopark gate booth', diff: 4,
+  voice: { rate: 1.0, pitch: 0.8 },
+  persona: 'Fair but formal guard with a visitor register and a teal ID lanyard; he needs a visitor pass before letting anyone in.',
+  goal: 'Say whom you are meeting, show an ID, ask where to sign, and ask where the lift is.',
+  steps: [
+    S('whom', ['ഹലോ മാഡം, ആരെ കാണാനാ വന്നത്?', 'Hello madam, aare kaanaanaa vannathu?', 'Hello madam, whom have you come to meet?'],
+      'Say you came to meet a friend who works here.', ['Ivide joli cheyyunna oru friendine kaanaan vannathaanu.', 'ഇവിടെ ജോലി ചെയ്യുന്ന ഒരു ഫ്രണ്ടിനെ കാണാൻ വന്നതാണ്.'],
+      ['friendine kaanaan vannathaanu', 'oru friendine kaanaan', 'ivide oru friend undu', 'friendine kaanaan vannu saare', 'saare friendine kaanaan', 'ഫ്രണ്ടിനെ കാണാൻ വന്നതാണ്'],
+      'say_whom_you_meet', ['Say who you are meeting.', '"Kaanaan vannathaanu" = came to see.'],
+      ['ശരി, ഒരു ഐഡി കാണിക്കൂ.', 'Shari, oru ID kaanikkoo.', 'Okay, show an ID.'],
+      ['ആരെയാ കാണേണ്ടത് മാഡം?', 'Aareyaa kaanendathu madam?', 'Whom do you need to meet, madam?']),
+    S('id', ['വിസിറ്റർ പാസിന് ഐഡി വേണം. ഉണ്ടോ?', 'Visitor passinu ID venam. Undo?', 'A visitor pass needs an ID. Do you have one?'],
+      'Show your ID.', ['Ithaa saare, ente ID.', 'ഇതാ സാറേ, എന്റെ ഐഡി.'],
+      ['ithaa ID saare', 'ente ID ithaa', 'passport ithaa saare', 'ID undu saare ithaa', 'ithaa saare', 'ഇതാ ഐഡി'],
+      'show_id', ['Hand over your ID.', '"Ithaa" = here it is.'],
+      ['ശരി, ഫോട്ടോ ഒത്തുനോക്കട്ടെ... ഓക്കെ.', 'Shari, photo othunokkatte... okay.', 'Okay, let me match the photo... fine.'],
+      ['ഐഡി കാണിക്കണം മാഡം.', 'ID kaanikkanam madam.', 'Please show an ID, madam.']),
+    S('sign', ['ഈ രജിസ്റ്ററിൽ പേരും സമയവും എഴുതണം.', 'Ee registeril perum samayavum ezhuthanam.', 'Write your name and time in this register.'],
+      'Ask where to sign.', ['Evide ezhuthanam saare?', 'എവിടെ എഴുതണം സാറേ?'],
+      ['evide sign cheyyanam', 'evide ezhuthanam', 'sign evide saare', 'ethu page-il ezhuthanam', 'evide ezhuthanam madam', 'എവിടെ സൈൻ ചെയ്യണം'],
+      'ask_where_to_sign', ['Ask where to sign.', '"Evide?" = where? "Ezhuthanam" = should write.'],
+      ['ഈ കോളത്തിൽ. പേന ഇതാ.', 'Ee kolathil. Pena ithaa.', 'In this column. Here is a pen.'],
+      ['എവിടെ എന്നാ ചോദിച്ചത്?', 'Evide ennaa chodichathu?', 'Where, did you ask?']),
+    S('lift', ['പാസ് ഇതാ. ലിഫ്റ്റിൽ കയറി ആറാം നില.', 'Pass ithaa. Liftil kayari aaraam nila.', 'Here is the pass. Take the lift to the sixth floor.'],
+      'Ask where the lift is.', ['Lift evideyaanu saare?', 'ലിഫ്റ്റ് എവിടെയാണ് സാറേ?'],
+      ['lift evide', 'lift evide saare', 'lift ethra aduthaanu', 'lift evide kittum', 'saare lift evideyaa', 'ലിഫ്റ്റ് എവിടെ'],
+      'ask_where_lift', ['Ask where the lift is.', '"Lift evide?" = where is the lift?'],
+      ['നേരെ പോയി വലത്തോട്ട്. നന്ദി മാഡം.', 'Nere poyi valatthottu. Nanni madam.', 'Straight, then right. Thanks, madam.'],
+      ['ലിഫ്റ്റ് വേണോ?', 'Lift veno?', 'Do you want the lift?']),
+  ],
+  outro: ['തിരിച്ച് വരുമ്പോൾ പാസ് തിരിച്ചേൽപ്പിക്കണം, കേട്ടോ.', 'Thirichu varumbol pass thirichelppikkanam, kettoo.', 'Return the pass when you come back, okay.'],
+  learned: [['friendine kaanaan vannathaanu', 'I came to meet a friend'], ['evide ezhuthanam?', 'where should I sign?'], ['lift evideyaanu?', 'where is the lift?']],
+  again: ['പാസ് ഉണ്ടല്ലോ, പൊയ്ക്കോളൂ മാഡം.', 'Pass undallo, poykkoloo madam.', 'You have the pass, go ahead madam.'],
+});

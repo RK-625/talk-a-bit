@@ -1,0 +1,38 @@
+// Auto driver at the Red Fort auto stand.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('taxiDriver', {
+  name: 'Kuldeep Paaji', role: 'auto driver', site: 'Red Fort auto stand', diff: 3,
+  voice: { rate: 1.05, pitch: 0.85 },
+  persona: 'Chatty Punjabi-flavoured auto driver who says the meter is broken and tries to haggle, but softens for a student heading to coaching.',
+  goal: 'Get an auto to Mukherjee Nagar on the meter, ask how long it takes, and pay the fare.',
+  steps: [
+    S('where', ['ऑटो चाहिए बेटा? बोल, कहाँ चलना है?', 'Auto chahiye beta? Bol, kahaan chalna hai?', 'Need an auto, beta? Tell me, where to?'],
+      'Ask if he will go to Mukherjee Nagar.', ['Bhaiya, Mukherjee Nagar chaloge?', 'भैया, मुखर्जी नगर चलोगे?'],
+      ['mukherjee nagar chaloge bhaiya', 'paaji mukherjee nagar chalna hai', 'mukherjee nagar jaana hai bhaiya', 'oye bhaiya mukherjee nagar chalega', 'bhaiya mukherjee nagar le chaloge', 'mujhe mukherjee nagar jaana hai', 'मुखर्जी नगर चलोगे'],
+      ['Ask if he will go to the place.', 'Will you go = "chaloge". Place = "Mukherjee Nagar".'],
+      ['मुखर्जी नगर? कोचिंग वाले हो! बैठो बैठो।', 'Mukherjee Nagar? Coaching wale ho! Baitho baitho.', 'Mukherjee Nagar? You are a coaching student! Sit, sit.'],
+      ['कहाँ बोला? ज़रा ज़ोर से बोल बेटा।', 'Kahaan bola? Zara zor se bol beta.', 'Where did you say? Speak a bit louder, beta.']),
+    S('meter', ['चलूँगा, पर मीटर ख़राब है। सौ रुपये लगेंगे।', 'Chalunga, par meter kharab hai. Sau rupaye lagenge.', 'I will go, but the meter is broken. It will be a hundred.'],
+      'Ask him to go by the meter.', ['Meter se chalo na bhaiya.', 'मीटर से चलो न भैया।'],
+      ['meter se chalo bhaiya', 'bhaiya meter se hi chalna', 'paaji meter laga lo', 'meter se chalo na yaar', 'meter on karo bhaiya', 'meter se chalenge toh chalunga', 'मीटर से चलो'],
+      ['Ask him to use the meter.', 'Meter = "meter", by/with = "se", go = "chalo".'],
+      ['अच्छा अच्छा, डाल दिया मीटर। तू तो होशियार निकला।', 'Accha accha, daal diya meter. Tu toh hoshiyaar nikla.', 'Okay okay, meter is on. You turned out smart.'],
+      ['मीटर-वीटर छोड़, सीधा बोल, चलना है या नहीं?', 'Meter-veetar chhod, seedha bol, chalna hai ya nahi?', 'Skip the meter talk, say straight, going or not?']),
+    S('time', ['ठीक है, बैठ। आज जाम बहुत है।', 'Theek hai, baith. Aaj jaam bahut hai.', 'All right, sit. There is a lot of jam today.'],
+      'Ask how long it will take to reach.', ['Mukherjee Nagar tak kitni der lagegi?', 'मुखर्जी नगर तक कितनी देर लगेगी?'],
+      ['kitni der lagegi bhaiya', 'paaji kitna time lagega', 'mukherjee nagar kitni der mein pahunchenge', 'bhaiya kitna time lagega', 'jaldi pahunch jayenge na', 'kitni der lagegi wahan tak', 'कितनी देर लगेगी'],
+      ['Ask about the time.', 'How long = "kitni der". It will take = "lagegi".'],
+      ['आधा घंटा समझ। रिंग रोड पर गाड़ी निकाल लूँगा, टेंशन मत ले।', 'Aadha ghanta samajh. Ring Road par gaadi nikaal lunga, tension mat le.', 'Take half an hour. I will get through on Ring Road, do not worry.'],
+      ['टाइम पूछ रहा है ना? साफ़ बोल।', 'Time puchh raha hai na? Saaf bol.', 'You are asking the time, right? Say it clearly.']),
+    S('pay', ['आ गया मुखर्जी नगर! मीटर में अस्सी रुपये हुए।', 'Aa gaya Mukherjee Nagar! Meter mein assi rupaye hue.', 'Mukherjee Nagar is here! The meter shows eighty rupees.'],
+      'Pay the fare of eighty rupees and say thanks.', ['Ye lo bhaiya, assi rupaye. Shukriya!', 'ये लो भैया, अस्सी रुपये। शुक्रिया!'],
+      ['ye lo assi rupaye shukriya', 'bhaiya assi rupaye ye lijiye', 'paaji ye lo assi rupaye', 'assi rupaye hue na, ye lo', 'ye lo bhaiya assi, thank you', 'अस्सी रुपये ये लो भैया'],
+      ['Pay the meter fare.', 'Eighty = "assi". Here you are = "ye lo".'],
+      ['बहुत बढ़िया! पेपर में सेलेक्शन हो तो ऑटो वाले को भूल मत जाना।', 'Bahut badhiya! Paper mein selection ho toh auto wale ko bhool mat jaana.', 'Great! If you get selected, do not forget the auto driver.'],
+      ['अस्सी बोला मैंने, इतने का मीटर है।', 'Assi bola maine, itne ka meter hai.', 'I said eighty, that is what the meter shows.']),
+  ],
+  outro: ['जा बेटा, पढ़ाई कर। वापसी में फिर बुला लेना, पाजी!', 'Ja beta, padhai kar. Waapsi mein phir bula lena, paaji!', 'Go, beta, study well. Call me again for the return, paaji!'],
+  learned: [['meter se chalo', 'go by the meter'], ['kitni der lagegi?', 'how long will it take?'], ['ye lo, assi rupaye', 'here, eighty rupees']],
+  again: ['ओए, फिर आ गया शेर! चल बैठ।', 'Oye, phir aa gaya sher! Chal baith.', 'Oye, the lion is back! Come, sit.'],
+});

@@ -2,7 +2,7 @@
 // Run: node scripts/validate-dialogue.mjs <world folder> <cast .md file> [--min N]
 //   e.g. node scripts/validate-dialogue.mjs src/worlds/bengaluru docs/BENGALURU_CAST.md --min 130
 // Loads <world folder>/dialogue/index.js (default export = { id: dialogue }, named export GREETINGS). Same checks as Mumbai's, plus
-// lang 'kn' / 'ta' / 'te' (script text in Kannada / Tamil / Telugu script, Latin roman, English en) and an optional `place` string. --min = least number of dialogues / cast ids (default 65).
+// lang 'kn' / 'ta' / 'te' / 'ml' (script text in Kannada / Tamil / Telugu / Malayalam script, Latin roman, English en) and an optional `place` string. --min = least number of dialogues / cast ids (default 65).
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -25,7 +25,8 @@ const hasDevanagari = (s) => /[ऀ-ॿ]/.test(s);
 const hasKannada = (s) => /[\u0C80-\u0CFF]/.test(s);
 const hasTamil = (s) => /[\u0B80-\u0BFF]/.test(s);
 const hasTelugu = (s) => /[\u0C00-\u0C7F]/.test(s);
-const SCRIPTS = { kn: ['Kannada', hasKannada], ta: ['Tamil', hasTamil], te: ['Telugu', hasTelugu] };
+const hasMalayalam = (s) => /[\u0D00-\u0D7F]/.test(s);
+const SCRIPTS = { kn: ['Kannada', hasKannada], ta: ['Tamil', hasTamil], te: ['Telugu', hasTelugu], ml: ['Malayalam', hasMalayalam] };
 const ids = new Set();
 const entries = Object.entries(dialogues);
 if (entries.length < MIN) err('index', `only ${entries.length} dialogues (need ${MIN})`);
@@ -36,7 +37,7 @@ for (const [key, d] of entries) {
   if (ids.has(d.id)) err(w, 'duplicate id'); ids.add(d.id);
   for (const k of ['name', 'role', 'persona', 'goal']) if (!isStr(d[k])) err(w, `missing ${k}`);
   if (d.place !== undefined && !isStr(d.place)) err(w, 'place must be a non-empty string');
-  if (!['hi', 'en', 'kn', 'ta', 'te'].includes(d.lang)) err(w, `bad lang ${d.lang}`);
+  if (!['hi', 'en', 'kn', 'ta', 'te', 'ml'].includes(d.lang)) err(w, `bad lang ${d.lang}`);
   if (!d.voice || typeof d.voice.rate !== 'number' || typeof d.voice.pitch !== 'number') err(w, 'bad voice');
   if (!(d.difficulty >= 1 && d.difficulty <= 5)) err(w, 'bad difficulty');
   if (!Array.isArray(d.steps) || d.steps.length < 1 || d.steps.length > 4) err(w, 'steps must be 1-4');

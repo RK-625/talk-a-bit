@@ -1,0 +1,38 @@
+// Auto driver at the Fort Kochi auto stand by the Chinese nets.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('taxiDriver', {
+  name: 'Sajan Chettan', role: 'auto driver', site: 'Fort Kochi auto stand by the Chinese nets, parked auto', diff: 2,
+  voice: { rate: 1.05, pitch: 0.85 },
+  persona: 'Chatty auto driver who first says he does not go by meter, but gives in with a laugh once he hears Ananya is learning Malayalam.',
+  goal: 'Ask if he goes to Mattancherry, ask him to use the meter, ask the fare, and pay at the end.',
+  steps: [
+    S('where', ['ഓട്ടോ വേണോ മോളേ? എങ്ങോട്ടാ പോകേണ്ടത്?', 'Auto veno mole? Engottaa pokendathu?', 'Need an auto, dear? Where do you want to go?'],
+      'Ask if he will go to Mattancherry.', ['Chetta, Mattancherry varumo?', 'ചേട്ടാ, മട്ടാഞ്ചേരി വരുമോ?'],
+      ['mattancherry varumo chetta', 'chetta mattancherry pokanam', 'mattancherry pokumo chetta', 'mattancherry varamo', 'chetta mattancherry varumo', 'മട്ടാഞ്ചേരി പോകണം ചേട്ടാ'],
+      'ask_auto_to_mattancherry', ['Name the place and ask if he comes.', '"Varumo?" = will you come?'],
+      ['മട്ടാഞ്ചേരിയോ? ശരി, കയറിക്കോ.', 'Mattancheriyo? Shari, kayarikko.', 'Mattancherry? Okay, get in.'],
+      ['എവിടെ എന്നാ പറഞ്ഞത്? കേട്ടില്ല.', 'Evide ennaa paranjathu? Kettilla.', 'Where did you say? I did not hear.']),
+    S('meter', ['മീറ്ററിൽ വരില്ല മോളേ, എൺപത് രൂപ തരണം.', 'Meeteril varilla mole, enpathu roopa tharanam.', 'I will not come by meter, dear, give eighty rupees.'],
+      'Ask him politely to go by meter.', ['Chetta, meter-il pokaamo?', 'ചേട്ടാ, മീറ്ററിൽ പോകാമോ?'],
+      ['meter ittu pokaamo chetta', 'meter idamo chetta', 'chetta meter venam', 'meter-il mathi chetta', 'meter ittal mathi', 'മീറ്ററിൽ പോകാം ചേട്ടാ'],
+      'ask_for_meter', ['Ask him to use the meter.', '"Meter-il" = by the meter. "Pokaamo?" = can we go?'],
+      ['ശരി ശരി, മലയാളം പഠിക്കുന്ന കുട്ടിയല്ലേ, മീറ്റർ ഇടാം.', 'Shari shari, Malayalam padikkunna kuttiyalle, meter idaam.', 'Okay okay, you are learning Malayalam, I will put the meter.'],
+      ['മീറ്റർ വേണോ, എൺപത് രൂപ വേണോ?', 'Meter veno, enpathu roopa veno?', 'Meter or eighty rupees?']),
+    S('fare', ['കയറിക്കോ മോളേ. ബ്ലോക്ക് ഉണ്ട്, കുറച്ച് താമസിക്കും.', 'Kayarikko mole. Block undu, kurachu thaamasikkum.', 'Get in, dear. There is a jam, it will take a while.'],
+      'Ask roughly how much it will be.', ['Ethra roopa aakum chetta?', 'എത്ര രൂപ ആകും ചേട്ടാ?'],
+      ['ethra aakum chetta', 'ethra roopa aakum', 'ethrayaakum chetta', 'charge ethra aakum', 'fare ethrayaa chetta', 'എത്ര ആകും ചേട്ടാ'],
+      'ask_fare', ['Ask how much it will cost.', '"Ethra" = how much. "Aakum" = it will be.'],
+      ['അറുപത് രൂപ വരെ ആകും മോളേ.', 'Arupathu roopa vare aakum mole.', 'It may come to around sixty rupees, dear.'],
+      ['എന്താ ചോദിച്ചത്? റേറ്റാണോ?', 'Enthaa chodichathu? Rateaano?', 'What did you ask? The rate?']),
+    S('pay', ['മട്ടാഞ്ചേരി എത്തി മോളേ. അറുപത് രൂപ.', 'Mattancherry etthi mole. Arupathu roopa.', 'We have reached Mattancherry, dear. Sixty rupees.'],
+      'Pay him and say thanks.', ['Ithaa chetta, nanni.', 'ഇതാ ചേട്ടാ, നന്ദി.'],
+      ['ithaa chetta arupathu roopa', 'nanni chetta', 'ithaa chetta paisa', 'thanks chetta ithaa', 'nanni chetta ithaa', 'ഇതാ ചേട്ടാ'],
+      'pay_and_thank_driver', ['Hand over the money and thank him.', '"Ithaa" = here you are. "Nanni" = thanks.'],
+      ['നന്ദി മോളേ! കൊട്ടാരം കാണാൻ മറക്കല്ലേ.', 'Nanni mole! Kottaaram kaanaan marakkalle.', 'Thanks dear! Do not forget to see the palace.'],
+      ['കാശ് തരുന്നില്ലേ മോളേ? ഇവിടെ നിർത്തി.', 'Kaashu tharunnille mole? Ivide nirtthi.', 'Will you not pay, dear? I have stopped here.']),
+  ],
+  outro: ['വീണ്ടും ഓട്ടോ വേണമെങ്കിൽ സജൻ ചേട്ടനെ വിളിച്ചോ!', 'Veendum auto venamenkil Sajan Chettane vilichoo!', 'If you need an auto again, call Sajan Chettan!'],
+  learned: [['Mattancherry varumo?', 'will you come to Mattancherry?'], ['meter-il pokaamo?', 'can we go by meter?'], ['ethra aakum?', 'how much will it be?']],
+  again: ['എന്താ മോളേ, വീണ്ടും ഓട്ടോ വേണോ?', 'Enthaa mole, veendum auto veno?', 'What, dear, need an auto again?'],
+});

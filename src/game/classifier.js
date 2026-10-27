@@ -71,7 +71,8 @@ const REASON_LINES = { language: 'Try it in Hindi.', extra: 'Just the answer, no
 const REASON_LINES_KN = { ...REASON_LINES, language: 'Try it in Kannada.', rude: 'Please be polite!' };
 const REASON_LINES_TA = { ...REASON_LINES_KN, language: 'Try it in Tamil.' };
 const REASON_LINES_TE = { ...REASON_LINES_KN, language: 'Try it in Telugu.' };
-export const reasonLine = (reason, lang) => ({ kn: REASON_LINES_KN, ta: REASON_LINES_TA, te: REASON_LINES_TE }[lang] ?? REASON_LINES)[reason] ?? null;
+const REASON_LINES_ML = { ...REASON_LINES_KN, language: 'Try it in Malayalam.' };
+export const reasonLine = (reason, lang) => ({ kn: REASON_LINES_KN, ta: REASON_LINES_TA, te: REASON_LINES_TE, ml: REASON_LINES_ML }[lang] ?? REASON_LINES)[reason] ?? null;
 
 const requested = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('classifier') : null;
 const abortErr = () => { const e = new Error('aborted'); e.name = 'AbortError'; return e; };

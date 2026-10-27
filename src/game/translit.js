@@ -1,10 +1,11 @@
 /**
- * game/translit.js: tiny helpers for the mock classifier. Devanagari, Kannada, Tamil and Telugu script -> rough Latin, and a normaliser that makes
- * romanised Hindi / Kannada / Tamil / Telugu spellings comparable (aa/a, ee/i, w/v, ph/f, aspirates, doubled letters...).
+ * game/translit.js: tiny helpers for the mock classifier. Devanagari, Kannada, Tamil, Telugu and Malayalam script -> rough Latin, and a normaliser that makes
+ * romanised Hindi / Kannada / Tamil / Telugu / Malayalam spellings comparable (aa/a, ee/i, w/v, ph/f, aspirates, doubled letters...).
  *   toRoman(str) -> str     normalize(str) -> lowercase, punctuation-free, Latin-normalised string
  *   tokens(str, lang?) -> [normalised word]   (lang 'kn' uses the Kannada spelling key: e/ee, o/oo, final -u/-nu, kaafi/coffee...; 'ta' also merges the
- *   unvoiced/voiced pairs Tamil spelling never distinguishes (k/g, t/d, p/b, ch/s, zh/l); 'te' is the Kannada key plus Telugu synonyms)
- *   tokenMatch(a, b) -> bool (fuzzy)     levenshtein(a, b)     hasKannada / hasTamil / hasTelugu / hasDevanagari (str)
+ *   unvoiced/voiced pairs Tamil spelling never distinguishes (k/g, t/d, p/b, ch/s, zh/l); 'te' is the Kannada key plus Telugu synonyms;
+ *   'ml' (Manglish) merges zh/l, doubled letters, aa/a, ee/e, oo/o, nt/nd, nj/n and a final -u / -m: venam = vennam, undo = undoo)
+ *   tokenMatch(a, b) -> bool (fuzzy)     levenshtein(a, b)     hasKannada / hasTamil / hasTelugu / hasMalayalam / hasDevanagari (str)
  */
 const CONS = { 'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'n', 'च': 'ch', 'छ': 'chh', 'ज': 'j', 'झ': 'jh', 'ञ': 'n', 'ट': 't', 'ठ': 'th', 'ड': 'd', 'ढ': 'dh', 'ण': 'n', 'त': 't', 'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n', 'प': 'p', 'फ': 'f', 'ब': 'b', 'भ': 'bh', 'म': 'm', 'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v', 'श': 'sh', 'ष': 'sh', 'स': 's', 'ह': 'h', 'ळ': 'l', 'क़': 'k', 'ख़': 'kh', 'ग़': 'g', 'ज़': 'z', 'ड़': 'r', 'ढ़': 'rh', 'फ़': 'f' };
 const VOW = { 'अ': 'a', 'आ': 'aa', 'इ': 'i', 'ई': 'ee', 'उ': 'u', 'ऊ': 'oo', 'ए': 'e', 'ऐ': 'ai', 'ओ': 'o', 'औ': 'au', 'ऋ': 'ri', 'ऑ': 'o' };
@@ -36,6 +37,37 @@ const isTa = (c) => c >= '஀' && c <= '௿';
 const isTe = (c) => c >= 'ఀ' && c <= '౿';
 export const hasTamil = (s) => /[஀-௿]/.test(String(s ?? ''));
 export const hasTelugu = (s) => /[ఀ-౿]/.test(String(s ?? ''));
+
+// ---- Malayalam: consonant + matra / virama / inherent 'a'; chillu letters stand alone; a word-final virama is the 'u' of ഒന്ന് (onnu) ----
+const ML_CONS = { 'ക': 'k', 'ഖ': 'kh', 'ഗ': 'g', 'ഘ': 'gh', 'ങ': 'ng', 'ച': 'ch', 'ഛ': 'chh', 'ജ': 'j', 'ഝ': 'jh', 'ഞ': 'nj', 'ട': 't', 'ഠ': 'th', 'ഡ': 'd', 'ഢ': 'dh', 'ണ': 'n', 'ത': 'th', 'ഥ': 'th', 'ദ': 'd', 'ധ': 'dh', 'ന': 'n', 'പ': 'p', 'ഫ': 'f', 'ബ': 'b', 'ഭ': 'bh', 'മ': 'm', 'യ': 'y', 'ര': 'r', 'ല': 'l', 'വ': 'v', 'ശ': 'sh', 'ഷ': 'sh', 'സ': 's', 'ഹ': 'h', 'ള': 'l', 'ഴ': 'zh', 'റ': 'r' };
+const ML_CHILLU = { 'ൺ': 'n', 'ൻ': 'n', 'ർ': 'r', 'ൽ': 'l', 'ൾ': 'l', 'ൿ': 'k' };
+const ML_VOW = { 'അ': 'a', 'ആ': 'aa', 'ഇ': 'i', 'ഈ': 'ii', 'ഉ': 'u', 'ഊ': 'uu', 'ഋ': 'ru', 'എ': 'e', 'ഏ': 'ee', 'ഐ': 'ai', 'ഒ': 'o', 'ഓ': 'oo', 'ഔ': 'au' };
+const ML_MATRA = { 'ാ': 'aa', 'ി': 'i', 'ീ': 'ii', 'ു': 'u', 'ൂ': 'uu', 'ൃ': 'ru', 'െ': 'e', 'േ': 'ee', 'ൈ': 'ai', 'ൊ': 'o', 'ോ': 'oo', 'ൌ': 'au', 'ൗ': 'au' };
+const ML_VIRAMA = '്', ZWJ = '‍', ZWNJ = '‌';
+const isMl = (c) => c >= 'ഀ' && c <= 'ൿ';
+export const hasMalayalam = (s) => /[ഀ-ൿ]/.test(String(s ?? ''));
+
+function mlToRoman(cs, i, out) {
+  const c = cs[i];
+  if (ML_CHILLU[c]) { out.push(ML_CHILLU[c]); return i; }
+  if (ML_CONS[c]) {
+    const nx = cs[i + 1];
+    if (nx && ML_MATRA[nx]) { out.push(ML_CONS[c], ML_MATRA[nx]); return i + 1; }
+    if (nx === ML_VIRAMA) {
+      out.push(ML_CONS[c]);
+      const after = cs[i + 2];
+      if (after === ZWJ) return i + 2;              // old-style chillu (ന + ് + ZWJ): a bare consonant
+      if (!after || !isMl(after)) out.push('u');     // word-final virama: onnu, aanu, undu
+      return i + 1;                                  // otherwise a conjunct: unda, kutti
+    }
+    out.push(ML_CONS[c], 'a'); return i;
+  }
+  if (ML_VOW[c]) out.push(ML_VOW[c]);
+  else if (c === 'ം' || c === 'ഁ') out.push('m');  // pazham, venam
+  else if (c === 'ഃ') out.push('h');
+  else if (c >= '൦' && c <= '൯') out.push(String(c.charCodeAt(0) - 0xD66));
+  return i;
+}
 
 function indicToRoman(T, cs, i, out) {
   const c = cs[i];
@@ -69,11 +101,13 @@ function knToRoman(cs, i, out) {
 
 export function toRoman(str) {
   const s = String(str ?? '').normalize('NFC');
-  if (![...s].some((c) => isDev(c) || isKn(c) || isTa(c) || isTe(c))) return s;
+  if (![...s].some((c) => isDev(c) || isKn(c) || isTa(c) || isTe(c) || isMl(c))) return s;
   const out = [];
   const cs = [...s];
   for (let i = 0; i < cs.length; i++) {
     let c = cs[i];
+    if (isMl(c)) { i = mlToRoman(cs, i, out); continue; }
+    if ((c === ZWJ || c === ZWNJ) && hasMalayalam(s)) continue;
     if (isKn(c)) { i = knToRoman(cs, i, out); continue; }
     if (isTa(c)) { i = indicToRoman(TABLES.ta, cs, i, out); continue; }
     if (isTe(c)) { i = indicToRoman(TABLES.te, cs, i, out); continue; }
@@ -131,6 +165,15 @@ function keyTa(w) {
   s = s.replace(/ai$/g, 'ay').replace(/(.{2,})ng?u$/, '$1n').replace(/(.{3,})u$/, '$1').replace(/(.{3,})m$/, '$1'); // onnu / onru / ondru ; venum / venu
   return s;
 }
+/** Malayalam romanisation (Manglish): zh/l, venam/vennam, undo/undoo, chaya/chai, final -u and -m dropped: a coarse key */
+function keyMl(w) {
+  let s = w;
+  s = s.replace(/ph/g, 'f').replace(/sh/g, 's').replace(/zh/g, 'l').replace(/([kgjtdbp])h/g, '$1').replace(/ch/g, '#');
+  s = s.replace(/w/g, 'v').replace(/z/g, 'j').replace(/x/g, 'ks').replace(/q/g, 'k').replace(/c/g, 'k').replace(/y$/g, 'i');
+  s = s.replace(/aa+/g, 'a').replace(/ee+/g, 'e').replace(/ii+/g, 'i').replace(/oo+/g, 'o').replace(/uu+/g, 'u').replace(/(.)\1+/g, '$1');
+  s = s.replace(/nj|ny/g, 'n').replace(/nt/g, 'nd').replace(/ai$/g, 'ay').replace(/(.{3,})u$/, '$1').replace(/(.{3,})m$/, '$1'); // njan / nyan ; unda / unta ; venam / vena
+  return s.replace(/#/g, 'ch');
+}
 const SYN_KN = {
   kaafi: ['coffee', 'kapi', 'kaphi', 'kofi', 'cofee'], beku: ['beeku', 'bekku', 'beke', 'beku', 'want'], illa: ['ila', 'illa', 'illaa', 'no'], kodi: ['kodi', 'kodu', 'koodi', 'kodri', 'give', 'kodiri'],
   ondu: ['ondu', 'ond', 'ondhu', 'one', '1'], eradu: ['eradu', 'eraadu', 'yeradu', 'two', '2'], mooru: ['mooru', 'muru', 'three', '3'], hauda: ['houdu', 'haudu', 'hauda', 'yes', 'haudhu'],
@@ -149,6 +192,12 @@ const SYN_TE = {
   dhanyavadalu: ['dhanyavadam', 'dhanyavaadalu', 'thanks', 'thank', 'thankyou', 'thanku'], namaskaram: ['namaste', 'namaskar', 'hello', 'hi'], entha: ['yentha', 'enta', 'how much'],
   rupayalu: ['rupayi', 'rupees', 'rupee', 'rupai', 'rs'], neellu: ['nellu', 'neeru', 'water'], chai: ['tea', 'chaay', 'teaa'], saaripoddi: ['saripothundi', 'saripoddi', 'saripodhi', 'enough'],
 };
+const SYN_ML = {
+  chaya: ['chai', 'chay', 'tea', 'chaaya', 'chaa', 'teaa', 'thee'], kapi: ['coffee', 'kaapi', 'kappi', 'kofi', 'cofee', 'kaphi'], venam: ['vennam', 'venum', 'vendam', 'veno', 'want', 'vene'], illa: ['ila', 'illaa', 'illai', 'no', 'venda'],
+  onnu: ['onn', 'onu', 'one', '1', 'oru'], randu: ['rand', 'rendu', 'two', '2'], moonnu: ['munnu', 'moonu', 'munu', 'three', '3'], athe: ['ate', 'ath', 'yes', 'sheri'], sheri: ['seri', 'shari', 'sari', 'ok', 'okay'],
+  nanni: ['nandi', 'nanri', 'thanks', 'thank', 'thankyou', 'thanku'], namaskaram: ['namaskar', 'namaste', 'hello', 'hi'], ethra: ['yethra', 'ethre', 'how much'], rupa: ['rupaya', 'rupees', 'rupee', 'roopa', 'rs'],
+  vellam: ['velam', 'water'], mathi: ['madhi', 'mati', 'enough', 'mathy'], tharamo: ['tharumo', 'taramo', 'tharuo', 'tharoo', 'taruo', 'give'],
+};
 const SYN = {
   chai: ['cha', 'tea', 'chay', 'chaay', 'chaye'], do: ['two', '2'], ek: ['one', '1'], teen: ['three', '3'], char: ['four', '4'],
   dena: ['dijiye', 'dijie', 'dedo', 'dedijiye', 'de', 'dijiyega', 'deejiye', 'give'], chahiye: ['chaiye', 'chahie', 'chahiyea', 'want', 'need'],
@@ -163,7 +212,9 @@ const CANON_TA = new Map();
 for (const [k, vs] of Object.entries(SYN_TA)) for (const v of [k, ...vs]) CANON_TA.set(keyTa(v.replace(/\s+/g, '')), keyTa(k));
 const CANON_TE = new Map(); // Telugu uses the Kannada key (same sound system for these purposes)
 for (const [k, vs] of Object.entries(SYN_TE)) for (const v of [k, ...vs]) CANON_TE.set(keyKn(v.replace(/\s+/g, '')), keyKn(k));
-const KEYS = { kn: [keyKn, CANON_KN], ta: [keyTa, CANON_TA], te: [keyKn, CANON_TE] };
+const CANON_ML = new Map();
+for (const [k, vs] of Object.entries(SYN_ML)) for (const v of [k, ...vs]) CANON_ML.set(keyMl(v.replace(/\s+/g, '')), keyMl(k));
+const KEYS = { kn: [keyKn, CANON_KN], ta: [keyTa, CANON_TA], te: [keyKn, CANON_TE], ml: [keyMl, CANON_ML] };
 
 export function levenshtein(a, b) {
   const m = a.length, n = b.length; if (!m) return n; if (!n) return m;

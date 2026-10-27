@@ -1,0 +1,38 @@
+// Private-bus conductor at the Fort Kochi bus stop by the Chinese nets.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('busConductor', {
+  name: 'Biju Chettan', role: 'private-bus conductor', site: 'Fort Kochi bus stop by the Chinese nets', diff: 3,
+  voice: { rate: 1.15, pitch: 0.9 },
+  persona: 'Hurried but polite conductor with a whistle, banging the side of the bus to tell the driver to go; he always finds a seat for the backpacker.',
+  goal: 'Ask if the bus goes to Infopark, ask the ticket price, buy one ticket, and ask him to tell you the stop.',
+  steps: [
+    S('route', ['എറണാകുളം, എറണാകുളം! കയറൂ കയറൂ!', 'Ernakulam, Ernakulam! Kayaroo kayaroo!', 'Ernakulam, Ernakulam! Get in, get in!'],
+      'Ask if this bus goes to Infopark.', ['Chetta, ee bus Infopark-il pokumo?', 'ചേട്ടാ, ഈ ബസ് ഇൻഫോപാർക്കിൽ പോകുമോ?'],
+      ['ee bus infopark pokumo', 'infopark pokumo chetta', 'chetta infopark-il pokumo', 'ee bus infoparkil varumo', 'bus infopark pokumo chetta', 'ഇൻഫോപാർക്കിൽ പോകുമോ'],
+      'ask_bus_to_infopark', ['Ask if the bus goes to Infopark.', '"Ee bus" = this bus. "Pokumo?" = does it go?'],
+      ['പോകും മോളേ, ഇത് തന്നെ കയറിക്കോ.', 'Pokum mole, ithu thanne kayarikko.', 'It goes, dear, just get on this one.'],
+      ['എവിടേക്കാ? വേഗം പറയൂ, ബസ് പോകും!', 'Evidekkaa? Vegam parayoo, bus pokum!', 'Where to? Say quickly, the bus will leave!']),
+    S('price', ['ടിക്കറ്റ്, ടിക്കറ്റ്! ടിക്കറ്റ് എടുക്കൂ മോളേ.', 'Ticket, ticket! Ticket edukkoo mole.', 'Tickets, tickets! Take a ticket, dear.'],
+      'Ask how much the ticket is.', ['Ticket ethra roopayaa chetta?', 'ടിക്കറ്റ് എത്ര രൂപയാ ചേട്ടാ?'],
+      ['ticket ethrayaa chetta', 'ethra roopayaa ticket', 'infopark ticket ethra', 'ticket ethra aakum', 'ethra roopa ticket chetta', 'ടിക്കറ്റ് എത്രയാ'],
+      'ask_ticket_price', ['Ask the price of the ticket.', '"Ethra roopayaa?" = how many rupees?'],
+      ['ഇരുപത്തിരണ്ട് രൂപ മോളേ.', 'Irupathirandu roopa mole.', 'Twenty-two rupees, dear.'],
+      ['എന്താ? ടിക്കറ്റിന്റെ വിലയാണോ ചോദിക്കുന്നത്?', 'Enthaa? Ticketinte vilayaano chodikkunnathu?', 'What? Are you asking the ticket price?']),
+    S('ticket', ['ഒരാളല്ലേ? ടിക്കറ്റ് വേണോ?', 'Oraalalle? Ticket veno?', 'Just one person? Want the ticket?'],
+      'Ask for one ticket.', ['Oru ticket tharoo chetta, ithaa kaash.', 'ഒരു ടിക്കറ്റ് തരൂ ചേട്ടാ, ഇതാ കാശ്.'],
+      ['oru ticket tharoo', 'oru ticket venam chetta', 'chetta oru ticket', 'ithaa chetta oru ticket', 'oru infopark ticket tharoo', 'ഒരു ടിക്കറ്റ് തരൂ'],
+      'buy_one_ticket', ['Ask for one ticket.', '"Oru ticket tharoo" = give me one ticket.'],
+      ['ഇതാ ടിക്കറ്റ്. ചില്ലറ ബാക്കി തരാം.', 'Ithaa ticket. Chillara baaki tharaam.', 'Here is the ticket. I will give the change.'],
+      ['ടിക്കറ്റ് വേണ്ടേ മോളേ?', 'Ticket vende mole?', 'Do you not want a ticket, dear?']),
+    S('stop', ['ശരി, സീറ്റിൽ ഇരിക്ക്. ഇറങ്ങേണ്ട സ്ഥലം അറിയാമോ?', 'Shari, seatil irikku. Irangenda sthalam ariyamo?', 'Okay, sit down. Do you know where to get off?'],
+      'Ask him to tell you when Infopark comes.', ['Infopark ethumbol onnu parayamo chetta?', 'ഇൻഫോപാർക്ക് എത്തുമ്പോൾ ഒന്ന് പറയാമോ ചേട്ടാ?'],
+      ['infopark aayal parayamo', 'infopark ethumbol parayane chetta', 'stop ethumbol onnu parayamo', 'infopark vannal onnu parayoo', 'chetta infopark ethumbol parayane', 'ഇൻഫോപാർക്ക് എത്തുമ്പോൾ പറയണേ'],
+      'ask_to_be_told_stop', ['Ask him to tell you at your stop.', '"Ethumbol" = when we reach. "Parayamo?" = can you tell?'],
+      ['ശരി മോളേ, ഞാൻ പറയാം. പേടിക്കണ്ട.', 'Shari mole, njaan parayaam. Pedikkanda.', 'Okay dear, I will tell you. Do not worry.'],
+      ['എവിടെ ഇറങ്ങണം മോളേ?', 'Evide irangenam mole?', 'Where do you want to get off, dear?']),
+  ],
+  outro: ['റൈറ്റ്, റൈറ്റ്! ഇറങ്ങിക്കോ മോളേ, ഇൻഫോപാർക്ക് ആയി.', 'Right, right! Irangikko mole, Infopark aayi.', 'Right, right! Get off dear, this is Infopark.'],
+  learned: [['Infopark pokumo?', 'does it go to Infopark?'], ['ticket ethra roopayaa?', 'how much is the ticket?'], ['ethumbol parayamo?', 'can you tell me when we reach?']],
+  again: ['വേഗം കയറൂ മോളേ, ബസ് പോകും!', 'Vegam kayaroo mole, bus pokum!', 'Get on quickly, dear, the bus is leaving!'],
+});

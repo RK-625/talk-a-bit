@@ -1,0 +1,38 @@
+// Porter on the Ernakulam Junction forecourt.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('coolie', {
+  name: 'Hamsa Chettan', role: 'railway porter', site: 'Ernakulam Junction forecourt', diff: 3,
+  voice: { rate: 1.0, pitch: 0.8 },
+  persona: 'Proud porter in a red shirt with a brass licence badge, carrying a trunk on his head; he knows every platform.',
+  goal: 'Ask which platform the Thiruvananthapuram train is on, where it is, the porter charge, and pay and thank him.',
+  steps: [
+    S('platform', ['ലഗേജ് വേണോ മോളേ? ഞാൻ എടുത്തു തരാം.', 'Luggage veno mole? Njaan edutthu tharaam.', 'Need luggage help, dear? I will carry it.'],
+      'Ask which platform the Thiruvananthapuram train is on.', ['Thiruvananthapuram train ethu platformilaa chetta?', 'തിരുവനന്തപുരം ട്രെയിൻ ഏത് പ്ലാറ്റ്ഫോമിലാ ചേട്ടാ?'],
+      ['trivandrum train ethu platform', 'ethu platformilaa trivandrum train', 'chetta trivandrum train evide', 'trivandrum train platform ethaa', 'ethu platform chetta', 'തിരുവനന്തപുരം ട്രെയിൻ ഏത് പ്ലാറ്റ്ഫോം'],
+      'ask_which_platform', ['Ask which platform.', '"Ethu platform?" = which platform?'],
+      ['തിരുവനന്തപുരം? മൂന്നാം പ്ലാറ്റ്ഫോം, മോളേ.', 'Thiruvananthapuram? Moonnaam platform, mole.', 'Thiruvananthapuram? Platform three, dear.'],
+      ['ഏത് ട്രെയിൻ? ഒന്നൂടെ പറയൂ.', 'Ethu train? Onnoode parayoo.', 'Which train? Say again.']),
+    S('where', ['മൂന്നാം പ്ലാറ്റ്ഫോം, പാലം കടന്ന് പോണം.', 'Moonnaam platform, paalam kadannu ponam.', 'Platform three, you cross the bridge.'],
+      'Ask where it is.', ['Moonnaam platform evideyaanu?', 'മൂന്നാം പ്ലാറ്റ്ഫോം എവിടെയാണ്?'],
+      ['platform moonnu evide', 'moonnaam platform evide chetta', 'evideyaa moonnaam platform', 'platform 3 evide', 'aa platform evide chetta', 'മൂന്നാം പ്ലാറ്റ്ഫോം എവിടെ'],
+      'ask_where_platform', ['Ask where platform three is.', '"Evide?" = where?'],
+      ['ആ പാലം കണ്ടോ? അതു കയറി ഇടത്തേക്ക്.', 'Aa paalam kando? Athu kayari idatthekku.', 'See that bridge? Climb it and go left.'],
+      ['എവിടെയെന്നാണ് ചോദിക്കുന്നത്?', 'Evideyennaanu chodikkunnathu?', 'You are asking where?']),
+    S('charge', ['ബാഗ് എടുക്കട്ടെ? കൂലി പറയാം.', 'Bag edukkatte? Kooli parayaam.', 'Shall I carry the bag? I will tell the charge.'],
+      'Ask how much he charges.', ['Kooli ethra aakum chetta?', 'കൂലി എത്ര ആകും ചേട്ടാ?'],
+      ['kooli ethra', 'ethra kooli', 'ethra roopa kooli aakum', 'kooli ethrayaa chetta', 'bag edukkaan ethra', 'കൂലി എത്രയാ'],
+      'ask_porter_charge', ['Ask the charge.', '"Kooli" = porter charge.'],
+      ['അറുപത് രൂപ മോളേ, ഫിക്സഡ് റേറ്റാ.', 'Arupathu roopa mole, fixed rateaa.', 'Sixty rupees, dear, it is the fixed rate.'],
+      ['കൂലിയാണോ ചോദിക്കുന്നത്?', 'Kooliyaano chodikkunnathu?', 'Are you asking the charge?']),
+    S('pay', ['പ്ലാറ്റ്ഫോം എത്തി. അറുപത് രൂപ.', 'Platform etthi. Arupathu roopa.', 'We are at the platform. Sixty rupees.'],
+      'Pay and thank him.', ['Ithaa chetta, arupathu roopa. Nanni.', 'ഇതാ ചേട്ടാ, അറുപത് രൂപ. നന്ദി.'],
+      ['ithaa arupathu roopa', 'nanni chetta ithaa kooli', 'arupathu roopa tharam', 'nanni chetta', 'thanks chetta ithaa', 'ഇതാ അറുപത് രൂപ'],
+      'pay_porter', ['Hand over the money.', '"Ithaa" = here. "Nanni" = thanks.'],
+      ['നന്ദി മോളേ! സുഖമായ യാത്ര.', 'Nanni mole! Sukhamaaya yaathra.', 'Thanks dear! Have a pleasant journey.'],
+      ['കൂലി തരണ്ടേ മോളേ?', 'Kooli tharande mole?', 'Will you not pay the charge, dear?']),
+  ],
+  outro: ['എന്റെ ബാഡ്ജ് നമ്പർ ഓർത്തോളൂ, അടുത്ത തവണയും ഞാൻ കാണും!', 'Ente badge number ortholoo, aduttha thavanayum njaan kaanum!', 'Remember my badge number, I will be here next time too!'],
+  learned: [['ethu platformilaa?', 'which platform is it on?'], ['evideyaanu?', 'where is it?'], ['kooli ethra aakum?', 'how much is the charge?']],
+  again: ['ലഗേജ് ഉണ്ടോ മോളേ?', 'Luggage undo mole?', 'Any luggage, dear?'],
+});

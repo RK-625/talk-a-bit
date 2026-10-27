@@ -1,0 +1,276 @@
+// Ernakulam Junction forecourt, Aspinwall House and the Kathakali mask, the St. Francis Church book stall, the Jew Town clock tower ledge.
+import { dialogue as D, step as S } from '../kit.js';
+
+export const sorter1 = D('cst-tiffin-sorter', {
+  name: 'Nandu', role: 'delivery rider sorting parcels', site: 'Ernakulam Junction forecourt, delivery scooters', diff: 2,
+  voice: { rate: 1.15, pitch: 0.95 },
+  persona: 'Rider in an orange T-shirt standing among the scooters, matching parcels to orders.',
+  goal: 'Offer to help sort the parcels and tell him where the red bag goes.',
+  steps: [
+    S('help', ['ഇത് ആരുടെ പാർസലാണെന്ന് അറിയാമോ? എല്ലാം കൂടിക്കലർന്നു!', 'Ithu aarude parcelaanennu ariyamo? Ellaam koodikkalarnnu!', 'Do you know whose parcel this is? Everything got mixed up!'],
+      'Offer to help sort the parcels.', ['Njaan sahaayikkaamo chetta?', 'ഞാൻ സഹായിക്കാമോ ചേട്ടാ?'],
+      ['njaan help cheyyaamo', 'sahaayam venamo chetta', 'njaanum nokkaamo', 'parcel nokkaam njaan', 'chetta njaan sahaayikkaam', 'സഹായം വേണോ ചേട്ടാ'],
+      'offer_to_sort_parcels', ['Offer to help.', '"Sahaayikkaamo?" = can I help?'],
+      ['ശരി, ഇത് ഇടത്തേക്ക് വെക്കൂ.', 'Shari, ithu idatthekku vekkoo.', 'Okay, put this one to the left.'],
+      ['സഹായിക്കുമോ ഇല്ലയോ?', 'Sahaayikkumo illayo?', 'Will you help or not?']),
+    S('side', ['ആ ചുവന്ന ബാഗ് ഏത് വശത്ത് വെക്കണം?', 'Aa chuvanna bag ethu vashathu vekkanam?', 'Which side should that red bag go?'],
+      'Say: on the right side.', ['Ee vashathu, valathu vashathu.', 'ഈ വശത്ത്, വലത്തെ വശത്ത്.'],
+      ['valathu vashathu vekkoo', 'ivide vekkaam valathu', 'valathu vashathu mathi', 'ee vashathu vecho', 'right side vekkoo', 'വലത്തെ വശത്ത് വെക്കൂ'],
+      'say_right_side', ['Pick a side.', '"Valathu" = right.'],
+      ['കൃത്യം! നീ ഒരു ഡെലിവറി റൈഡർ ആകേണ്ടതാ.', 'Kruthyam! Nee oru delivery rider aakendathaa.', 'Exactly! You should be a delivery rider.'],
+      ['ഇടത്തോ വലത്തോ?', 'Idatho valatho?', 'Left or right?']),
+  ],
+  outro: ['പാർസൽ കൂടി കലർന്നാൽ വിളിക്കാം.', 'Parcel koodi kalarnnaal vilikkaam.', 'If the parcels get mixed up again, I will call you.'],
+  learned: [['njaan sahaayikkaamo?', 'can I help?'], ['valathu vashathu', 'on the right side']],
+  again: ['ഇനിയും പാർസൽ ബാക്കിയുണ്ട്.', 'Iniyum parcel baakkiyundu.', 'There are still parcels left.'],
+});
+
+export const sorter2 = D('cst-tiffin-sorter-2', {
+  name: 'Anand', role: 'delivery rider sorting parcels', site: 'Ernakulam Junction forecourt, delivery scooters', diff: 2,
+  voice: { rate: 1.1, pitch: 1.0 },
+  persona: 'Rider in an orange cap sorting parcels beside the other rider.',
+  goal: 'Ask how many parcels there are.',
+  steps: [
+    S('count', ['ഇത് ഒറ്റയ്ക്ക് തീർക്കാൻ പറ്റില്ല.', 'Ithu ottaykku theerkkaan pattilla.', 'I cannot finish this alone.'],
+      'Ask how many parcels there are.', ['Ethra parcel undu chetta?', 'എത്ര പാർസൽ ഉണ്ട് ചേട്ടാ?'],
+      ['ethra parcels undu', 'parcel ethra undu', 'ethra ennam undu', 'ethra orders undu chetta', 'ethra parcel baaki', 'എത്ര പാർസൽ ഉണ്ട്'],
+      'ask_parcel_count', ['Ask how many.', '"Ethra" = how many.'],
+      ['ഇരുപത്തഞ്ച്! ഉച്ചയ്ക്ക് മുൻപ് തീർക്കണം.', 'Irupathanchu! Uchaykku munpu theerkkanam.', 'Twenty-five! Must finish before noon.'],
+      ['എത്ര എന്നാണോ?', 'Ethra ennaano?', 'How many, you mean?']),
+  ],
+  outro: ['ഒരുമിച്ച് ചെയ്താൽ വേഗം തീരും.', 'Orumichu cheythaal vegam theerum.', 'Together it will finish quickly.'],
+  learned: [['ethra parcel undu?', 'how many parcels are there?']],
+  again: ['പാർസൽ എണ്ണി തീർന്നില്ല.', 'Parcel enni theernnilla.', 'I have not finished counting the parcels.'],
+});
+
+export const officeGoer1 = D('cst-officegoer', {
+  name: 'Sanjay', role: 'office-goer hurrying to work', site: 'Ernakulam Junction forecourt', diff: 3,
+  voice: { rate: 1.15, pitch: 0.95 },
+  persona: 'Man in a sky-blue striped shirt with an office ID, a phone and a lunch bag, hurrying to catch the metro feeder bus.',
+  goal: 'Say you are new here, then say you want to see Fort Kochi.',
+  steps: [
+    S('bus', ['മെട്രോ ഫീഡർ ബസ് പോയോ? ഞാൻ ലേറ്റാ!', 'Metro feeder bus poyo? Njaan latea!', 'Has the metro feeder bus gone? I am late!'],
+      'Say you do not know, you are new here.', ['Enikku ariyilla, njaan ivide puthiyathaanu.', 'എനിക്ക് അറിയില്ല, ഞാൻ ഇവിടെ പുതിയതാണ്.'],
+      ['ariyilla chetta puthiyathaanu', 'njaan puthiyathaanu', 'enikku ariyilla', 'ivide puthiyathaa njaan', 'ariyilla njaan tourist aanu', 'എനിക്ക് അറിയില്ല'],
+      'say_new_here', ['Say you are new.', '"Puthiyathaanu" = I am new.'],
+      ['ശരി, ക്ഷമിക്കണം. ഞാൻ ഫോണിൽ നോക്കാം.', 'Shari, kshamikkanam. Njaan phonil nokkaam.', 'Okay, sorry. I will check on my phone.'],
+      ['ബസ് പോയോ എന്നാ ചോദിച്ചത്.', 'Bus poyo ennaa chodichathu.', 'I asked if the bus has gone.']),
+    S('see', ['ഓ! ടൂറിസ്റ്റാണോ? എവിടെ പോകണം?', 'O! Touristaano? Evide pokanam?', 'Oh! A tourist? Where do you want to go?'],
+      'Say you want to see Fort Kochi.', ['Enikku Fort Kochi kaananam.', 'എനിക്ക് ഫോർട്ട് കൊച്ചി കാണണം.'],
+      ['fort kochi kaananam', 'njaan fort kochi pokunnu', 'fort kochi pokaanaanu', 'kochi kaanaan vannathaanu', 'fort kochi kaanaan aanu', 'ഫോർട്ട് കൊച്ചി കാണണം'],
+      'say_want_fort_kochi', ['Say where you want to go.', '"Kaananam" = I want to see.'],
+      ['ജലമെട്രോ എടുത്തോളൂ, ഏറ്റവും സുഖം.', 'Jala metro edutholoo, ettavum sukham.', 'Take the water metro, it is the most pleasant.'],
+      ['എവിടെ പോകണം?', 'Evide pokanam?', 'Where do you want to go?']),
+  ],
+  outro: ['ഇനി ഞാൻ ഓടട്ടെ, ലേറ്റ് ആയി!', 'Ini njaan odatte, late aayi!', 'Let me run, I am late!'],
+  learned: [['njaan ivide puthiyathaanu', 'I am new here'], ['enikku Fort Kochi kaananam', 'I want to see Fort Kochi']],
+  again: ['ബസ് കിട്ടിയോ ആവോ!', 'Bus kittiyo aavo!', 'I wonder if I got the bus!'],
+});
+
+export const porter2 = D('cst-coolie-2', {
+  name: 'Basheer', role: 'porter', site: 'Ernakulam Junction forecourt, east end', diff: 2,
+  voice: { rate: 1.0, pitch: 0.8 },
+  persona: 'Porter in a coral-red shirt and a brass armband, standing with luggage on his shoulder waiting for a passenger.',
+  goal: 'Say you carry your own rucksack and that you are going to the backwaters.',
+  steps: [
+    S('bag', ['ലഗേജ് ഉണ്ടോ ചേച്ചീ? ഞാൻ കാത്തിരിക്കുകയാ.', 'Luggage undo chechee? Njaan kaathirikkukayaa.', 'Any luggage, chechi? I am waiting.'],
+      'Say you will carry your own rucksack.', ['Ente rucksack njaan thanne edukkaam.', 'എന്റെ റക്സാക്ക് ഞാൻ തന്നെ എടുക്കാം.'],
+      ['njaan thanne edukkaam', 'rucksack ente thanne', 'enikku porter venda', 'bag njaan edukkaam chetta', 'njaan thanne pidikkaam', 'ഞാൻ തന്നെ എടുക്കാം'],
+      'carry_own_rucksack', ['Say you can carry it.', '"Thanne" = by myself.'],
+      ['ശരി ശരി, ബാഗ് കണ്ടാൽ തോന്നും ഒരു പർവതാരോഹകയെന്ന്!', 'Shari shari, bag kandaal thonnum oru parvathaarohakayennu!', 'Okay okay, with that bag you look like a mountaineer!'],
+      ['ലഗേജ് വേണോ?', 'Luggage veno?', 'Luggage help?']),
+    S('go', ['ഇത്ര വലിയ ബാഗ് എവിടേക്കാ?', 'Ithra valiya bag evidekkaa?', 'Where is that big bag going?'],
+      'Say you are going to the backwaters.', ['Njaan kaayalilekku pokunnu.', 'ഞാൻ കായലിലേക്ക് പോകുന്നു.'],
+      ['backwatersil pokunnu', 'kaayal kaanaan pokunnu', 'alappuzhaykku pokunnu', 'houseboatil pokunnu', 'kaayalilekku pokunnu chetta', 'കായലിലേക്ക് പോകുന്നു'],
+      'say_going_to_backwaters', ['Say where you are going.', '"Kaayal" = backwater.'],
+      ['ഹൗസ്ബോട്ടോ! നല്ല യാത്ര, കേട്ടോ.', 'Houseboato! Nalla yaathra, kettoo.', 'A houseboat! Good journey, okay.'],
+      ['എവിടേക്കാ യാത്ര?', 'Evidekkaa yaathra?', 'Where is the journey to?']),
+  ],
+  outro: ['ബോട്ടിൽ ഇരുന്ന് ചായ കുടിക്കണം.', 'Bottil irunnu chaya kudikkanam.', 'Have tea while sitting on the boat.'],
+  learned: [['njaan thanne edukkaam', 'I will carry it myself'], ['kaayalilekku pokunnu', 'I am going to the backwaters']],
+  again: ['ലഗേജ് ഇല്ലേ, ഞാൻ കാത്തിരിക്കട്ടെ.', 'Luggage ille, njaan kaathirikkatte.', 'No luggage, then I will keep waiting.'],
+});
+
+export const officeGoer2 = D('cst-officegoer-2', {
+  name: 'Vishnu', role: 'office-goer', site: 'Ernakulam Junction forecourt, front lane', diff: 2,
+  voice: { rate: 1.15, pitch: 1.0 },
+  persona: 'Office-goer in a pastel shirt with a lanyard, hurrying across the forecourt while checking his watch.',
+  goal: 'Wish him a good meeting.',
+  steps: [
+    S('meeting', ['ഇന്ന് മീറ്റിംഗ് ഉണ്ട്, വൈകരുത്!', 'Innu meeting undu, vaikaruthu!', 'There is a meeting today, I must not be late!'],
+      'Wish him a good meeting.', ['Meeting nannaayi nadakkatte.', 'മീറ്റിംഗ് നന്നായി നടക്കട്ടെ.'],
+      ['all the best meetingnu', 'nalla meeting aavatte', 'meeting success aavatte', 'nannaayi varatte', 'good luck chetta', 'മീറ്റിംഗ് നന്നാവട്ടെ'],
+      'wish_good_meeting', ['Wish him luck.', '"Nannaayi nadakkatte" = may it go well.'],
+      ['താങ്ക്സ്! ലേറ്റാകാതെ എത്തണം.', 'Thanks! Late aakaathe etthanam.', 'Thanks! I must get there on time.'],
+      ['ഏ? എന്താ പറഞ്ഞത് ചേച്ചീ?', 'Ae? Enthaa paranjathu chechee?', 'Eh? What did you say, chechi?']),
+  ],
+  outro: ['ഇന്ന് നല്ല ദിവസമാകട്ടെ.', 'Innu nalla divasamaakatte.', 'May it be a good day today.'],
+  learned: [['meeting nannaayi nadakkatte', 'may the meeting go well']],
+  again: ['വാച്ചിൽ സമയം നോക്കി ഓടുകയാ!', 'Watchil samayam nokki odukayaa!', 'Running, watching the clock!'],
+});
+
+export const touristStatue = D('bse-bull-tourist', {
+  name: 'Oliver', role: 'foreign tourist taking a selfie', site: 'Aspinwall House, giant Kathakali mask sculpture', diff: 4, lang: 'en',
+  voice: { rate: 1.0, pitch: 0.95 },
+  persona: 'Thin tourist in a sky-blue floral shirt and yellow cap taking a selfie with the giant Kathakali mask. Speaks only English.',
+  goal: 'Explain that it is a Kathakali mask and what the colours mean.',
+  steps: [
+    S('what', 'Wow, what is this giant painted face? Is it a mask?',
+      'Tell him it is a giant Kathakali mask sculpture.', ['Yes, it is a giant Kathakali mask sculpture.', 'Yes, it is a giant Kathakali mask sculpture.'],
+      ['yes it is a giant kathakali mask', 'it is a kathakali mask sculpture', 'that is a giant kathakali mask', 'yes a huge kathakali mask', 'it is a big kathakali face sculpture', 'it is a kathakali mask a dance theatre mask'],
+      'explain_kathakali_mask', ['Say what it is.', 'Say: a giant Kathakali mask.'],
+      'Amazing! I love it, I need a better selfie.', 'Sorry, what is it again?'),
+    S('colours', 'And what do the painted colours mean?',
+      'Say green is a noble hero and red is a fierce character.', ['Green is a noble hero and red is a fierce character.', 'Green is a noble hero and red is a fierce character.'],
+      ['green is a noble hero and red is a fierce character', 'green means a hero and red means a fierce one', 'green for noble heroes red for fierce characters', 'a green face is a good hero a red one is fierce', 'green is noble red is fierce', 'noble heroes are green and fierce ones are red'],
+      'explain_mask_colours', ['Explain the colours.', 'Say: green noble, red fierce.'],
+      'Fascinating, thank you!', 'Sorry, what do the colours mean?'),
+  ],
+  outro: 'Thanks, I will look for a Kathakali show tonight!',
+  learned: [['a giant Kathakali mask', 'explaining the sculpture'], ['green is noble, red is fierce', 'explaining the colours']],
+  again: 'Hello again, one more selfie!',
+});
+
+export const riponGuard = D('bse-guard', {
+  name: 'Prasad', role: 'Aspinwall House security guard', site: 'Aspinwall House gate', diff: 3,
+  voice: { rate: 0.95, pitch: 0.85 },
+  persona: 'Guard in a charcoal uniform with a handlebar moustache and a visitor register, checking every visitor politely and pointing to the Biennale hall.',
+  goal: 'Ask what the Biennale is and pay fifty rupees for a ticket.',
+  steps: [
+    S('what', ['രജിസ്റ്ററിൽ പേരെഴുതൂ. ബിനാലെ ഹാൾ ഇടത്തോട്ട്.', 'Registeril perezhuthoo. Biennale hall idatthottu.', 'Sign your name in the register. The Biennale hall is to the left.'],
+      'Ask what the Biennale is.', ['Ee Biennale enthaanu saare?', 'ഈ ബിനാലെ എന്താണ് സാറേ?'],
+      ['biennale ennal enthaa', 'ee biennale entha', 'biennale ethaanu saare', 'ivide enthu nadakkunnu', 'saare biennale enthaa', 'ബിനാലെ എന്താണ്'],
+      'ask_what_biennale', ['Ask what it is.', '"Enthaanu?" = what is it?'],
+      ['ലോകമെമ്പാടുമുള്ള കലാകാരന്മാരുടെ പ്രദർശനം!', 'Lokamempaadumulla kalaakaaranmaarude pradarshanam!', 'An exhibition by artists from all over the world!'],
+      ['ബിനാലെയെ പറ്റിയാണോ?', 'Biennaleye pattiyaano?', 'About the Biennale?']),
+    S('ticket', ['ടിക്കറ്റ് എടുക്കൂ. അമ്പത് രൂപ.', 'Ticket edukkoo. Ambathu roopa.', 'Take a ticket. Fifty rupees.'],
+      'Pay fifty rupees.', ['Ithaa saare, ambathu roopa.', 'ഇതാ സാറേ, അമ്പത് രൂപ.'],
+      ['ambathu roopa ithaa saare', 'ithaa ambathu roopa', 'ticket venam saare', 'ambathu roopa tharam', 'saare ticket tharoo', 'ഇതാ അമ്പത് രൂപ'],
+      'pay_biennale_ticket', ['Hand over the money.', '"Ambathu" = fifty.'],
+      ['ശരി, അകത്തേക്ക് പോകാം. കണ്ണ് തുറന്ന് കാണണം!', 'Shari, akattekku pokaam. Kannu thurannu kaananam!', 'Okay, you may go in. Keep your eyes open!'],
+      ['ടിക്കറ്റ് വേണ്ടേ?', 'Ticket vende?', 'Do you not want a ticket?']),
+  ],
+  outro: ['ഒരു ചിത്രത്തിന് മുന്നിൽ ഒരു മിനിറ്റ് നിൽക്കൂ.', 'Oru chithrathinu munnil oru minute nilkkoo.', 'Stand a minute before one painting.'],
+  learned: [['ee Biennale enthaanu?', 'what is this Biennale?'], ['ithaa, ambathu roopa', 'here, fifty rupees']],
+  again: ['രജിസ്റ്ററിൽ ഒപ്പിട്ടോ?', 'Registeril oppittoo?', 'Did you sign the register?'],
+});
+
+export const broker = D('bse-broker', {
+  name: 'Sudheer', role: 'Biennale volunteer on the phone', site: 'Aspinwall House, near the notice board', diff: 3,
+  voice: { rate: 1.2, pitch: 0.9 },
+  persona: 'Volunteer with a purple lanyard, phone at his ear, arguing about a delivery of art crates.',
+  goal: 'Say you will come back later since he is busy.',
+  steps: [
+    S('busy', ['ഹലോ? ആർട്ട് ക്രേറ്റുകൾ എവിടെ? ഇന്ന് ഇറക്കണം!', 'Hello? Art cratekal evide? Innu irakkanam!', 'Hello? Where are the art crates? They must be unloaded today!'],
+      'Tell him you will come back later.', ['Njaan pinne varaam, thirakku alle.', 'ഞാൻ പിന്നെ വരാം, തിരക്കല്ലേ.'],
+      ['pinne varaam chetta', 'pinne kaanaam', 'thirakkaanu alle pinne varaam', 'njaan pinne varaam', 'later varaam chetta', 'പിന്നെ വരാം ചേട്ടാ'],
+      'say_will_come_later', ['Say you will return.', '"Pinne varaam" = I will come later.'],
+      ['താങ്ക്സ് മോളേ, ഈ ക്രേറ്റുകൾ എന്നെ കൊല്ലും!', 'Thanks mole, ee cratekal enne kollum!', 'Thanks dear, these crates will be the death of me!'],
+      ['ഒരു മിനിറ്റ്... എന്താ പറഞ്ഞത്?', 'Oru minute... enthaa paranjathu?', 'One minute... what did you say?']),
+  ],
+  outro: ['ബിനാലെ തുടങ്ങിയാൽ വരണം!', 'Biennale thudangiyaal varanam!', 'Come when the Biennale starts!'],
+  learned: [['njaan pinne varaam', 'I will come later']],
+  again: ['ക്രേറ്റ് എത്തിയോ എന്ന് നോക്കട്ടെ.', 'Crate etthiyo ennu nokkatte.', 'Let me see if the crates arrived.'],
+});
+
+export const bookSeller = D('rajabai-book-seller', {
+  name: 'Jose', role: 'second-hand book seller', site: 'St. Francis Church precinct, book stall', diff: 3,
+  voice: { rate: 0.95, pitch: 0.9 },
+  persona: 'Man in a mustard long kurta dusting a book cover, happy to recommend old Malayalam novels.',
+  goal: 'Ask for an easy Malayalam book for learners and buy it for thirty rupees.',
+  steps: [
+    S('book', ['പഴയ പുസ്തകങ്ങൾ! മലയാള നോവലുകൾ ഉണ്ട്.', 'Pazhaya pusthakangal! Malayalam novelukal undu.', 'Old books! We have Malayalam novels.'],
+      'Ask for an easy Malayalam book for a learner.', ['Malayalam padikkaan oru eluppamulla pusthakam undo?', 'മലയാളം പഠിക്കാൻ ഒരു എളുപ്പമുള്ള പുസ്തകം ഉണ്ടോ?'],
+      ['eluppamulla pusthakam undo', 'kuttikalude pusthakam undo', 'easy book undo chetta', 'padikkaan oru book venam', 'simple malayalam book', 'എളുപ്പമുള്ള പുസ്തകം ഉണ്ടോ'],
+      'ask_easy_malayalam_book', ['Ask for an easy book.', '"Eluppam" = easy.'],
+      ['ഉണ്ട്! കുട്ടികളുടെ കഥാപുസ്തകം നല്ലതാ.', 'Undu! Kuttikalude kathaapusthakam nallathaa.', 'Yes! A children\'s story book is good.'],
+      ['ഏത് തരം പുസ്തകം?', 'Ethu tharam pusthakam?', 'What kind of book?']),
+    S('buy', ['ഇത് മുപ്പത് രൂപ. എടുക്കുന്നോ?', 'Ithu muppathu roopa. Edukkunno?', 'This is thirty rupees. Will you take it?'],
+      'Say yes, you will take it.', ['Athe, njaan edukkaam.', 'അതെ, ഞാൻ എടുക്കാം.'],
+      ['edukkaam chetta', 'njaan edukkunnu', 'ithu mathi', 'athe venam', 'shari njaan edukkaam', 'ഞാൻ എടുക്കാം'],
+      'buy_the_book', ['Say yes.', '"Edukkaam" = I will take it.'],
+      ['നല്ലത്! ദിവസവും ഒരു പേജ് വായിക്കൂ.', 'Nallathu! Divasavum oru page vaayikkoo.', 'Good! Read one page every day.'],
+      ['എടുക്കുന്നോ ഇല്ലയോ?', 'Edukkunno illayo?', 'Will you take it or not?']),
+  ],
+  outro: ['വായിച്ചിട്ട് വന്ന് കഥ പറയണം.', 'Vaayichittu vannu katha parayanam.', 'Read it and come tell me the story.'],
+  learned: [['eluppamulla pusthakam undo?', 'do you have an easy book?'], ['njaan edukkaam', 'I will take it']],
+  again: ['പുസ്തകം ഇഷ്ടമായോ?', 'Pusthakam ishtamaayo?', 'Did you like the book?'],
+});
+
+export const lawStudent = D('rajabai-student-a', {
+  name: 'Akshay', role: 'college student', site: 'St. Francis Church precinct, Jew Town ledge', diff: 3,
+  voice: { rate: 1.15, pitch: 1.0 },
+  persona: 'Young man in a yellow cap with books under his arm, heading to class and worried about an exam.',
+  goal: 'Encourage him, then say you are travelling and learning Malayalam.',
+  steps: [
+    S('exam', ['നാളെ പരീക്ഷയാ, പേടിയാകുന്നു!', 'Naale pareekshayaa, pediyaakunnu!', 'The exam is tomorrow, I am scared!'],
+      'Encourage him: you will write well.', ['Pedikkanda, nee nannaayi ezhuthum.', 'പേടിക്കണ്ട, നീ നന്നായി എഴുതും.'],
+      ['nannaayi ezhuthum', 'pedikkanda mone', 'all the best parikshaykku', 'ninakku pattum', 'nee jayikkum', 'പേടിക്കണ്ട'],
+      'encourage_for_exam', ['Tell him not to worry.', '"Pedikkanda" = do not be scared.'],
+      ['താങ്ക്സ് ചേച്ചീ! ഇത്ര ധൈര്യം തന്നു.', 'Thanks chechee! Ithra dhairyam thannu.', 'Thanks chechi! You gave me such courage.'],
+      ['പേടി മാറിയില്ല, ഒന്നൂടെ പറയൂ.', 'Pedi maariyilla, onnoode parayoo.', 'The fear has not gone, say once more.']),
+    S('who', ['ഏത് നാടാ ചേച്ചീ? ഇവിടെ എന്ത് ചെയ്യുന്നു?', 'Ethu naadaa chechee? Ivide enthu cheyyunnu?', 'Which place are you from, chechi? What are you doing here?'],
+      'Say you are travelling and learning Malayalam.', ['Njaan yaathra cheyyunnu, Malayalam padikkunnu.', 'ഞാൻ യാത്ര ചെയ്യുന്നു, മലയാളം പഠിക്കുന്നു.'],
+      ['malayalam padikkunnu', 'njaan yaathra cheyyukayaanu', 'njaan sanchaariyaanu', 'yaathrayaanu malayalam padikkunnu', 'njaan malayalam padikkukayaanu', 'മലയാളം പഠിക്കുന്നു'],
+      'say_travelling_learning', ['Say what you are doing.', '"Padikkunnu" = I am learning.'],
+      ['കൊള്ളാം! ചേച്ചിയുടെ മലയാളം നല്ലതാ.', 'Kollaam! Chechiyude Malayalam nallathaa.', 'Great! Your Malayalam is good.'],
+      ['എന്താ ചെയ്യുന്നത്?', 'Enthaa cheyyunnathu?', 'What are you doing?']),
+  ],
+  outro: ['പരീക്ഷ കഴിഞ്ഞ് ഞാൻ ചായ വാങ്ങിത്തരാം.', 'Pareeksha kazhinju njaan chaya vaangittharaam.', 'After the exam I will buy you tea.'],
+  learned: [['pedikkanda', 'do not be scared'], ['Malayalam padikkunnu', 'I am learning Malayalam']],
+  again: ['പുസ്തകം തുറന്നിട്ടേ ഇല്ല!', 'Pusthakam thurannittte illa!', 'I have not even opened the book!'],
+});
+
+export const bookBrowser = D('rajabai-book-browser', {
+  name: 'Jibin', role: 'college student browsing books', site: 'St. Francis Church precinct, book stall', diff: 2,
+  voice: { rate: 1.1, pitch: 1.0 },
+  persona: 'Student in a mint striped shirt with specs, browsing the stall and chatting about exams.',
+  goal: 'Say you cannot say if the book is good, since you are not from here.',
+  steps: [
+    S('ask', ['ചേച്ചീ, ഈ ബുക്ക് നല്ലതാണോ? പരീക്ഷയ്ക്ക് വേണം.', 'Chechee, ee book nallathaano? Pareekshaykku venam.', 'Chechi, is this book good? I need it for the exam.'],
+      'Say you do not know, you are not from here.', ['Enikku ariyilla, njaan ivide ninnalla.', 'എനിക്ക് അറിയില്ല, ഞാൻ ഇവിടെ നിന്നല്ല.'],
+      ['ariyilla njaan ivide ninnalla', 'enikku ariyilla mone', 'njaan ivide ninnalla', 'chodikkaam vere aalodu', 'njaan puthiyathaanu ariyilla', 'എനിക്ക് അറിയില്ല മോനേ'],
+      'say_do_not_know_book', ['Say you cannot help.', '"Ariyilla" = I do not know.'],
+      ['ശരി ചേച്ചീ, ഞാൻ കടക്കാരനോട് ചോദിക്കാം.', 'Shari chechee, njaan kadakkaaranodu chodikkaam.', 'Okay chechi, I will ask the shopkeeper.'],
+      ['ബുക്ക് നല്ലതാണോ?', 'Book nallathaano?', 'Is the book good?']),
+  ],
+  outro: ['പരീക്ഷയ്ക്ക് വേണ്ടി മാത്രമല്ല, കഥയും വായിക്കൂ!', 'Pareekshaykku vendi maathramalla, kathayum vaayikkoo!', 'Read stories too, not just for exams!'],
+  learned: [['enikku ariyilla', 'I do not know']],
+  again: ['ചേച്ചീ, ഒരു ബുക്ക് കൂടി നോക്കട്ടെ.', 'Chechee, oru book koodi nokkatte.', 'Chechi, let me look at one more book.'],
+});
+
+export const ledgeReader = D('flora-ledge-reader', {
+  name: 'Gayathri', role: 'college girl on the ledge', site: 'Jew Town synagogue clock tower ledge', diff: 2,
+  voice: { rate: 1.0, pitch: 1.2 },
+  persona: 'College girl in a butter-yellow churidar top and specs, seated on the ledge reading.',
+  goal: 'Tell her you are reading a map.',
+  steps: [
+    S('read', ['ഈ ഗ്രന്ഥം രസമുണ്ട്. ചേച്ചി എന്താ വായിക്കുന്നത്?', 'Ee grantham rasamundu. Chechi enthaa vaayikkunnathu?', 'This book is interesting. What are you reading, chechi?'],
+      'Say you are reading a map.', ['Njaan oru map vaayikkukayaanu.', 'ഞാൻ ഒരു മാപ്പ് വായിക്കുകയാണ്.'],
+      ['map aanu vaayikkunnathu', 'njaan map nokkukayaanu', 'paper map aanu', 'ente kayyil map aanu', 'map mathram vaayikkunnu', 'ഞാൻ മാപ്പ് നോക്കുന്നു'],
+      'say_reading_a_map', ['Say what you hold.', '"Map" = map.'],
+      ['ഹ ഹ, നല്ല വായന! ജൂത തെരുവിലേക്കുള്ള വഴി ഞാൻ പറയാം.', 'Ha ha, nalla vaayana! Jootha theruvilekkulla vazhi njaan parayaam.', 'Ha ha, good reading! I will tell you the way to Jew Town.'],
+      ['എന്താ വായിക്കുന്നത്?', 'Enthaa vaayikkunnathu?', 'What are you reading?']),
+  ],
+  outro: ['ക്ലോക്ക് ടവർ കാണാതെ പോകരുത്.', 'Clock tower kaanaathe pokaruthu.', 'Do not leave without seeing the clock tower.'],
+  learned: [['njaan oru map vaayikkukayaanu', 'I am reading a map']],
+  again: ['ഒരു പേജ് കൂടി വായിക്കട്ടെ.', 'Oru page koodi vaayikkatte.', 'Let me read one more page.'],
+});
+
+export const ledgeTeen = D('flora-ledge-sketcher', {
+  name: 'Rohan', role: 'teen on the ledge', site: 'Jew Town synagogue clock tower ledge', diff: 2,
+  voice: { rate: 1.15, pitch: 1.3 },
+  persona: 'Teen in a red cap and a sky-blue jhola, people-watching from the ledge, bored and chatty.',
+  goal: 'Suggest he go and see the Chinese nets.',
+  steps: [
+    S('bored', ['ബോറടിച്ചു! ആളുകളെ നോക്കി ഇരിക്കുവാ.', 'Boradichu! Aalukale nokki irikkuvaa.', 'I am bored! Just sitting and watching people.'],
+      'Suggest he go and see the Chinese nets.', ['Chinese vala kaanaan pokoo, nalla rasamaanu.', 'ചൈനീസ് വല കാണാൻ പോകൂ, നല്ല രസമാണ്.'],
+      ['vala kaanaan poyi nokku', 'chinese vala kaanu', 'nets nokku', 'fort kochi pokoo', 'sunset kaanaan pokoo', 'ചൈനീസ് വല കാണൂ'],
+      'suggest_chinese_nets', ['Give him an idea.', '"Vala" = net.'],
+      ['ശരി! വൈകുന്നേരം ഞാൻ പോകാം. താങ്ക്സ്!', 'Shari! Vaikunneram njaan pokaam. Thanks!', 'Okay! I will go in the evening. Thanks!'],
+      ['എന്ത് ചെയ്യാനാ പറഞ്ഞത്?', 'Enthu cheyyaanaa paranjathu?', 'What did you tell me to do?']),
+  ],
+  outro: ['ബോറടി മാറ്റാൻ ഒരു ചായ കുടിക്കാം.', 'Boradi maattaan oru chaya kudikkaam.', 'Let us have tea to chase the boredom.'],
+  learned: [['chinese vala kaanaan pokoo', 'go and see the Chinese nets']],
+  again: ['ഇനിയും ബോറടിക്കുന്നു!', 'Iniyum boradikkunnu!', 'Still bored!'],
+});

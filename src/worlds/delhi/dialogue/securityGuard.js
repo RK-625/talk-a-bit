@@ -1,0 +1,38 @@
+// Cyber Hub tower security guard at the gate booth.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('securityGuard', {
+  name: 'Rajpal Singh', role: 'security guard', site: 'Cyber Hub tower gate booth, Gurugram', diff: 4,
+  voice: { rate: 1.0, pitch: 0.8 },
+  persona: 'Fair but formal gate guard with a visitor register, who needs a pass for everyone but secretly likes helping young job-seekers.',
+  goal: 'Say you are here for a walk-in interview, show your ID, ask where to sign, and ask which floor.',
+  steps: [
+    S('purpose', ['रुकिए, किससे मिलना है? विज़िटर पास चाहिए।', 'Rukiye, kisse milna hai? Visitor pass chahiye.', 'Stop please, whom do you want to meet? You need a visitor pass.'],
+      'Say you are here for a walk-in interview.', ['Sir, main walk-in interview ke liye aaya hoon.', 'सर, मैं वॉक-इन इंटरव्यू के लिए आया हूँ।'],
+      ['main walk-in interview ke liye aaya hoon', 'sir interview ke liye aaya hoon', 'walk in interview hai sir', 'sir mera interview hai aaj', 'main interview dene aaya hoon', 'paaji walk-in interview ke liye aaya hoon', 'मैं वॉक-इन इंटरव्यू के लिए आया हूँ'],
+      ['Tell him why you are here.', 'I have come for = "ke liye aaya hoon". Interview = "interview".'],
+      ['ठीक है, इंटरव्यू वाले लोग आज बहुत आ रहे हैं।', 'Theek hai, interview wale log aaj bahut aa rahe hain.', 'Okay, many interview candidates are coming today.'],
+      ['साफ़ बोलिए, किसलिए आए हैं?', 'Saaf boliye, kisliye aaye hain?', 'Speak clearly, what have you come for?']),
+    S('id', ['अपना फ़ोटो आईडी दिखाइए, बिना आईडी के एंट्री नहीं।', 'Apna photo ID dikhaiye, bina ID ke entry nahi.', 'Show your photo ID, no entry without it.'],
+      'Show your ID.', ['Ye lijiye sir, meri ID.', 'ये लीजिए सर, मेरी आईडी।'],
+      ['ye lijiye sir meri id', 'sir ye mera photo id hai', 'ye lo meri id sir', 'paaji ye meri id hai', 'meri id ye rahi', 'sir id dikha raha hoon', 'ये लीजिए सर मेरी आईडी'],
+      ['Hand over your ID.', 'Here you are = "ye lijiye". My ID = "meri ID".'],
+      ['ठीक है, फ़ोटो मिल गई। नाम राहुल है, पटना से?', 'Theek hai, photo mil gayi. Naam Rahul hai, Patna se?', 'Fine, photo matches. Name is Rahul, from Patna?'],
+      ['आईडी दिखानी है, सिर्फ़ बोलने से नहीं चलेगा।', 'ID dikhani hai, sirf bolne se nahi chalega.', 'Show the ID, speaking alone will not do.']),
+    S('sign', ['यहाँ रजिस्टर में एंट्री करनी पड़ेगी।', 'Yahan register mein entry karni padegi.', 'You will have to write an entry in the register here.'],
+      'Ask where to sign.', ['Sir, main kahaan sign karoon?', 'सर, मैं कहाँ साइन करूँ?'],
+      ['sir main kahaan sign karoon', 'kahaan sign karna hai sir', 'register mein kahaan likhun', 'paaji sign kidhar karna hai', 'is register mein kahaan sign karun', 'sir kis column mein sign karun', 'मैं कहाँ साइन करूँ'],
+      ['Ask where to sign.', 'Where = "kahaan". I should sign = "sign karoon".'],
+      ['यहाँ नाम और समय लिख दीजिए, फिर नीचे दस्तख़त।', 'Yahan naam aur samay likh dijiye, phir neeche dastakhat.', 'Write name and time here, then sign below.'],
+      ['साइन की बात है ना? धीरे और साफ़ बोलिए।', 'Sign ki baat hai na? Dheere aur saaf boliye.', 'About signing, right? Speak slowly and clearly.']),
+    S('floor', ['ये लीजिए पास। अब आगे बढ़िए, लिफ़्ट उधर है।', 'Ye lijiye pass. Ab aage badhiye, lift udhar hai.', 'Here is your pass. Go ahead, the lift is there.'],
+      'Ask which floor the interview is on.', ['Interview kaun se floor par hai?', 'इंटरव्यू कौन से फ़्लोर पर है?'],
+      ['interview kaun se floor par hai', 'sir kaunse floor par jaana hai', 'interview kis floor pe hai sir', 'paaji kaunsi manzil par jaun', 'kaun si floor hai interview ki', 'sir interview ka floor batayein', 'इंटरव्यू कौन से फ़्लोर पर है'],
+      ['Ask which floor.', 'Which floor = "kaun se floor par". Is = "hai".'],
+      ['सातवें माले पर, लिफ़्ट नंबर दो से जाइए। ऑल द बेस्ट!', 'Saatven maale par, lift number do se jaiye. All the best!', 'On the seventh floor, take lift number two. All the best!'],
+      ['कौन-सा फ़्लोर, यही पूछ रहे हैं ना?', 'Kaun-sa floor, yahi puchh rahe hain na?', 'Which floor, that is what you are asking, right?']),
+  ],
+  outro: ['जाइए, दिल लगाकर इंटरव्यू देना। नौकरी भी, यूपीएससी भी!', 'Jaiye, dil lagakar interview dena. Naukri bhi, UPSC bhi!', 'Go, give the interview with heart. Job and UPSC both!'],
+  learned: [['main walk-in interview ke liye aaya hoon', 'I have come for a walk-in interview'], ['main kahaan sign karoon?', 'where should I sign?'], ['kaun se floor par hai?', 'which floor is it on?']],
+  again: ['अरे आप फिर? इस बार पास साथ लाए हैं ना?', 'Arre aap phir? Is baar pass saath laaye hain na?', 'You again? You brought your pass this time, right?'],
+});

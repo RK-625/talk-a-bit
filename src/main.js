@@ -9,6 +9,8 @@ const WORLDS = {
   bengaluru: () => import('./worlds/bengaluru/index.js'),
   hyderabad: () => import('./worlds/hyderabad/index.js'),
   chennai: () => import('./worlds/chennai/index.js'),
+  delhi: () => import('./worlds/delhi/index.js'),
+  kerala: () => import('./worlds/kerala/index.js'),
 };
 const DEFAULT_WORLD = 'mumbai';
 

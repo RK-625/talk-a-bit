@@ -75,6 +75,42 @@ Object.assign(dialogues, {
   ]),
 });
 
+// two sample Malayalam dialogues (Kochi) and two Delhi Hindi ones, inline for the same reason
+Object.assign(dialogues, {
+  ml_chayakada: southern('ml_chayakada', 'Kuttan Chettan', 'chaiwalaUncle', 'ml', 'kerala', 'Warm chaya kada owner who is kind to Ananya, a backpacker learning Malayalam.', 'Order a chaya at the chaya kada.', [
+    { id: 'order', npc: kn('എന്താ വേണ്ടത് മോളേ?', 'Entha vendathu mole?', 'What do you want, dear?'), instruction: 'Ask for one tea.',
+      suggest: { roman: 'Chettaa, oru chaya tharamo?', text: 'ചേട്ടാ, ഒരു ചായ തരാമോ?' }, intent: 'order_one_tea',
+      accept: ['chetta oru chaya tharamo', 'oru chaya venam chetta', 'oru chaya tharu chetta', 'chettaa oru chaya', 'ഒരു ചായ വേണം', 'chaya tharamo chetta', 'oru tea tharamo chetta'] },
+    { id: 'pori', npc: kn('പഴം പൊരി വേണോ?', 'Pazham pori veno?', 'Want some pazham pori?'), instruction: 'Say yes, you want one pazham pori too.',
+      suggest: { roman: 'Venam chetta, oru pazham pori kudi.', text: 'വേണം ചേട്ടാ, ഒരു പഴം പൊരി കൂടി.' }, intent: 'accept_pazham_pori',
+      accept: ['venam chetta oru pazham pori kudi', 'venam chetta', 'athe oru pazham pori tharu', 'oru pazham pori venam', 'വേണം ചേട്ടാ', 'pazham pori venam chetta'] },
+  ]),
+  ml_auto: southern('ml_auto', 'Sajan', 'taxiDriver', 'ml', 'kerala', 'Chatty auto driver who haggles over the fare.', 'Ask an auto driver to take you to Fort Kochi.', [
+    { id: 'where', npc: kn('എവിടെ പോകണം മാഡം?', 'Evide pokanam madam?', 'Where do you want to go, madam?'), instruction: 'Ask if he will go to Fort Kochi.',
+      suggest: { roman: 'Chetta, Fort Kochi varumo?', text: 'ചേട്ടാ, ഫോർട്ട് കൊച്ചി വരുമോ?' }, intent: 'ask_go_fort_kochi',
+      accept: ['chetta fort kochi varumo', 'fort kochi varumo', 'fort kochi pokanam chetta', 'chetta fort kochi varuvo', 'ഫോർട്ട് കൊച്ചി വരുമോ', 'fort kochi varamo chetta'] },
+    { id: 'fare', npc: kn('നൂറു രൂപ ആകും.', 'Nooru roopa aakum.', 'It will be a hundred rupees.'), instruction: 'Say that is too much and offer seventy rupees.',
+      suggest: { roman: 'Kooduthal aanu chetta, ezhupathu roopa tharam.', text: 'കൂടുതൽ ആണ് ചേട്ടാ, എഴുപത് രൂപ തരാം.' }, intent: 'haggle_seventy',
+      accept: ['kooduthal aanu chetta ezhupathu roopa tharam', 'kooduthal chetta ezhupathu roopa', 'ezhupathu roopa tharam chetta', 'valare kooduthal ezhupathu', 'എഴുപത് രൂപ തരാം', 'seventy roopa tharam chetta'] },
+  ]),
+  hi_dilli_chai: southern('hi_dilli_chai', 'Bittu Bhaiya', 'chaiwalaUncle', 'hi', 'delhi', 'Chatty Delhi chai-stall owner who looks out for Rahul, a UPSC aspirant from Patna.', 'Order a chai and a bun-makhan at the stall.', [
+    { id: 'order', npc: kn('हाँ बेटा, क्या चाहिए?', 'Haan beta, kya chahiye?', 'Yes son, what do you want?'), instruction: 'Ask for one chai.',
+      suggest: { roman: 'Bhaiya, ek chai dena.', text: 'भैया, एक चाय देना।' }, intent: 'order_one_chai',
+      accept: ['bhaiya ek chai dena', 'ek chai chahiye bhaiya', 'bhaiya ek chai de do', 'ek chai pilao bhaiya', 'भैया एक चाय देना', 'ek kadak chai dena bhaiya'] },
+    { id: 'bun', npc: kn('साथ में बन-मक्खन लेगा?', 'Saath mein bun-makhan lega?', 'Will you have a bun-makhan with it?'), instruction: 'Say yes, one bun-makhan too.',
+      suggest: { roman: 'Haan bhaiya, ek bun-makhan bhi dena.', text: 'हाँ भैया, एक बन-मक्खन भी देना।' }, intent: 'accept_bun_makhan',
+      accept: ['haan bhaiya ek bun makhan bhi dena', 'haan ek bun makhan de do', 'bun makhan bhi dena bhaiya', 'haan bhaiya bun makhan', 'हाँ भैया बन मक्खन', 'ek bun makhan bhi'] },
+  ]),
+  hi_dilli_auto: southern('hi_dilli_auto', 'Pappu', 'taxiDriver', 'hi', 'delhi', 'Chatty Delhi auto driver who haggles over the fare.', 'Ask an auto driver to take you to Connaught Place.', [
+    { id: 'where', npc: kn('कहाँ चलना है भाई?', 'Kahan chalna hai bhai?', 'Where do you want to go, brother?'), instruction: 'Ask if he will go to Connaught Place.',
+      suggest: { roman: 'Bhaiya, Connaught Place chaloge?', text: 'भैया, कनॉट प्लेस चलोगे?' }, intent: 'ask_go_cp',
+      accept: ['bhaiya connaught place chaloge', 'connaught place chaloge', 'cp chaloge bhaiya', 'bhaiya cp chalna hai', 'भैया कनॉट प्लेस चलोगे', 'connaught place jaana hai bhaiya'] },
+    { id: 'fare', npc: kn('दो सौ लगेंगे।', 'Do sau lagenge.', 'It will be two hundred.'), instruction: 'Say that is too much and offer one hundred rupees.',
+      suggest: { roman: 'Bahut zyada hai bhaiya, sau rupaye dunga.', text: 'बहुत ज़्यादा है भैया, सौ रुपये दूँगा।' }, intent: 'haggle_hundred',
+      accept: ['bahut zyada hai bhaiya sau rupaye dunga', 'zyada hai bhaiya sau dunga', 'sau rupaye dunga bhaiya', 'bahut mehnga hai sau doonga', 'सौ रुपये दूँगा भैया', 'bhaiya sau de dunga'] },
+  ]),
+});
+
 const V = 'valid', R = 'retry';
 // [npc, step index, label, reply, expected verdict, expected reason?]
 const CASES = [
@@ -188,6 +224,53 @@ const CASES = [
   ['te_auto', 0, 'TE auto wrong place', 'anna airport ki vastara', R],
   ['te_auto', 1, 'TE haggle suggested', 'Chala ekkuva anna, nooru rupayalu istanu.', V],
   ['te_auto', 1, 'TE haggle wrong amount', 'chala ekkuva anna, aravai rupayalu istanu', R],
+  // ---- Malayalam (lang ml) ----
+  ['ml_chayakada', 0, 'ML suggested phrase', 'Chettaa, oru chaya tharamo?', V],
+  ['ml_chayakada', 0, 'ML accepted variant', 'oru chaya venam chetta', V],
+  ['ml_chayakada', 0, 'ML Malayalam script', 'ഒരു ചായ തരാമോ', V],
+  ['ml_chayakada', 0, 'ML Manglish paraphrase', 'chetta one strong chaya tharamo please', V],
+  ['ml_chayakada', 0, 'ML Whisper misspelt', 'chetta oru chaaya tharumo', V],
+  ['ml_chayakada', 0, 'ML wrong item (coffee)', 'chetta oru coffee tharamo', R, 'off_task'],
+  ['ml_chayakada', 0, 'ML wrong number', 'chetta anju chaya tharamo', R],
+  ['ml_chayakada', 0, 'ML pure Hindi', 'bhaiya ek chai dena', R, 'language'],
+  ['ml_chayakada', 0, 'ML Hindi Devanagari', 'भैया एक चाय दो', R, 'language'],
+  ['ml_chayakada', 0, 'ML Tamil reply', 'anna oru tea kudunga', R, 'language'],
+  ['ml_chayakada', 0, 'ML pure English', 'Give me one tea please', R, 'language'],
+  ['ml_chayakada', 0, 'ML pizza + answer', 'i like pizza chetta oru chaya tharamo', R, 'extra'],
+  ['ml_chayakada', 0, 'ML off-task Malayalam', 'ഞാൻ നാളെ നാട്ടിൽ പോകും', R],
+  ['ml_chayakada', 0, 'ML gibberish', 'asdf qwer zxcv', R],
+  ['ml_chayakada', 0, 'ML rude', 'you stupid old man oru chaya tharamo', R, 'rude'],
+  ['ml_chayakada', 1, 'ML yes: roman', 'venam chetta, oru pazham pori kudi', V],
+  ['ml_chayakada', 1, 'ML yes: script', 'വേണം ചേട്ടാ, ഒരു പഴം പൊരി കൂടി', V],
+  ['ml_chayakada', 1, 'ML yes: vennam spelling', 'vennam chetta oru pazhampori', V],
+  ['ml_chayakada', 1, 'ML yes: partial', 'വേണം ചേട്ടാ', R],
+  ['ml_auto', 0, 'ML auto suggested', 'Chetta, Fort Kochi varumo?', V],
+  ['ml_auto', 0, 'ML auto script', 'ചേട്ടാ, ഫോർട്ട് കൊച്ചി വരുമോ', V],
+  ['ml_auto', 0, 'ML auto Hindi', 'bhaiya Fort Kochi chaloge', R, 'language'],
+  ['ml_auto', 0, 'ML auto English', 'Take me to Fort Kochi please', R, 'language'],
+  ['ml_auto', 0, 'ML auto Tamil (romanised)', 'anna Fort Kochi ku varuveengala, meter podunga', R, 'language'],
+  ['ml_chayakada', 0, 'ML Tamil Tanglish', 'anna enakku oru tea venum', R, 'language'],
+  ['ml_auto', 0, 'ML auto wrong place', 'chetta airport varumo', R],
+  ['ml_auto', 1, 'ML haggle suggested', 'Kooduthal aanu chetta, ezhupathu roopa tharam.', V],
+  ['ml_auto', 1, 'ML haggle wrong amount', 'kooduthal aanu chetta, aimbathu roopa tharam', R],
+  // ---- Delhi Hindi (lang hi, worldId delhi) ----
+  ['hi_dilli_chai', 0, 'DEL suggested phrase', 'Bhaiya, ek chai dena.', V],
+  ['hi_dilli_chai', 0, 'DEL Punjabi-flavoured', 'paaji ek chai dena', V],
+  ['hi_dilli_chai', 0, 'DEL slang paraphrase', 'oye bhaiya ek kadak chai pila de yaar', V],
+  ['hi_dilli_chai', 0, 'DEL Devanagari', 'भैया एक चाय देना', V],
+  ['hi_dilli_chai', 0, 'DEL wrong item (coffee)', 'bhaiya ek coffee dena', R, 'off_task'],
+  ['hi_dilli_chai', 0, 'DEL pure English', 'One tea please sir', R, 'language'],
+  ['hi_dilli_chai', 0, 'DEL Tamil reply', 'anna oru tea kudunga', R, 'language'],
+  ['hi_dilli_chai', 0, 'DEL pizza + answer', 'mujhe pizza pasand hai bhaiya ek chai dena', R, 'extra'],
+  ['hi_dilli_chai', 1, 'DEL bun: yes', 'haan bhaiya ek bun makhan bhi dena', V],
+  ['hi_dilli_chai', 1, 'DEL bun: slang', 'haan yaar, bun makhan bhi laga de', V],
+  ['hi_dilli_chai', 1, 'DEL bun: no (wrong)', 'nahi bhaiya sirf chai', R],
+  ['hi_dilli_auto', 0, 'DEL auto suggested', 'Bhaiya, Connaught Place chaloge?', V],
+  ['hi_dilli_auto', 0, 'DEL auto CP slang', 'paaji CP chalna hai, chalega', V],
+  ['hi_dilli_auto', 0, 'DEL auto English', 'Take me to Connaught Place please', R, 'language'],
+  ['hi_dilli_auto', 1, 'DEL haggle suggested', 'Bahut zyada hai bhaiya, sau rupaye dunga.', V],
+  ['hi_dilli_auto', 1, 'DEL haggle Punjabi', 'oye paaji bahut zyada hai, sau de dunga', V],
+  ['hi_dilli_auto', 1, 'DEL haggle wrong amount', 'bahut zyada hai bhaiya, pachaas rupaye dunga', R],
 ];
 
 const pad = (s, n) => String(s).padEnd(n).slice(0, n);

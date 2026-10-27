@@ -1,0 +1,38 @@
+// DTC conductor at the Red Fort bus stop.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('busConductor', {
+  name: 'Harpal', role: 'DTC conductor', site: 'Red Fort DTC bus stop', diff: 3,
+  voice: { rate: 1.1, pitch: 0.9 },
+  persona: 'Hurried but polite DTC conductor with a ticket machine, calling out stops, who keeps one eye on the clock and one on the coaching kids.',
+  goal: 'Ask if the bus goes to Connaught Place, buy a ticket, pay in exact change, and ask him to tell you the stop.',
+  steps: [
+    S('route', ['लाल क़िला से कनॉट प्लेस, कनॉट प्लेस! चढ़ना है?', 'Laal Qila se Connaught Place, Connaught Place! Chadhna hai?', 'Red Fort to Connaught Place! Are you getting on?'],
+      'Ask if this bus goes to Connaught Place.', ['Bhaiya, ye bus Connaught Place jaayegi?', 'भैया, ये बस कनॉट प्लेस जाएगी?'],
+      ['ye bus connaught place jaayegi', 'connaught place jaati hai ye bus', 'paaji ye bus cp jaayegi', 'bhaiya cp ki bus hai ye', 'kya ye bus connaught place jaayegi', 'ye cp jaayegi kya bhaiya', 'ये बस कनॉट प्लेस जाएगी'],
+      ['Ask if the bus goes there.', 'This bus = "ye bus". Will it go = "jaayegi".'],
+      ['हाँ हाँ, सीधी जाएगी। चढ़ जा जल्दी, पीछे जाम लगा है।', 'Haan haan, seedhi jaayegi. Chadh ja jaldi, peeche jaam laga hai.', 'Yes yes, it goes straight. Get on quickly, a jam is building behind.'],
+      ['कहाँ की बस पूछ रहा है? ज़ोर से बोल।', 'Kahaan ki bus puchh raha hai? Zor se bol.', 'Which bus are you asking about? Speak louder.']),
+    S('ticket', ['ठीक है। अंदर आ जा, कितनी टिकट बनाऊँ?', 'Theek hai. Andar aa ja, kitni ticket banaun?', 'Fine. Come inside, how many tickets shall I make?'],
+      'Ask for one ticket to Connaught Place.', ['Ek ticket dena, Connaught Place ka.', 'एक टिकट देना, कनॉट प्लेस का।'],
+      ['ek ticket connaught place ka dena', 'bhaiya ek ticket cp ka', 'ek ticket de do cp tak', 'paaji ek ticket cp di', 'ek ticket chahiye connaught place', 'connaught place ki ek ticket', 'एक टिकट कनॉट प्लेस का'],
+      ['Ask for one ticket and name the stop.', 'One ticket = "ek ticket". Of CP = "cp ka".'],
+      ['ये ले टिकट। पंद्रह रुपये हुए।', 'Ye le ticket. Pandrah rupaye hue.', 'Here is the ticket. That is fifteen rupees.'],
+      ['टिकट कहाँ की? पीछे लाइन लगी है भाई।', 'Ticket kahaan ki? Peeche line lagi hai bhai.', 'Ticket to where? There is a line behind you, brother.']),
+    S('change', ['पचास का नोट मत दे, छुट्टे नहीं हैं मेरे पास।', 'Pachaas ka note mat de, chhutte nahi hain mere paas.', 'Do not give a fifty, I have no change.'],
+      'Say you have exact change and hand it over.', ['Mere paas chhutte hain, ye lo.', 'मेरे पास छुट्टे हैं, ये लो।'],
+      ['mere paas chhutte hain ye lo', 'chhutte hain bhaiya ye lijiye', 'paaji chhutte hain mere paas', 'ye lo pandrah rupaye', 'bhaiya chhutte hain ye lo', 'mere paas pandrah rupaye hain', 'मेरे पास छुट्टे हैं'],
+      ['Say you have small change.', 'Change = "chhutte". I have = "mere paas hain".'],
+      ['वाह, छुट्टे वाला पैसेंजर! तू तो सबका फ़ेवरेट है।', 'Wah, chhutte wala passenger! Tu toh sabka favourite hai.', 'Wow, a passenger with change! You are everyone\'s favourite.'],
+      ['छुट्टे हैं या नहीं? हाँ-ना बोल बस।', 'Chhutte hain ya nahi? Haan-na bol bas.', 'Do you have change or not? Just say yes or no.']),
+    S('stop', ['बैठ जा सीट पर। कुछ और पूछना है?', 'Baith ja seat par. Kuch aur puchhna hai?', 'Sit on the seat. Anything else to ask?'],
+      'Ask him to tell you when Connaught Place comes.', ['Connaught Place aaye toh bata dena.', 'कनॉट प्लेस आए तो बता देना।'],
+      ['connaught place aaye toh bata dena', 'cp aaye to bata dena bhaiya', 'paaji cp aaye toh awaaz laga dena', 'bhaiya cp aane par bata dena', 'jab connaught place aaye tab bata do', 'mujhe cp par utaar dena', 'कनॉट प्लेस आए तो बताना'],
+      ['Ask him to tell you at the stop.', 'When it comes = "aaye toh". Tell me = "bata dena".'],
+      ['पक्का बेटा, कान लगाकर रख। आगे वाले गेट पर रहना।', 'Pakka beta, kaan lagakar rakh. Aage wale gate par rehna.', 'Sure, beta, keep your ears open. Stay near the front door.'],
+      ['क्या बता दूँ? पूरा बोल, स्टॉप का नाम बोल।', 'Kya bata dun? Poora bol, stop ka naam bol.', 'Tell what? Say it fully, say the stop name.']),
+  ],
+  outro: ['चल भाई, आगे कनॉट प्लेस आ रहा है! उतर जा।', 'Chal bhai, aage Connaught Place aa raha hai! Utar ja.', 'Come on brother, Connaught Place is coming! Get down.'],
+  learned: [['ye bus Connaught Place jaayegi?', 'does this bus go to Connaught Place?'], ['mere paas chhutte hain', 'I have change'], ['aaye toh bata dena', 'tell me when it comes']],
+  again: ['फिर वही बस? आ जा, सीट खाली है।', 'Phir wahi bus? Aa ja, seat khaali hai.', 'The same bus again? Come, a seat is free.'],
+});

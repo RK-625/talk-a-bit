@@ -1,0 +1,38 @@
+// Kochi Metro commuter reading the timetable on the platform.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('commuter', {
+  name: 'Anoop', role: 'metro commuter', site: 'Kochi Metro station platform, timetable board', diff: 3,
+  voice: { rate: 1.05, pitch: 0.95 },
+  persona: 'Office-goer with a teal lanyard checking his watch; he knows the Aluva train and that the first coach is for women.',
+  goal: 'Ask if the metro goes to Aluva, ask for the next train, ask where the women coach stops, and ask where to buy a ticket.',
+  steps: [
+    S('aluva', ['എന്താ മോളേ? ട്രെയിൻ നോക്കുകയാണോ?', 'Enthaa mole? Train nokkukayaano?', 'Yes, dear? Looking for a train?'],
+      'Ask if this metro goes to Aluva.', ['Ee metro Aluvayilekku pokumo?', 'ഈ മെട്രോ ആലുവയിലേക്ക് പോകുമോ?'],
+      ['aluvaykku pokumo', 'ee train aluva pokumo', 'metro aluva pokumo chetta', 'aluvayilekku ee metro', 'chetta aluva pokumo', 'ആലുവയ്ക്ക് പോകുമോ'],
+      'ask_metro_to_aluva', ['Ask if it goes to Aluva.', '"Pokumo?" = does it go?'],
+      ['പോകും. ഈ വശത്തുള്ള ട്രെയിൻ ആലുവയ്ക്കാണ്.', 'Pokum. Ee vashathulla train Aluvaykkaanu.', 'It does. The train on this side is for Aluva.'],
+      ['ഏത് സ്ഥലത്തേക്കാ?', 'Ethu sthalathekkaa?', 'To which place?']),
+    S('next', ['ടൈം ടേബിൾ ആ ബോർഡിലുണ്ട്. ഞാനും നോക്കുകയാ.', 'Time table aa boardilundu. Njaanum nokkukayaa.', 'The timetable is on that board. I am checking it too.'],
+      'Ask when the next train is.', ['Adutha train eppozhaa?', 'അടുത്ത ട്രെയിൻ എപ്പോഴാ?'],
+      ['adutha train eppol', 'next train eppo', 'adutha metro eppozhaanu', 'ethra minute kazhinjaal train', 'train eppol varum', 'അടുത്ത ട്രെയിൻ എപ്പോൾ'],
+      'ask_next_train', ['Ask about the next train.', '"Adutha" = next.'],
+      ['അഞ്ച് മിനിറ്റിനുള്ളിൽ വരും.', 'Anchu minuttinullil varum.', 'It will come within five minutes.'],
+      ['ട്രെയിൻ എപ്പോഴെന്നാണോ?', 'Train eppozhennaano?', 'You mean when is the train?']),
+    S('ladies', ['ആദ്യത്തെ കോച്ച് സ്ത്രീകൾക്കുള്ളതാ, ഓർക്കണേ.', 'Aadyathe coach sthreekalkkullathaa, orkkane.', 'The first coach is for women, remember.'],
+      'Ask where the first (women) coach stops.', ['Ladies coach evide nilkkum?', 'ലേഡീസ് കോച്ച് എവിടെ നിൽക്കും?'],
+      ['women coach evide', 'ladies coach evideyaanu', 'sthreekalude coach evide', 'first coach evide nilkkum', 'ladies coachinte aduthu evide', 'സ്ത്രീകളുടെ കോച്ച് എവിടെ'],
+      'ask_where_ladies_coach', ['Ask where the women coach stops.', '"Evide nilkkum?" = where will it stand?'],
+      ['ആ പിങ്ക് വരയുടെ അടുത്ത് നിന്നോളൂ.', 'Aa pink varayude aduthu ninnoloo.', 'Stand near that pink line.'],
+      ['ഏത് കോച്ച് എന്നാ ചോദിച്ചത്?', 'Ethu coach ennaa chodichathu?', 'Which coach did you ask about?']),
+    S('ticket', ['ടിക്കറ്റ് കാർഡ് ഉണ്ടോ? ഇല്ലെങ്കിൽ കൗണ്ടറിൽ വാങ്ങാം.', 'Ticket card undo? Illenkil counteril vaangaam.', 'Do you have a ticket card? If not, buy at the counter.'],
+      'Ask where to buy a ticket.', ['Ticket evide kittum chetta?', 'ടിക്കറ്റ് എവിടെ കിട്ടും ചേട്ടാ?'],
+      ['ticket evide vaangaam', 'ticket counter evide', 'ticket evideyaanu kittunnathu', 'chetta ticket evide', 'ticket vaangaan evide pokanam', 'ടിക്കറ്റ് എവിടെ വാങ്ങാം'],
+      'ask_where_ticket', ['Ask where tickets are sold.', '"Evide kittum?" = where will I get it?'],
+      ['ആ ജനലിൽ, ടിക്കറ്റ് ക്ലർക്ക് ഉണ്ട്.', 'Aa janalil, ticket clerk undu.', 'At that window, the ticket clerk is there.'],
+      ['ടിക്കറ്റാണോ വേണ്ടത്?', 'Ticketaano vendathu?', 'Is it a ticket you need?']),
+  ],
+  outro: ['ആലുവയിൽ നിന്ന് മൂന്നാർ ബസ് കിട്ടും, ഒന്ന് പോയി നോക്കൂ!', 'Aluvayil ninnu Munnar bus kittum, onnu poyi nokkoo!', 'You get a Munnar bus from Aluva, do go and see!'],
+  learned: [['Aluvayilekku pokumo?', 'does it go to Aluva?'], ['adutha train eppozhaa?', 'when is the next train?'], ['ticket evide kittum?', 'where do I get a ticket?']],
+  again: ['ട്രെയിൻ വരാറായി മോളേ.', 'Train varaaraayi mole.', 'The train is about to come, dear.'],
+});

@@ -1,0 +1,38 @@
+// Gurudwara sevadar at the Lotus Temple causeway gate.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('pilgrim', {
+  name: 'Balbir Singh', role: 'sevadar', site: 'Lotus Temple causeway gate', diff: 3,
+  voice: { rate: 0.95, pitch: 0.85 },
+  persona: 'Kind elderly sevadar in an orange turban, barefoot on the causeway with a thali of karah prasad, who talks about seva and keeps visitors quiet.',
+  goal: 'Greet him, ask the closing time, ask where to leave your shoes, and promise to stay silent.',
+  steps: [
+    S('greet', ['सत श्री अकाल, बेटा! कमल मंदिर देखने आए हो?', 'Sat Sri Akal, beta! Kamal Mandir dekhne aaye ho?', 'Sat Sri Akal, beta! Have you come to see the Lotus Temple?'],
+      'Greet him back with Sat Sri Akal.', ['Sat Sri Akal paaji, haan darshan karne aaya hoon.', 'सत श्री अकाल पाजी, हाँ दर्शन करने आया हूँ।'],
+      ['sat sri akal paaji', 'sat sri akal ji haan dekhne aaya hoon', 'sat sri akal paaji lotus temple dekhne aaya hoon', 'namaste paaji haan dekhne aaya hoon', 'sat sri akal ji darshan karne aaya hoon', 'haan ji paaji andar jaana hai', 'सत श्री अकाल पाजी'],
+      ['Greet him and say why you came.', '"Sat Sri Akal paaji" greets. I have come = "aaya hoon".'],
+      ['बहुत अच्छा! कड़ाह प्रसाद ले लो, पहले मुँह मीठा करो।', 'Bahut accha! Karah prasad le lo, pehle munh meetha karo.', 'Very good! Take some karah prasad, sweeten your mouth first.'],
+      ['सत श्री अकाल बोलो बेटा, ज़रा ऊँचे से।', 'Sat Sri Akal bolo beta, zara oonche se.', 'Say Sat Sri Akal, beta, a bit louder.']),
+    S('time', ['प्रसाद खाओ। मंदिर शाम को जल्दी बंद हो जाता है।', 'Prasad khao. Mandir shaam ko jaldi band ho jaata hai.', 'Eat the prasad. The temple closes early in the evening.'],
+      'Ask what time it closes.', ['Ye kitne baje band hota hai?', 'ये कितने बजे बंद होता है?'],
+      ['ye kitne baje band hota hai', 'paaji band kitne baje hota hai', 'mandir kitne baje tak khula hai', 'kab tak khula rehta hai ye', 'closing time kya hai paaji', 'kitne baje tak andar ja sakte hain', 'ये कितने बजे बंद होता है'],
+      ['Ask about the closing time.', 'At what time = "kitne baje". It closes = "band hota hai".'],
+      ['शाम पाँच बजे तक अंदर जा सकते हो। अभी बहुत वक़्त है।', 'Shaam paanch baje tak andar ja sakte ho. Abhi bahut waqt hai.', 'You can go in until five. There is plenty of time now.'],
+      ['टाइम पूछ रहे हो? फिर से बोलो बेटा।', 'Time puchh rahe ho? Phir se bolo beta.', 'Asking the time? Say it again, beta.']),
+    S('shoes', ['अंदर जूते-चप्पल नहीं चलते। बाहर उतार दो।', 'Andar joote-chappal nahi chalte. Bahar utaar do.', 'Shoes and sandals are not allowed inside. Take them off outside.'],
+      'Ask where to leave your shoes.', ['Joote kahaan utaarun, paaji?', 'जूते कहाँ उतारूँ, पाजी?'],
+      ['joote kahaan utaarun paaji', 'paaji chappal kahaan rakhun', 'jootey kidhar rakhne hain', 'joote rakhne ki jagah kahaan hai', 'shoes kahaan chhodun paaji', 'chappal kahaan utaarni hai', 'जूते कहाँ उतारूँ पाजी'],
+      ['Ask where your shoes go.', 'Shoes = "joote". Where do I take off = "kahaan utaarun".'],
+      ['वो रहा जूता-घर, टोकन लेते जाना। फ़िक्र मत करो।', 'Wo raha joota-ghar, token lete jaana. Fikr mat karo.', 'There is the shoe counter, take a token. Do not worry.'],
+      ['जूते वाली बात पूछ रहे हो? धीरे बोलो।', 'Joote wali baat puchh rahe ho? Dheere bolo.', 'Asking about shoes? Speak softly.']),
+    S('silence', ['अंदर पूरी शांति रखना। बात नहीं करनी, फ़ोटो भी नहीं।', 'Andar poori shaanti rakhna. Baat nahi karni, photo bhi nahi.', 'Keep complete silence inside. No talking, no photos.'],
+      'Promise to keep silent inside.', ['Ji paaji, andar bilkul shaanti rakhunga.', 'जी पाजी, अंदर बिल्कुल शांति रखूँगा।'],
+      ['ji paaji andar bilkul shaanti rakhunga', 'haan ji main chup rahunga andar', 'theek hai paaji koi awaaz nahi karunga', 'paaji main shaanti banaye rakhunga', 'ji bilkul chup rahunga', 'haan ji andar phone band rakhunga', 'जी पाजी, अंदर शांति रखूँगा'],
+      ['Promise silence.', 'I will keep = "rakhunga". Peace/silence = "shaanti".'],
+      ['शाबाश बेटा। मन शांत रखना, पढ़ाई का बोझ भी हल्का होगा।', 'Shabaash beta. Man shaant rakhna, padhai ka bojh bhi halka hoga.', 'Well done, beta. Keep your mind calm, the study burden will feel lighter.'],
+      ['चुप रहोगे या नहीं? पक्का बोलो।', 'Chup rahoge ya nahi? Pakka bolo.', 'Will you stay quiet or not? Say it firmly.']),
+  ],
+  outro: ['जाओ बेटा, पानी के बीच बैठकर थोड़ी देर आँखें बंद करना।', 'Jao beta, paani ke beech baithkar thodi der aankhen band karna.', 'Go, beta, sit by the water and close your eyes for a while.'],
+  learned: [['ye kitne baje band hota hai?', 'what time does this close?'], ['joote kahaan utaarun?', 'where should I take off my shoes?'], ['main shaanti rakhunga', 'I will keep silent']],
+  again: ['अरे बेटा, फिर आ गए! प्रसाद लोगे?', 'Arre beta, phir aa gaye! Prasad loge?', 'Oh beta, you are back! Will you take prasad?'],
+});

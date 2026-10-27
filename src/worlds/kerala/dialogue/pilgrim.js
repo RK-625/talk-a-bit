@@ -1,0 +1,38 @@
+// Devotee at the island chapel gate, Bolgatty.
+import { dialogue as D, step as S } from './kit.js';
+
+export default D('pilgrim', {
+  name: 'Joseph Chettan', role: 'devotee at the island chapel', site: 'Bolgatty island chapel gate', diff: 3,
+  voice: { rate: 0.95, pitch: 0.9 },
+  persona: 'Kind man with a basket of white flowers and candles, humming a hymn; he explains how to light a candle and that the same lane has a temple and a mosque.',
+  goal: 'Greet him, ask the chapel closing time, ask where to light a candle, and thank him.',
+  steps: [
+    S('greet', ['ദൈവം അനുഗ്രഹിക്കട്ടെ, കുട്ടീ. എവിടെ നിന്നാ?', 'Daivam anugrahikkatte, kutti. Evide ninnaa?', 'God bless you, child. Where are you from?'],
+      'Greet him.', ['Namaskaaram chetta, sukhamaano?', 'നമസ്കാരം ചേട്ടാ, സുഖമാണോ?'],
+      ['namaskaram chetta', 'sukhamaano chetta', 'hello chetta sukhamaano', 'namaskaram sukhamano', 'chetta namaskaram', 'സുഖമാണോ ചേട്ടാ'],
+      'greet_the_devotee', ['Greet him politely.', '"Sukhamaano?" = how are you?'],
+      ['സുഖം, സുഖം. ബോൾഗാട്ടി ദ്വീപിലേക്ക് സ്വാഗതം.', 'Sukham, sukham. Bolgatty dweepilekku swaagatham.', 'Fine, fine. Welcome to Bolgatty island.'],
+      ['ഒന്നൂടെ പറയൂ കുട്ടീ.', 'Onnoode parayoo kutti.', 'Say it again, child.']),
+    S('closing', ['പള്ളി അടയ്ക്കുന്നതിനു മുൻപ് ഉള്ളിൽ കയറിക്കോ.', 'Palli adaykkunnathinu munpu ullil kayarikko.', 'Go inside before the chapel closes.'],
+      'Ask what time it closes.', ['Palli ethra manikku adaykkum?', 'പള്ളി എത്ര മണിക്ക് അടയ്ക്കും?'],
+      ['ethra manikku adaykkum', 'palli eppol adaykkum', 'chapel ethra manikku close', 'adaykkunnath ethra manikku', 'palli ethra mani vare', 'പള്ളി എപ്പോൾ അടയ്ക്കും'],
+      'ask_closing_time', ['Ask the closing time.', '"Ethra manikku?" = at what time?'],
+      ['വൈകിട്ട് ആറ് മണിക്ക്. ധാരാളം സമയമുണ്ട്.', 'Vaikittu aaru manikku. Dhaaraalam samayamundu.', 'At six in the evening. Plenty of time.'],
+      ['സമയമാണോ ചോദിച്ചത്?', 'Samayamaano chodichathu?', 'Did you ask about the time?']),
+    S('candle', ['മെഴുകുതിരി കത്തിക്കണമെങ്കിൽ ആ കടയിൽ വാങ്ങിക്കോ.', 'Mezhukuthiri kathikkanamenkil aa kadayil vaangikko.', 'To light a candle, buy one at that stall.'],
+      'Ask where to light a candle.', ['Mezhukuthiri evide kathikkanam?', 'മെഴുകുതിരി എവിടെ കത്തിക്കണം?'],
+      ['candle evide kathikkanam', 'mezhukuthiri kathikkaan evide', 'candle kathikkaan evideyaanu', 'evide kathikkanam chetta', 'chapelil evide candle', 'മെഴുകുതിരി എവിടെ കത്തിക്കും'],
+      'ask_where_to_light_candle', ['Ask where to light it.', '"Mezhukuthiri" = candle.'],
+      ['ആ വിളക്കിന്റെ അടുത്ത്, ഇടത്തേക്ക്. പ്രാർത്ഥിച്ചോളൂ.', 'Aa vilakkinte aduthu, idatthekku. Praarthichooloo.', 'Near that lamp, to the left. Go and pray.'],
+      ['എന്താ വേണ്ടത്? മെഴുകുതിരിയോ?', 'Enthaa vendathu? Mezhukuthiriyo?', 'What do you need? A candle?']),
+    S('thanks', ['അടുത്ത ലെയ്നിൽ അമ്പലവും മസ്ജിദും ഉണ്ട്, കണ്ടോളൂ.', 'Aduttha laneil ambalavum masjidum undu, kandoloo.', 'The next lane has a temple and a mosque, go see them.'],
+      'Thank him.', ['Valare nanni chetta.', 'വളരെ നന്ദി ചേട്ടാ.'],
+      ['nanni chetta', 'thanks chetta', 'valare nanni', 'nanni chetta daivam anugrahikkatte', 'shari chetta nanni', 'നന്ദി ചേട്ടാ'],
+      'thank_the_devotee', ['Thank him warmly.', '"Valare nanni" = thank you very much.'],
+      ['ദൈവം നിന്നെ കാക്കട്ടെ, കുട്ടീ.', 'Daivam ninne kaakkatte, kutti.', 'May God protect you, child.'],
+      ['ഒന്നും പറഞ്ഞില്ലല്ലോ കുട്ടീ.', 'Onnum paranjillallo kutti.', 'You said nothing, child.']),
+  ],
+  outro: ['എല്ലാ മതക്കാരും ഇവിടെ ഒന്നാണ്, കേട്ടോ.', 'Ellaa mathakkaarum ivide onnaanu, kettoo.', 'People of all faiths are one here, you know.'],
+  learned: [['sukhamaano?', 'how are you?'], ['palli ethra manikku adaykkum?', 'what time does the chapel close?'], ['mezhukuthiri evide kathikkanam?', 'where do I light a candle?']],
+  again: ['പ്രാർത്ഥിച്ചോ കുട്ടീ?', 'Praarthicho kutti?', 'Did you pray, child?'],
+});
