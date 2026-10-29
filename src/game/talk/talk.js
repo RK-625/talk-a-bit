@@ -18,7 +18,7 @@
  */
 import * as THREE from 'three';
 import { createTalkUI } from './ui.js';
-import { speak, cancel as cancelSpeech } from './speak.js';
+import { speak, preload, cancel as cancelSpeech } from './speak.js';
 import { phrasebook } from './phrasebook.js';
 import { classify, reasonLine } from '../classifier.js';
 import { GREETINGS, GREETINGS_EN } from './sampleDialogue.js';
@@ -241,9 +241,10 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     t.hold?.(true);
     if (!dlg) { // ambient citizen: a short spoken greeting
       const pool = t.lang === 'en' ? GREETINGS_EN : greetings;
-      const line = pool[(hash(t.id ?? t.role) + Math.floor(Math.random() * 7)) % pool.length];
+      const gi = (hash(t.id ?? t.role) + Math.floor(Math.random() * 7)) % pool.length, line = pool[gi];
       amb = { t, until: performance.now() + 3200, line, q0 }; state = 'ambient';
-      speak(line.text, { lang: speechLang(t.lang), voice: { rate: 1, pitch: 1 } });
+      const lineId = pool === GREETINGS_EN ? `shared/greetings-en/g${gi}` : pool === GREETINGS ? null : `${worldId}/_greetings/g${gi}`; // ids from scripts/voices.mjs
+      speak(line.text, { lang: speechLang(t.lang), voice: { rate: 1, pitch: 1 }, lineId });
       return;
     }
     finishGuide(t);
@@ -258,12 +259,12 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     runStep();
   }
 
-  function say(line, { react = false, wait = true } = {}) {
+  function say(line, { react = false, wait = true, id = null } = {}) {
     const dlg = conv?.dlg;
     ui.setNpc(line, { react });
     ui.setSpeaking(true);
     const tok = conv?.token;
-    const p = speak(dlg?.lang === 'en' || conv?.t.lang === 'en' ? (line.text || line.roman) : (line.text || line.roman), { lang: speechLang(dlg?.lang ?? conv?.t.lang), voice: dlg?.voice ?? {} })
+    const p = speak(dlg?.lang === 'en' || conv?.t.lang === 'en' ? (line.text || line.roman) : (line.text || line.roman), { lang: speechLang(dlg?.lang ?? conv?.t.lang), voice: dlg?.voice ?? {}, lineId: id })
       .then(() => { if (conv && conv.token === tok) ui.setSpeaking(false); });
     return wait ? p : Promise.resolve();
   }
@@ -273,7 +274,10 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     c.attempt = 0; state = 'npc';
     ui.resetRow();
     ui.setStep({ instruction: step.instruction, suggest: step.suggest });
-    say(c.i === 0 && c.dlg.again && doneIds.has(c.dlg.id) ? c.dlg.again : step.npc, { wait: false }); // "phir aaya?" opener on a repeat visit
+    const lid = (k) => (c.dlg.id ? `${worldId}/${c.dlg.id}/${k}` : null); // pre-generated voice line ids (scripts/voices.mjs)
+    const again = c.i === 0 && c.dlg.again && doneIds.has(c.dlg.id);
+    say(again ? c.dlg.again : step.npc, { wait: false, id: lid(again ? 'again' : `${step.id}-npc`) }); // "phir aaya?" opener on a repeat visit
+    if (step.onValid) preload(lid(`${step.id}-valid`)); if (step.onRetry) preload(lid(`${step.id}-retry`)); // warm the likely next lines
     ui.setBusy(false); state = 'await';
   }
 
@@ -303,14 +307,14 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     state = 'react'; ui.flashRetry();
     ui.setHint(hint, c.attempt); ui.setReason(reasonLine(res.reason, c.dlg.lang));
     ui.setBusy(false); ui.focusInput(); state = 'await';
-    await say(step.onRetry ?? (FALLBACK_RETRY[c.dlg.lang] ?? FALLBACK_RETRY.hi), { react: true, wait: false });
+    await say(step.onRetry ?? (FALLBACK_RETRY[c.dlg.lang] ?? FALLBACK_RETRY.hi), { react: true, wait: false, id: step.onRetry && c.dlg.id ? `${worldId}/${c.dlg.id}/${step.id}-retry` : null });
   }
 
   async function advance(step, assisted) {
     const c = conv, tok = c.token; state = 'react';
     if (!assisted) ui.flashValid();
     ui.setHint(null, 0);
-    await Promise.all([say(step.onValid ?? (FALLBACK_VALID[c.dlg.lang] ?? FALLBACK_VALID.hi), { wait: true }), sleep(1300)]);
+    await Promise.all([say(step.onValid ?? (FALLBACK_VALID[c.dlg.lang] ?? FALLBACK_VALID.hi), { wait: true, id: step.onValid && c.dlg.id ? `${worldId}/${c.dlg.id}/${step.id}-valid` : null }), sleep(1300)]);
     if (!conv || conv.token !== tok) return;
     if (++c.i < c.dlg.steps.length) return runStep();
     outro();
@@ -322,7 +326,7 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     const learned = (c.dlg.learned ?? []).length ? c.dlg.learned : c.dlg.steps.filter((s) => s.suggest).map((s) => ({ roman: s.suggest.roman, en: s.instruction, text: s.suggest.text }));
     if (c.dlg.id && !doneIds.has(c.dlg.id)) { doneIds.add(c.dlg.id); try { localStorage.setItem('talkabit.done.v1', JSON.stringify([...doneIds])); } catch { /* storage blocked */ } }
     phrasebook.add(c.dlg.name ?? c.t.name ?? (NPC_LABEL[worldId] ?? 'Mumbaikar'), worldId, learned);
-    const p = c.dlg.outro ? say(c.dlg.outro, { wait: true }) : Promise.resolve();
+    const p = c.dlg.outro ? say(c.dlg.outro, { wait: true, id: c.dlg.id ? `${worldId}/${c.dlg.id}/outro` : null }) : Promise.resolve();
     ui.showReward({ learned });
     state = 'reward';
     await p;

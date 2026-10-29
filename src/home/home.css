@@ -115,6 +115,17 @@ html.home { overflow-x: hidden; }
 .st-sub { margin-top: 3px; padding-top: 3px; border-top: 1.5px solid rgba(43,42,51,.35); font-size: 15px; letter-spacing: .03em; opacity: .85; }
 .st-date { font-size: 15px; opacity: .8; }
 @media (min-width: 1000px) { .stamp { position: absolute; top: -8px; right: 0; margin: 0; } }
+/* voice credit: the mint twin of the stamp, pinned top-left on desktop */
+.voice-stamp { width: 200px; transform: rotate(-3deg); }
+.voice-stamp .stamp-in { background: #dcefe6 border-box; gap: 3px; }
+.vs-top { display: flex; align-items: center; gap: 5px; font-size: 16px; }
+.vs-logo { display: block; width: 96px; height: auto; margin: 1px 0; }
+.vs-sub { padding-top: 3px; border-top: 1.5px solid rgba(43,42,51,.3); font-size: 14px; letter-spacing: .03em; opacity: .85; white-space: nowrap; }
+.vs-langs { max-width: 150px; font-size: 13px; line-height: 1.35; opacity: .85; }
+.vs-langs b { font-weight: 400; }
+.vs-langs .dv { font-family: 'Tiro Devanagari Hindi', serif; } .vs-langs .kn { font-family: 'Baloo Tamma 2', sans-serif; } .vs-langs .ta { font-family: 'Baloo Thambi 2', sans-serif; }
+.vs-langs .te { font-family: 'Baloo Tammudu 2', sans-serif; } .vs-langs .ml { font-family: 'Baloo Chettan 2', sans-serif; }
+@media (min-width: 1000px) { .voice-stamp { right: auto; left: 0; top: 0; } }
 
 /* ---- card characters: only transform/opacity animate, inside the SVG, so the card box never moves ---- */
 .wave { transform-box: fill-box; transform-origin: 0% 100%; animation: wave 1.5s ease-in-out infinite alternate; }
@@ -124,6 +135,6 @@ html.home { overflow-x: hidden; }
 .bub { transform-box: fill-box; transform-origin: 20% 100%; transition: transform .25s cubic-bezier(.2,.9,.3,1.5); }
 .card:hover .bub, .card:focus-visible .bub { transform: scale(1.12) rotate(-2.5deg); }
 footer .fo-hash { font-weight: 700; opacity: 1; }
-@media (max-width: 999px) { .hero-head { display: flex; flex-direction: column; align-items: center; } .hero-head > * { max-width: 100%; } .stamp { order: 1; margin: 20px 0 0; } .squig { order: 2; } }
+@media (max-width: 999px) { .hero-head { display: flex; flex-direction: column; align-items: center; } .hero-head > * { max-width: 100%; } .stamp { order: 1; margin: 20px 0 0; } .voice-stamp { order: 1; margin-top: 14px; } .squig { order: 2; } }
 @media (max-width: 700px) { .flow-svg { height: 140px; } }
 @media (prefers-reduced-motion: reduce) { .wave { animation: none; } .bub, .stamp { transition: none; } }

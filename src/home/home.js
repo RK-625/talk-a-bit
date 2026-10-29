@@ -5,6 +5,7 @@
  * To add a world: add an entry to WORLDS below (and to the registry in src/main.js).
  */
 import './home.css';
+import sarvamLogo from './sarvam-wordmark.svg'; // official wordmark, assets.sarvam.ai/assets/brand/logos
 
 const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Figtree:wght@400;500;700&family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&family=Baloo+Thambi+2:wght@400;600&family=Baloo+Tammudu+2:wght@400;600&family=Baloo+Chettan+2:wght@400;600&display=swap';
 const INK = '#2b2a33';
@@ -791,6 +792,17 @@ const STAMP = `
   </span>
 </a>`;
 
+// the voice credit: a second, smaller ticket (mint, tilted the other way) for the NPC voices, which are Sarvam Bulbul text-to-speech.
+const VOICE_STAMP = `
+<a class="stamp voice-stamp" href="https://www.sarvam.ai/apis/text-to-speech" target="_blank" rel="noopener" aria-label="Character voices by Sarvam AI, Bulbul text-to-speech">
+  <span class="stamp-in">
+    <span class="vs-top"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="#1f6f68" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/></svg>Voices by</span>
+    <img class="vs-logo" src="${sarvamLogo}" alt="Sarvam AI" width="96" height="15">
+    <span class="vs-sub">Bulbul text-to-speech</span>
+    <span class="vs-langs"><b class="dv">हिंदी</b> · <b class="kn">ಕನ್ನಡ</b> · <b class="ta">தமிழ்</b> · <b class="te">తెలుగు</b> · <b class="ml">മലയാളം</b></span>
+  </span>
+</a>`;
+
 export function mountHome() {
   document.documentElement.classList.add('home');
   document.title = 'Talk-a-bit';
@@ -802,6 +814,7 @@ export function mountHome() {
     <main class="home-page">
     <header class="hero-head">
       ${STAMP}
+      ${VOICE_STAMP}
       <p class="kicker">a small game for shy talkers</p>
       <h1 class="wm" aria-label="Talk-a-bit">${WORDMARK}</h1>
       <p class="tagline">Practise the language of the street, one small talk at a time.</p>
