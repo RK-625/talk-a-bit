@@ -221,24 +221,26 @@ export function population4(h) {
     return base;
   };
   const fillAt = (d, b) => { const dir = snap(d, b); return { dir, fwd: tangentTo(dir, POLE).applyAxisAngle(dir, rnd() * 6.28), radius: null }; };
+  /** a FILL person who is just standing about strolls a small loop round their spot instead (npcs.js stroll) */
+  const strl = (seed, kind, loop, id, p, look) => N.stroll(seed, { kind, loop, id, tweak: tw(look) }, p.dir);
   const FILL = [
     () => cit(601, 'kid', 'kite', 'rail-kite-kid', fillAt(50.5, -95.5), { ...shirt(P.sky, P.khaki, { outfit: 'shirtShorts', topPattern: 'checks' }), hair: { style: 'messy', color: 0x2b2330 }, acc: [], footwear: 'bare' }),
-    () => cit(602, 'woman', 'chat', 'lane-aunty-gossip', fillAt(82.2, 84.8), { ...saree(P.rose, P.sky, P.saffron), hair: { style: 'bun', flower: true }, face: { bindi: true, specs: false }, acc: [{ name: 'jhola', color: P.lilac }] }),
-    () => cit(603, 'kid', 'wave', 'east-schoolgirl', fillAt(107.5, -62.8), { ...kurta(P.white, P.navy, { sleeves: 'short' }), hair: { style: 'plait', color: 0x2b2330 }, face: { lashes: true, smile: 'big' }, acc: ['backpack'], footwear: 'shoes', footColor: P.white }),
+    () => strl(602, 'woman', 'chat', 'lane-aunty-gossip', fillAt(82.2, 84.8), { ...saree(P.rose, P.sky, P.saffron), hair: { style: 'bun', flower: true }, face: { bindi: true, specs: false }, acc: [{ name: 'jhola', color: P.lilac }] }),
+    () => strl(603, 'kid', 'wave', 'east-schoolgirl', fillAt(107.5, -62.8), { ...kurta(P.white, P.navy, { sleeves: 'short' }), hair: { style: 'plait', color: 0x2b2330 }, face: { lashes: true, smile: 'big' }, acc: ['backpack'], footwear: 'shoes', footColor: P.white }),
     () => per('tourist', 604, 'gateway-road-tourist', fillAt(129.9, 15.3), { skin: 0xf6d2b4, top: P.mint, topPattern: 'floral', outfit: 'shirtShorts', hair: { style: 'cap', hat: P.butter, color: 0x9a5b32 } }, { loop: 'snap' }),
-    () => cit(605, 'elder', 'idle', 'scrub-elder-umbrella', fillAt(105.7, -102.9), { ...kurta(P.sand, 0xf3ecd9), hair: { style: 'topi', hat: P.white, color: GREY }, face: { moustache: 'thick', specs: true }, acc: [{ name: 'umbrella', color: P.teal, color2: P.cream }] }),
-    () => cit(606, 'man', 'phone', 'east-road-rickshaw-driver', fillAt(46, -49.5), { outfit: 'uniform', top: P.khaki, topPattern: 'belt', top2: 0x6c5d58, bottom: 0xc9b87e, hair: { style: 'short', color: 0x2b2330 }, face: { moustache: 'thick' }, acc: ['phone'], footwear: 'chappal' }),
-    () => cit(607, 'teen', 'phone', 'seaview-selfie-teen', fillAt(109.1, 122.6), { ...shirt(P.pink, P.denim, { topPattern: 'dots' }), hair: { style: 'messy', color: 0x2b2330 }, acc: ['phone', 'sunglasses'], footwear: 'shoes' }),
-    () => cit(608, 'woman', 'idle', 'bridge-road-shopper', fillAt(139.8, 123.2), { ...kurta(P.terracotta, P.cream, { sleeves: 'short' }), hair: { style: 'plait' }, face: { bindi: true }, acc: ['sabziBag', { name: 'jhola', color: P.teal }] }),
-    () => cit(609, 'teen', 'idle', 'juhu-road-ball-teen', fillAt(104.2, 174.8), { ...shirt(P.teal, P.khaki, { outfit: 'shirtShorts', topPattern: 'stripes' }), hair: { style: 'cap', hat: P.sky, color: 0x2b2330 }, acc: ['ball'], footwear: 'shoes', footColor: P.red }),
+    () => strl(605, 'elder', 'idle', 'scrub-elder-umbrella', fillAt(105.7, -102.9), { ...kurta(P.sand, 0xf3ecd9), hair: { style: 'topi', hat: P.white, color: GREY }, face: { moustache: 'thick', specs: true }, acc: [{ name: 'umbrella', color: P.teal, color2: P.cream }] }),
+    () => strl(606, 'man', 'phone', 'east-road-rickshaw-driver', fillAt(46, -49.5), { outfit: 'uniform', top: P.khaki, topPattern: 'belt', top2: 0x6c5d58, bottom: 0xc9b87e, hair: { style: 'short', color: 0x2b2330 }, face: { moustache: 'thick' }, acc: ['phone'], footwear: 'chappal' }),
+    () => strl(607, 'teen', 'phone', 'seaview-selfie-teen', fillAt(109.1, 122.6), { ...shirt(P.pink, P.denim, { topPattern: 'dots' }), hair: { style: 'messy', color: 0x2b2330 }, acc: ['phone', 'sunglasses'], footwear: 'shoes' }),
+    () => strl(608, 'woman', 'idle', 'bridge-road-shopper', fillAt(139.8, 123.2), { ...kurta(P.terracotta, P.cream, { sleeves: 'short' }), hair: { style: 'plait' }, face: { bindi: true }, acc: ['sabziBag', { name: 'jhola', color: P.teal }] }),
+    () => strl(609, 'teen', 'idle', 'juhu-road-ball-teen', fillAt(104.2, 174.8), { ...shirt(P.teal, P.khaki, { outfit: 'shirtShorts', topPattern: 'stripes' }), hair: { style: 'cap', hat: P.sky, color: 0x2b2330 }, acc: ['ball'], footwear: 'shoes', footColor: P.red }),
     () => cit(610, 'elder', 'news', 'antilia-lane-walker', fillAt(74.5, 141.2), { ...shirt(P.white, 0x9a9ab4, { sleeves: 'long' }), hair: { style: 'cap', hat: P.white, color: GREY }, face: { specs: true }, acc: [], footwear: 'shoes', footColor: P.white }),
-    () => cit(611, 'woman', 'idle', 'chawl-lane-vegetable-woman', fillAt(44.9, -175.1), { ...saree(P.butter, P.olive, P.rose), hair: { style: 'bun', color: GREY }, face: { bindi: true }, acc: ['sabziBag'] }),
-    () => cit(612, 'man', 'wave', 'chawl-lane-milkman', fillAt(44.7, 112.5), { ...shirt(P.cream, P.khaki, { sleeves: 'long' }), hair: { style: 'cap', hat: P.sky, color: 0x2b2330 }, face: { moustache: 'thin' }, acc: ['kettle'], footwear: 'chappal' }),
-    () => cit(613, 'woman', 'watch', 'deco-office-woman', fillAt(74.5, 63), { ...shirt(P.white, 0x7f8fb5, { sleeves: 'short' }), hair: { style: 'bun' }, face: { lashes: true }, acc: ['briefcase', 'watch'], footwear: 'shoes' }),
-    () => cit(614, 'kid', 'idle', 'east-field-ball-kid', fillAt(114.3, -82.2), { ...shirt(P.lilac, P.olive, { outfit: 'shirtShorts' }), hair: { style: 'short', color: 0x2b2330 }, acc: ['ball'], footwear: 'bare' }),
+    () => strl(611, 'woman', 'idle', 'chawl-lane-vegetable-woman', fillAt(44.9, -175.1), { ...saree(P.butter, P.olive, P.rose), hair: { style: 'bun', color: GREY }, face: { bindi: true }, acc: ['sabziBag'] }),
+    () => strl(612, 'man', 'wave', 'chawl-lane-milkman', fillAt(44.7, 112.5), { ...shirt(P.cream, P.khaki, { sleeves: 'long' }), hair: { style: 'cap', hat: P.sky, color: 0x2b2330 }, face: { moustache: 'thin' }, acc: ['kettle'], footwear: 'chappal' }),
+    () => strl(613, 'woman', 'watch', 'deco-office-woman', fillAt(74.5, 63), { ...shirt(P.white, 0x7f8fb5, { sleeves: 'short' }), hair: { style: 'bun' }, face: { lashes: true }, acc: ['briefcase', 'watch'], footwear: 'shoes' }),
+    () => strl(614, 'kid', 'idle', 'east-field-ball-kid', fillAt(114.3, -82.2), { ...shirt(P.lilac, P.olive, { outfit: 'shirtShorts' }), hair: { style: 'short', color: 0x2b2330 }, acc: ['ball'], footwear: 'bare' }),
     () => cit(615, 'man', 'bat', 'field-batting-uncle', fillAt(72, -152.6), { ...shirt(P.sand, P.khaki, { outfit: 'shirtShorts' }), hair: { style: 'short', color: GREY }, face: { moustache: 'thick' }, acc: ['cricketBat'], footwear: 'shoes', footColor: P.white }),
-    () => cit(616, 'woman', 'phone', 'field-phone-woman', fillAt(75.9, -100.9), { ...kurta(P.lilac, P.denim, { sleeves: 'short' }), hair: { style: 'plait' }, face: { specs: true, bindi: true }, acc: ['phone'] }),
-    () => cit(617, 'teen', 'idle', 'north-field-backpacker-teen', fillAt(103.8, -132.7), { ...shirt(P.mint, P.navy, { topPattern: 'checks', sleeves: 'long' }), hair: { style: 'messy', color: 0x2b2330 }, face: { specs: true }, acc: ['backpack'], footwear: 'shoes' }),
+    () => strl(616, 'woman', 'phone', 'field-phone-woman', fillAt(75.9, -100.9), { ...kurta(P.lilac, P.denim, { sleeves: 'short' }), hair: { style: 'plait' }, face: { specs: true, bindi: true }, acc: ['phone'] }),
+    () => strl(617, 'teen', 'idle', 'north-field-backpacker-teen', fillAt(103.8, -132.7), { ...shirt(P.mint, P.navy, { topPattern: 'checks', sleeves: 'long' }), hair: { style: 'messy', color: 0x2b2330 }, face: { specs: true }, acc: ['backpack'], footwear: 'shoes' }),
     () => per('chanaSeller', 618, 'beach-road-peanut-seller', fillAt(111.1, -166.2), { bottom: P.lilac }),
   ];
   FILL.forEach((f) => guard(f));

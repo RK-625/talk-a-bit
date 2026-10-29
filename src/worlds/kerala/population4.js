@@ -208,24 +208,26 @@ export function population4(h) {
     return base;
   };
   const fillAt = (d, b) => { const dir = snap(d, b); return { dir, fwd: tangentTo(dir, POLE).applyAxisAngle(dir, rnd() * 6.28), radius: null }; };
+  /** a FILL person who is just standing about strolls a small loop round their spot instead (npcs.js stroll) */
+  const strl = (seed, kind, loop, id, p) => N.stroll(seed, { kind, loop, id }, p.dir);
   const FILL = [
     () => cit(601, 'kid', 'kite', 'rail-kite-kid', fillAt(50.5, -95.5)),
-    () => cit(602, 'woman', 'chat', 'lane-aunty-gossip', fillAt(82.2, 84.8)),
-    () => cit(603, 'kid', 'wave', 'east-schoolgirl', fillAt(107.5, -62.8)),
+    () => strl(602, 'woman', 'chat', 'lane-aunty-gossip', fillAt(82.2, 84.8)),
+    () => strl(603, 'kid', 'wave', 'east-schoolgirl', fillAt(107.5, -62.8)),
     () => per('tourist', 604, 'gateway-road-tourist', fillAt(129.9, 15.3), { loop: 'snap' }),
-    () => cit(605, 'elder', 'idle', 'scrub-elder-umbrella', fillAt(105.7, -102.9)),
-    () => cit(606, 'man', 'phone', 'east-road-rickshaw-driver', fillAt(46, -49.5)),
-    () => cit(607, 'teen', 'phone', 'seaview-selfie-teen', fillAt(109.1, 122.6)),
-    () => cit(608, 'woman', 'idle', 'bridge-road-shopper', fillAt(139.8, 123.2)),
-    () => cit(609, 'teen', 'idle', 'juhu-road-ball-teen', fillAt(104.2, 174.8)),
+    () => strl(605, 'elder', 'idle', 'scrub-elder-umbrella', fillAt(105.7, -102.9)),
+    () => strl(606, 'man', 'phone', 'east-road-rickshaw-driver', fillAt(46, -49.5)),
+    () => strl(607, 'teen', 'phone', 'seaview-selfie-teen', fillAt(109.1, 122.6)),
+    () => strl(608, 'woman', 'idle', 'bridge-road-shopper', fillAt(139.8, 123.2)),
+    () => strl(609, 'teen', 'idle', 'juhu-road-ball-teen', fillAt(104.2, 174.8)),
     () => cit(610, 'elder', 'news', 'antilia-lane-walker', fillAt(74.5, 141.2)),
-    () => cit(611, 'woman', 'idle', 'chawl-lane-vegetable-woman', fillAt(44.9, -175.1)),
-    () => cit(612, 'man', 'wave', 'chawl-lane-milkman', fillAt(44.7, 112.5)),
-    () => cit(613, 'woman', 'watch', 'deco-office-woman', fillAt(74.5, 63)),
-    () => cit(614, 'kid', 'idle', 'east-field-ball-kid', fillAt(114.3, -82.2)),
+    () => strl(611, 'woman', 'idle', 'chawl-lane-vegetable-woman', fillAt(44.9, -175.1)),
+    () => strl(612, 'man', 'wave', 'chawl-lane-milkman', fillAt(44.7, 112.5)),
+    () => strl(613, 'woman', 'watch', 'deco-office-woman', fillAt(74.5, 63)),
+    () => strl(614, 'kid', 'idle', 'east-field-ball-kid', fillAt(114.3, -82.2)),
     () => cit(615, 'man', 'bat', 'field-batting-uncle', fillAt(72, -152.6)),
-    () => cit(616, 'woman', 'phone', 'field-phone-woman', fillAt(75.9, -100.9)),
-    () => cit(617, 'teen', 'idle', 'north-field-backpacker-teen', fillAt(103.8, -132.7)),
+    () => strl(616, 'woman', 'phone', 'field-phone-woman', fillAt(75.9, -100.9)),
+    () => strl(617, 'teen', 'idle', 'north-field-backpacker-teen', fillAt(103.8, -132.7)),
     () => per('chanaSeller', 618, 'beach-road-peanut-seller', fillAt(111.1, -166.2)),
   ];
   FILL.forEach((f) => guard(f));

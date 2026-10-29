@@ -16,6 +16,10 @@ import { flagShadows } from './world.js';
 import { talkHook } from './talkHook.js';
 
 const POLE = new THREE.Vector3(0, 1, 0);
+/** citizen loops that keep playing while they walk (the rest only play while they pause) */
+const WALK_LOOP = new Set(['phone', 'news']);
+/** loops of someone just standing about, who may stroll instead */
+const STROLL_LOOPS = new Set(['idle', 'phone', 'wave', 'watch', 'chat']);
 const _q = new THREE.Quaternion(), _m = new THREE.Matrix4(), _v = new THREE.Vector3(), _s = new THREE.Sphere();
 
 export function npcs(W, S) {
@@ -159,7 +163,26 @@ export function npcs(W, S) {
     flagShadows(g);
     W.root.add(g);
     const actor = W.actors.add(g, { type: 'spline', dirs, speed, closed: !!o.closed, phase }, { radiusFn: (d) => planet.getWalkRadius(d) + (o.lift ?? 0), collider: o.solid === false ? null : { radius: g.userData.radius ?? 0.45, height: 2.4 } });
-    return register(g, { g, id: o.id, convo: o.convo, dir: actor.dir, role, walker: true, solid: o.solid !== false, actor, speed, lookAt: o.lookAt !== false, wave: !!o.wave, waved: false, waveCool: 0, look: false });
+    return register(g, { g, id: o.id, convo: o.convo, dir: actor.dir, role, walker: true, solid: o.solid !== false, actor, speed, lookAt: o.lookAt !== false, wave: !!o.wave, waved: false, waveCool: 0, look: false, stroll: o.stroll ? { loop: o.stroll.loop ?? null, walking: true, t: 4 + ((o.seed ?? 1) % 7) } : null });
+  }
+  /** a free citizen strolling a small, slightly wobbly loop (about 4 units across) round their spot, on ground clear of stalls, walls and
+   *  people; they pause now and then in their own loop (phone, wave, idle ...) and stop for the player (see update). No clear loop: they stand. */
+  function stroll(seed, o, dir, r = 2.1) {
+    if (!STROLL_LOOPS.has(o.loop)) return citizen(seed, o, dir, tangentTo(dir, POLE), null); // busy (selling, praying, batting ...): stays put
+    const clear = (d) => !W.colliders.list.some((k) => !k.update && k.height >= 0.3 && !k.a && d.dot(k.dir) > Math.cos((k.radius + 0.55) / R));
+    const t = tangentTo(dir, POLE), b = new THREE.Vector3().crossVectors(dir, t).normalize();
+    const way = (a) => t.clone().multiplyScalar(Math.cos(a)).addScaledVector(b, Math.sin(a)).normalize();
+    const wob = Array.from({ length: 8 }, (_, i) => 0.75 + 0.5 * (((seed * 7919 + i * 104729) % 97) / 97));
+    const ring = (c) => wob.map((f, i) => stepAlong(c, way((i / 8) * Math.PI * 2 + seed), r * f));
+    let dirs = null; // nearest centre (rings of 1 unit outward) whose whole loop is clear
+    for (let s = 0; s <= 3 && !dirs; s++) for (let j = 0; j < (s ? 8 : 1) && !dirs; j++) {
+      const c = s ? stepAlong(dir, way((j / 8) * Math.PI * 2), s) : dir, pts = ring(c);
+      if (pts.every(clear)) dirs = pts;
+    }
+    if (!dirs) return citizen(seed, o, dir, tangentTo(dir, POLE), null);
+    const n = walker('citizen', { ...o, seed, closed: true, stroll: { loop: o.loop } }, dirs, 0.8, (seed % 11) / 11);
+    n.g.userData.playLoop(WALK_LOOP.has(o.loop) ? o.loop : 'walk');
+    return n;
   }
 
   // ---- birds: pigeons on the plaza, crows on wires and roofs -------------------------------------------------------------
@@ -219,7 +242,15 @@ export function npcs(W, S) {
       const n = list[i];
       const lv = n.g.userData.lodLevel ? n.g.userData.lodLevel() : (n.g.userData.lod ? 0 : 0);
       if (lv !== 0 && !(n.g.userData.people && n.g.visible)) { if (n.walker) n.actor.speed = n.speed; continue; }
-      if (n.walker && n.solid) { // wait for Chotu if he stands in the way
+      if (n.stroll) { // strolling: walk a while, pause a while in their own loop; stand still facing the player while they are close
+        const st = n.stroll, near = Math.acos(THREE.MathUtils.clamp(pu.dot(n.actor.dir), -1, 1)) * R < 4.5;
+        st.t -= dt;
+        if (!near && st.t <= 0) { st.walking = !st.walking; st.t = st.walking ? 7 + Math.random() * 7 : 2.5 + Math.random() * 3.5; }
+        const go = st.walking && !near;
+        if (go !== st.went) { st.went = go; n.g.userData.playLoop(go ? (WALK_LOOP.has(st.loop) ? st.loop : 'walk') : st.loop); }
+        n.actor.speed = go ? n.speed : 0;
+      }
+      else if (n.walker && n.solid) { // wait for Chotu if he stands in the way
         const dw = Math.acos(THREE.MathUtils.clamp(pu.dot(n.actor.dir), -1, 1)) * R;
         if (dw < 2.6) { // wait for Chotu; if he stays in the way for a moment, turn round (never deadlock a narrow causeway)
           n.actor.speed = 0; n.blocked = (n.blocked ?? 0) + dt;
@@ -286,6 +317,6 @@ export function npcs(W, S) {
     }
   }
 
-  return { npcs: list, birds, update, crowd, person, citizen, couple, walker, addPerson, bird, frustum };
+  return { npcs: list, birds, update, crowd, person, citizen, couple, walker, stroll, addPerson, bird, frustum };
 }
 void createBalloonBunch; void MARINE; void GEO; void polar; void dist; void placed;

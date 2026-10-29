@@ -321,7 +321,8 @@ export function details(W, S, N, sites = {}) {
       for (let i = 0; i < cands.length; i++) { const dd = dist(cands[i], d); if (dd < minD[i]) minD[i] = dd; }
       const k = placedAt.length;
       const t = tangentTo(d, POLE).applyAxisAngle(d, rnd() * 6.28);
-      citizen(300 + k * 7, { kind: kinds[(k - 1) % kinds.length], loop: loops[Math.floor(rnd() * loops.length)], id: 'street-' + k }, { dir: d, fwd: t, radius: null });
+      const loop = loops[Math.floor(rnd() * loops.length)], o = { kind: kinds[(k - 1) % kinds.length], loop, id: 'street-' + k };
+      if (loop === 'news') citizen(300 + k * 7, o, { dir: d, fwd: t, radius: null }); else { clearAt(d); N.stroll(300 + k * 7, o, d); } // readers stand; the rest stroll
     }
     props.set('_ambientCount', placedAt.length);
   }
