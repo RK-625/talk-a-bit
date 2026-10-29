@@ -618,7 +618,7 @@ const FLOW_DY = 45; // the viewBox grew by 40 so the edit chips have room above 
 const FLOW_H = 210;
 const PILL = { x: 636, y: FLOW_DY + 68, w: 136, h: 64, cx: 704, cy: FLOW_DY + 100 };
 const TEAL = '#1f6f68';
-// live waveform: BAR_N bars, BAR_STEP apart, scrolling left one step per ~140ms; clipped to the pill's inner rect
+// live waveform: BAR_N bars, BAR_STEP apart, scrolling right (with the speech, toward the ribbon) one step per ~140ms; clipped to the pill's inner rect
 const BAR_N = 22, BAR_STEP = 5, BAR_X0 = 664, BAR_W = 2.5;
 const BAR_STATIC = [10, 3, 22, 14, 30, 3, 18, 38, 24, 3, 34, 16, 28, 40, 3, 20, 32, 14, 3, 24, 12, 3];
 const randBar = () => { const r = Math.random(); return r < 0.35 ? 3 : r > 0.92 ? 32 + Math.random() * 8 : 8 + Math.pow(Math.random(), 1.5) * 24; };
@@ -684,15 +684,15 @@ const startFlow = () => {
   };
   const draw = () => { for (const l of lanes) if (l.w) l.el.setAttribute('startOffset', f(((s * l.speed) % l.w) - l.w)); };
 
-  // ---- live waveform: ring buffer of heights, new bar enters from the right, the group glides one step left in between
+  // ---- live waveform: ring buffer of heights, new bar enters from the left, the group glides one step right in between
   const barsG = $('flow-bars'), bars = [...barsG.children];
   const heights = Array.from({ length: BAR_N }, randBar);
   let wAcc = 0, wNext = 140;
   const paintBars = (h) => bars.forEach((b, i) => { b.setAttribute('height', f(h[i])); b.setAttribute('y', f(PILL.cy - h[i] / 2)); });
   const stepBars = (dt) => {
     wAcc += dt;
-    while (wAcc >= wNext) { wAcc -= wNext; heights.shift(); heights.push(randBar()); wNext = 120 + Math.random() * 40; }
-    paintBars(heights); barsG.setAttribute('transform', `translate(${f(-BAR_STEP * wAcc / wNext)} 0)`);
+    while (wAcc >= wNext) { wAcc -= wNext; heights.pop(); heights.unshift(randBar()); wNext = 120 + Math.random() * 40; }
+    paintBars(heights); barsG.setAttribute('transform', `translate(${f(BAR_STEP * wAcc / wNext)} 0)`);
   };
 
   // ---- edit chips: a pure function of (event index, ms into the event)
