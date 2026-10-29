@@ -583,7 +583,9 @@ const WORLDS = [
   { id: 'dozy-hollow', title: 'Dozy Hollow', city: 'The practice meadow', script: '', scriptCls: '', lang: 'Hindi basics', hero: 'the pink blob', sky: ['#dff0f4', '#f3f0d4'], accent: '#c77a9a', tag: 'Start gently in Dozy Hollow with the pink blob', hi: 'Namaste!', soft: true },
 ];
 
-Object.keys(ART).forEach((id) => { ART[id] = withGuide(id, ART[id]); });
+// guides + speech bubbles are switched off for now; set SHOW_GUIDES = true to bring them back on every card
+const SHOW_GUIDES = false;
+if (SHOW_GUIDES) Object.keys(ART).forEach((id) => { ART[id] = withGuide(id, ART[id]); });
 
 const card = (w) => `
 <li id="card-${w.id}" class="slot${w.soft ? ' soft' : ''}" style="--accent:${w.accent};--sky-a:${w.sky[0]};--sky-b:${w.sky[1]}">
