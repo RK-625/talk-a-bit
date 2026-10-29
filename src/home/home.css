@@ -81,3 +81,47 @@ footer kbd { font: inherit; border: 2px solid var(--ink); border-radius: 6px; pa
   .cards { gap: 36px 0; }
 }
 @media (prefers-reduced-motion: reduce) { .card, .tag, .tag span { transition: none; } }
+
+/* ---- line of flow ribbon: full-bleed, clipped so it can never cause horizontal scroll ---- */
+html.home { overflow-x: hidden; }
+.flow { position: relative; width: 100vw; margin: 18px 0 0 calc(50% - 50vw); overflow: hidden; }
+.flow-svg { display: block; width: 100%; height: clamp(150px, 15.3vw, 232px); }
+.flow-pill .bar, .flow-pill { transform-box: fill-box; transform-origin: center; }
+.flow-pill .bar { animation: bar 1.3s ease-in-out infinite; }
+@keyframes bar { 0%, 100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
+.flow-cap { transform-box: fill-box; transform-origin: center; transform: rotate(-2deg); }
+
+/* ---- hackathon stamp: perforated edge via a mask, tilted, pinned top-right on desktop ---- */
+.hero-head { position: relative; }
+.stamp {
+  display: block; width: 214px; margin: 20px auto 0; color: var(--ink); text-decoration: none; transform: rotate(3deg);
+  filter: drop-shadow(3px 4px 0 rgba(43,42,51,.22)); transition: transform .2s cubic-bezier(.2,.8,.3,1.2);
+}
+.stamp:hover, .stamp:focus-visible { transform: rotate(0deg) translateY(-3px) scale(1.03); }
+.stamp:focus-visible { outline: 3px solid #e0517a; outline-offset: 6px; }
+.stamp-in {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; box-sizing: border-box; padding: 8px 12px 10px;
+  border: 8px solid transparent; background: #fff2c9 border-box; text-align: center; line-height: 1.15;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, radial-gradient(circle 4.4px at 8px 8px, #0000 97%, #000) -8px -8px / 16px 16px border-box;
+  mask: linear-gradient(#000 0 0) padding-box, radial-gradient(circle 4.4px at 8px 8px, #0000 97%, #000) -8px -8px / 16px 16px border-box;
+}
+.stamp-in::after { content: ''; position: absolute; inset: -2px; border: 2px dashed rgba(43,42,51,.55); border-radius: 4px; pointer-events: none; }
+.st-top { white-space: nowrap; display: flex; align-items: center; gap: 5px; font-size: 17px; }
+.st-top b { font: 800 19px/1 'Baloo 2', sans-serif; color: #e0517a; }
+.st-mid { font: 700 17px/1.1 'Kalam', cursive; }
+.st-sub, .st-date, .st-mid { white-space: nowrap; }
+.st-sub { margin-top: 3px; padding-top: 3px; border-top: 1.5px solid rgba(43,42,51,.35); font-size: 15px; letter-spacing: .03em; opacity: .85; }
+.st-date { font-size: 15px; opacity: .8; }
+@media (min-width: 1000px) { .stamp { position: absolute; top: -8px; right: 0; margin: 0; } }
+
+/* ---- card characters: only transform/opacity animate, inside the SVG, so the card box never moves ---- */
+.wave { transform-box: fill-box; transform-origin: 0% 100%; animation: wave 1.5s ease-in-out infinite alternate; }
+.slot:nth-child(2n) .wave { animation-delay: -.6s; }
+.slot:nth-child(3n) .wave { animation-delay: -1.1s; }
+@keyframes wave { from { transform: rotate(-9deg); } to { transform: rotate(13deg); } }
+.bub { transform-box: fill-box; transform-origin: 20% 100%; transition: transform .25s cubic-bezier(.2,.9,.3,1.5); }
+.card:hover .bub, .card:focus-visible .bub { transform: scale(1.12) rotate(-2.5deg); }
+footer .fo-hash { font-weight: 700; opacity: 1; }
+@media (max-width: 999px) { .hero-head { display: flex; flex-direction: column; align-items: center; } .hero-head > * { max-width: 100%; } .stamp { order: 1; margin: 20px 0 0; } .squig { order: 2; } }
+@media (max-width: 700px) { .flow-svg { height: 136px; } }
+@media (prefers-reduced-motion: reduce) { .wave, .flow-pill .bar { animation: none; } .flow-pill .bar { transform: scaleY(.75); } .bub, .stamp { transition: none; } }

@@ -497,6 +497,81 @@ const dozy = () => {
 
 const ART = { mumbai: mumbai(), delhi: typeof delhi === 'function' ? delhi() : '', bengaluru: typeof bengaluru === 'function' ? bengaluru() : '', chennai: typeof chennai === 'function' ? chennai() : '', hyderabad: typeof hyderabad === 'function' ? hyderabad() : '', kerala: typeof kerala === 'function' ? kerala() : '', 'dozy-hollow': typeof dozy === 'function' ? dozy() : '' };
 
+
+// ---- guides: each world's character + speech bubble, appended to that world's SVG. Gouache-simple: round face, little body, one waving arm.
+// Only `.wave` (the arm) and `.bub` (the bubble) animate, via CSS transform, so nothing in the card can change layout.
+const CREAM = '#fffaf0';
+const bubble = (x, y, text, tail = 'l') => {
+  const w = Math.round(text.length * 9.8 + 26), h = 32, tx = tail === 'l' ? x + 14 : x + w - 14, dir = tail === 'l' ? -1 : 1;
+  return `<g class="bub"><path d="M${tx} ${y + h - 1}L${tx + dir * 10} ${y + h + 13}L${tx + (tail === 'l' ? 14 : -14)} ${y + h - 1}" fill="${CREAM}" stroke="${INK}" stroke-width="2.6" stroke-linejoin="round"/>`
+    + `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="13" fill="${CREAM}" stroke="${INK}" stroke-width="2.6"/>`
+    + `<path d="M${tx + (tail === 'l' ? 2 : -2)} ${y + h}H${tx + (tail === 'l' ? 12 : -12)}" stroke="${CREAM}" stroke-width="4"/>`
+    + `<text x="${x + w / 2}" y="${y + 22}" text-anchor="middle" font-family="Kalam, 'Patrick Hand', cursive" font-weight="700" font-size="18" fill="${INK}">${text}</text></g>`;
+};
+// character in its own space: feet at (0,0), ~80 tall, facing front. o: skin, hair, shirt, pants, back (drawn behind), hairBack, front (props on the torso), hold (left hand), wave (in the waving hand), face (extra on head), hat
+const kid = (o) => {
+  const k = o.skin;
+  const head = `${o.hairBack || ''}${C(-15, -61, 3, k)}${C(15, -61, 3, k)}${C(0, -62, 15, k)}${P('M-15.5 -63Q-15-80 0-80Q15-80 15.5-63Q9-71.5 0-70.5Q-9-71.5-15.5-63Z', o.hair)}${C(-5.5, -61, 1.9, INK)}${C(5.5, -61, 1.9, INK)}${L('M-4.2-55.5Q0-51.5 4.2-55.5', INK, 1.5)}${E(-9.5, -56, 3, 2, '#e8808a', 'opacity=".55"')}${E(9.5, -56, 3, 2, '#e8808a', 'opacity=".55"')}${o.face || ''}${o.hat || ''}`;
+  return `${E(0, 2, 30, 5, '#fff0d0', 'opacity=".3"')}${E(0, 1, 24, 4, '#2a2030', 'opacity=".22"')}${o.back || ''}`
+    + `<rect x="-10" y="-22" width="8" height="21" rx="3.4" fill="${o.pants}"/><rect x="2" y="-22" width="8" height="21" rx="3.4" fill="${o.pants}"/>${E(-6.5, -1, 6.4, 3, '#3a2a2a')}${E(6.5, -1, 6.4, 3, '#3a2a2a')}`
+    + `<rect x="-14" y="-49" width="28" height="31" rx="11" fill="${o.shirt}"/>${R(-14, -33, 28, 3, '#000', 'opacity=".06"')}${o.front || ''}`
+    + `${L('M-13-43Q-22-32-19-21', o.shirt, 6.2)}${C(-19, -19, 3.6, k)}${o.hold || ''}`
+    + head
+    + `<g class="wave">${L('M13-43Q23-50 26-65', o.shirt, 6.2)}${C(26, -67, 3.7, k)}${o.wave || ''}</g>`;
+};
+const GUIDE_ZOOM = 1.5;
+const GUIDES = {
+  // Chotu: tiny topi, a little kettle in one hand, a glass of chai held up in the waving hand
+  mumbai: { x: 54, y: 378, s: 1.1, bx: 58, by: 250, text: 'Kya bolta?', k: {
+    skin: '#b97c52', hair: '#2d2228', shirt: '#e9a23b', pants: '#6b5a8a',
+    hat: P('M-11-74Q0-86 11-74Q0-71-11-74Z', '#fffaf0', `stroke="${INK}" stroke-width="1" stroke-opacity=".5"`),
+    hold: at(-19, -22, 1, `${E(0, -6, 9, 7, '#8a8f98')}${E(0, -13, 5, 2.2, '#6f747d')}${C(0, -16, 1.8, '#6f747d')}${P('M7-8L16-15L17.5-12.5L9-4Z', '#8a8f98')}${L('M-8-9Q-17-18-5-15', '#555a63', 1.8)}${L('M-5-8Q0-4 5-8', '#fff', 1.2, 0.5)}`),
+    wave: `<g transform="translate(1 -6)">${P('M-4-11H4L3 1H-3Z', '#f4e3c8')}${P('M-3.4-8H3.4L2.6 1H-2.6Z', '#c8863a')}${E(0, -11, 4, 1.2, '#fffaf0')}${L('M-1.5-14q-2-3 0-5t0-4M2-14q-2-3 0-5', '#fff', 1, 0.8)}</g>` } },
+  // Rahul: specs, a bulging backpack and a stack of books under one arm
+  delhi: { x: 54, y: 378, s: 1.1, bx: 58, by: 250, text: 'Aur bhai!', k: {
+    skin: '#c38a5e', hair: '#2d2228', shirt: '#4a8fa8', pants: '#3b4a6b',
+    back: R(-18, -47, 36, 31, '#d9603b', 'rx="9"') + R(-13, -29, 26, 9, '#b84a2c', 'rx="4"'),
+    front: L('M-7-49V-30M7-49V-30', '#b84a2c', 3.2),
+    face: `${C(-5.5, -61, 4.6, 'none', `stroke="${INK}" stroke-width="1.2"`)}${C(5.5, -61, 4.6, 'none', `stroke="${INK}" stroke-width="1.2"`)}${L('M-1-61H1', INK, 1.2)}`,
+    hold: at(-19, -20, 1, `${R(-11, -7, 22, 6.5, '#e0517a', 'rx="1.5"')}${R(-10, -13.5, 20, 6.5, '#2f8f8a', 'rx="1.5"')}${R(-12, -20, 23, 6.5, '#e9c56a', 'rx="1.5"')}${L('M-9-17h16M-8-10.5h14', '#fffaf0', 1, 0.7)}`),
+    wave: '' } },
+  // Rohan: lanyard, an open laptop held at his side, a steel filter-coffee tumbler in the waving hand
+  bengaluru: { x: 62, y: 350, s: 1.05, bx: 32, by: 226, text: 'Namaskara!', k: {
+    skin: '#c9915f', hair: '#2d2228', shirt: '#6b7bd6', pants: '#4a4a58',
+    front: `${L('M-6-49L0-30L6-49', '#c6564a', 1.8)}${R(-4.5, -31, 9, 11, '#fffaf0', `rx="1.5" stroke="${INK}" stroke-width="1"`)}${C(0, -27, 2, '#3f8f6b')}`,
+    hold: `${R(-33, -38, 21, 15, '#3b4252', 'rx="2"')}${R(-31.5, -36.5, 18, 12, '#8fc7ee', 'rx="1"')}${L('M-29-33h8M-29-30h12', '#fff', 1, 0.7)}${R(-35, -24, 26, 3.4, '#b8bfc9', 'rx="1.5"')}`,
+    wave: `<g transform="translate(1 -5)">${E(0, 1, 8, 2.2, '#d9dde3')}${P('M-4.4-10H4.4L3.6 0H-3.6Z', '#c9ced6')}${R(-4.6, -11.5, 9.2, 2, '#aeb4bd')}${L('M-1.6-4v-3', '#fff', 1, 0.6)}${L('M-1.6-14q-2-3 0-5t0-4M2-14q-2-3 0-5', '#fff', 1, 0.85)}</g>` } },
+  // Meera: long hair, banana-leaf meal in one hand, phone held up to snap it
+  chennai: { x: 54, y: 378, s: 1.1, bx: 58, by: 250, text: 'Vanakkam!', k: {
+    skin: '#c08a62', hair: '#2d2228', shirt: '#d1447a', pants: '#2f5a7a',
+    hairBack: P('M-16-66Q-19-40-11-33H11Q19-40 16-66Z', '#2d2228'),
+    front: L('M-14-40H14', '#f6c9d6', 2, 0.8),
+    hold: at(-20, -21, 1, `${E(0, -4, 17, 5.5, '#4f9a52')}${L('M-15-4H15', '#3c7e42', 0.9, 0.7)}${C(-3, -8, 5.2, '#fffaf0')}${C(8, -6.5, 2.2, '#e9a44f')}${C(-11, -6, 2, '#e0517a')}${C(12, -3, 1.6, '#c8e07a')}`),
+    wave: `<g transform="translate(3 -6) rotate(14)">${R(-3.6, -13, 7.2, 12.5, INK, 'rx="1.8"')}${R(-2.6, -11.8, 5.2, 9, '#8fc7ee', 'rx=".8"')}${C(0, -14.2, 0.01, INK)}${L('M7-12l3-3M8-7h4M6-16l1-4', '#e9a44f', 1.2)}</g>` } },
+  // Sameer: a jangle of Laad Bazaar bangles on the waving wrist, an Irani chai glass in the other hand
+  hyderabad: { x: 54, y: 378, s: 1.1, bx: 58, by: 250, text: 'Bagunnara?', k: {
+    skin: '#bd8359', hair: '#2d2228', shirt: '#3f9a9a', pants: '#2d3a52',
+    hold: at(-19, -20, 1, `${E(0, 0, 8, 2.2, '#f1e6d6')}${P('M-4.8-12H4.8L3.8-1H-3.8Z', '#f4e3c8')}${P('M-4.2-9H4.2L3.5-1H-3.5Z', '#c8863a')}${L('M-1-15q-2-3 0-5', '#fff', 1, 0.85)}`),
+    wave: `${['#e0517a', '#f2c04e', '#4fa3a5', '#8a5aa0', '#e0713f', '#e0517a'].map((c, i) => E(25.6 + i * 0.4, -58 - i * 2.2, 4.4, 1.7, 'none', `stroke="${c}" stroke-width="1.8" transform="rotate(-18 26 ${-58 - i * 2.2})"`)).join('')}` } },
+  // Ananya: sun hat, a huge backpack with a rolled mat, a camera on a strap, one hand waving
+  kerala: { x: 588, y: 378, s: 1.1, flip: 1, bx: 424, by: 250, tail: 'r', text: 'Namaskaram!', k: {
+    skin: '#c08a62', hair: '#3a2a22', shirt: '#f2954a', pants: '#8a7a5a',
+    back: R(-22, -62, 44, 46, '#4f7a52', 'rx="11"') + R(-20, -68, 40, 8, '#e0517a', 'rx="4"') + R(-13, -40, 26, 12, '#3f6a42', 'rx="4"') + L('M-20-64h40', '#fff', 0.8, 0.4),
+    front: `${L('M-7-49V-24M7-49V-24', '#2f5a34', 3.4)}${L('M12-48L-8-27', '#2b2a33', 1.6)}`,
+    hat: `${E(0, -75, 20, 4.2, '#e9c56a')}${P('M-11-75Q-10-88 0-88Q10-88 11-75Z', '#e9c56a')}${R(-11, -79, 22, 3.4, '#e0517a')}`,
+    hold: `${R(-27, -31, 17, 11.5, '#3b3b44', 'rx="2.4"')}${R(-24, -34, 6, 3.5, '#3b3b44', 'rx="1"')}${C(-18.5, -25, 4.4, '#9aa3b0')}${C(-18.5, -25, 2.5, INK)}${C(-13.5, -28, 1, '#e0517a')}`,
+    wave: '' } },
+  // Dozy Hollow: the pink blob is already in the drawing, so just the bubble
+  'dozy-hollow': { bubbleOnly: 1, bx: 380, by: 254, text: 'Namaste!' },
+};
+const withGuide = (id, svg) => {
+  const g = GUIDES[id]; if (!g) return svg;
+  const who = g.bubbleOnly ? '' : `<g transform="translate(${g.x} ${g.y}) scale(${g.flip ? -g.s : g.s} ${g.s})">${kid(g.k)}</g>`;
+  // grow guide + bubble together about the guide's feet (bubble-only: about the bubble's tail)
+  const ox = g.x ?? g.bx + 20, oy = g.y ?? g.by + 46, z = g.bubbleOnly ? 1.25 : GUIDE_ZOOM;
+  return svg.replace('</svg>', `<g transform="translate(${ox} ${oy}) scale(${z}) translate(${-ox} ${-oy})">${who}${bubble(g.bx, g.by, g.text, g.tail || 'l')}</g></svg>`);
+};
+
 // ---- worlds: order = card order. `sky` / `accent` colour each card. ----
 const WORLDS = [
   { id: 'mumbai', title: 'Aamchi Mumbai', city: 'Mumbai', script: 'मुंबई', scriptCls: 'dv', lang: 'Hindi', hero: 'Chotu, the chaiwala kid', sky: ['#bfe3ee', '#f6e9c8'], accent: '#e0713f', tag: 'Learn Bambaiya Hindi with Chotu', hi: 'Kya bolta?' },
@@ -508,8 +583,10 @@ const WORLDS = [
   { id: 'dozy-hollow', title: 'Dozy Hollow', city: 'The practice meadow', script: '', scriptCls: '', lang: 'Hindi basics', hero: 'the pink blob', sky: ['#dff0f4', '#f3f0d4'], accent: '#c77a9a', tag: 'Start gently in Dozy Hollow with the pink blob', hi: 'Namaste!', soft: true },
 ];
 
+Object.keys(ART).forEach((id) => { ART[id] = withGuide(id, ART[id]); });
+
 const card = (w) => `
-<li class="slot${w.soft ? ' soft' : ''}" style="--accent:${w.accent};--sky-a:${w.sky[0]};--sky-b:${w.sky[1]}">
+<li id="card-${w.id}" class="slot${w.soft ? ' soft' : ''}" style="--accent:${w.accent};--sky-a:${w.sky[0]};--sky-b:${w.sky[1]}">
   <a class="card" href="?world=${w.id}" aria-label="${w.title}: ${w.lang} with ${w.hero}">
     <div class="art">${ART[w.id]}<span class="chip">${w.lang}</span></div>
     <div class="body">
@@ -521,6 +598,69 @@ const card = (w) => `
   <a class="tag" href="?world=${w.id}"><em>${w.hi}</em> ${w.tag} <span aria-hidden="true">&rarr;</span></a>
 </li>`;
 
+
+// ---- the line of flow: a shy thought drifts along a loose squiggle, passes through a voice-capsule, and comes out as a dark ribbon of greetings.
+const THOUGHTS = ['umm…', 'what if I say it wrong…', 'okay, just say hi…', "they're probably nice…", 'one small word…'];
+const GREETINGS = ['Kya bolta, bhidu?', 'नमस्ते', 'Aur bhai, kya haal?', 'Namaskara, hegiddira?', 'ನಮಸ್ಕಾರ', 'Vanakkam! Eppadi irukeenga?', 'வணக்கம்', 'Bagunnara?', 'నమస్కారం', 'Namaskaram, sukhamano?', 'നമസ്കാരം'];
+const DOT = ' · ';
+const FLOW_FONTS = "'Patrick Hand', 'Baloo Tamma 2', 'Baloo Thambi 2', 'Baloo Tammudu 2', 'Baloo Chettan 2', 'Tiro Devanagari Hindi', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Malayalam', sans-serif";
+const FLOW_THOUGHT_PATH = 'M-40 150C60 160 130 160 200 140C300 112 370 46 312 20C250 -4 150 34 168 104C186 172 330 196 430 144C500 108 560 106 600 108S650 110 700 110';
+const FLOW_RIBBON_PATH = 'M700 110C780 110 790 128 880 130C980 132 1010 70 1110 74S1250 134 1340 100S1480 52 1560 58';
+const BARS = [0.45, 0.8, 0.55, 1, 0.7, 0.95, 0.5, 0.85, 0.6, 1, 0.75, 0.5, 0.9, 0.55];
+const flowSvg = () => `
+<svg class="flow-svg" viewBox="0 0 1440 220" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A shy thought, umm what if I say it wrong, flows through a microphone and comes out as greetings in many Indian languages.">
+  <defs><path id="flow-thought" d="${FLOW_THOUGHT_PATH}"/><path id="flow-ribbon" d="${FLOW_RIBBON_PATH}"/></defs>
+  <use href="#flow-thought" fill="none" stroke="${INK}" stroke-opacity=".07" stroke-width="2" stroke-dasharray="2 9" stroke-linecap="round"/>
+  <text class="flow-thought" font-family="${FLOW_FONTS}" font-size="31" fill="${INK}" fill-opacity=".4"><textPath id="flow-t1" href="#flow-thought" startOffset="0">${(THOUGHTS.join(' ') + ' ').repeat(3)}</textPath></text>
+  <use href="#flow-ribbon" fill="none" stroke="${INK}" stroke-width="36" stroke-linecap="butt"/>
+  <text class="flow-greet" font-family="${FLOW_FONTS}" font-size="23" fill="#fffaf0" dy="7.4"><textPath id="flow-t2" href="#flow-ribbon" startOffset="0">${(GREETINGS.join(DOT) + DOT).repeat(2)}</textPath></text>
+  <g class="flow-pill">
+    <rect x="618" y="76" width="204" height="68" rx="34" fill="#fffaf0" stroke="${INK}" stroke-width="3"/>
+    <rect x="626" y="84" width="188" height="52" rx="26" fill="none" stroke="#e0517a" stroke-width="1.6" stroke-opacity=".35" stroke-dasharray="3 6" stroke-linecap="round"/>
+    ${BARS.map((h, i) => `<rect class="bar" x="${651 + i * 11.4}" y="${110 - h * 25}" width="6" height="${h * 50}" rx="3" fill="${i % 4 === 1 ? '#e0517a' : INK}" style="animation-delay:${-((i * 0.37) % 1.3).toFixed(2)}s"/>`).join('')}
+  </g>
+  <text class="flow-cap" x="720" y="176" text-anchor="middle" font-family="Kalam, 'Patrick Hand', cursive" font-size="25" font-weight="700" fill="${INK}" fill-opacity=".8">speak it, don’t type it</text>
+  <path d="M668 184Q720 198 772 184" fill="none" stroke="#e0517a" stroke-width="3" stroke-linecap="round"/>
+</svg>`;
+
+// drift both texts along their paths via startOffset (rAF: SMIL startOffset is flaky in Safari). The text is repeated, and the offset wraps by exactly one repeat, so there is never a gap.
+const startFlow = () => {
+  const svg = document.querySelector('.flow-svg'); if (!svg) return;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const lanes = [
+    { el: svg.querySelector('#flow-t1'), unit: THOUGHTS.join(' ') + ' ', speed: 20, w: 0 },
+    { el: svg.querySelector('#flow-t2'), unit: GREETINGS.join(DOT) + DOT, speed: 34, w: 0 },
+  ];
+  let s = 0, last = 0, raf = 0;
+  const measure = () => {
+    for (const l of lanes) {
+      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('font-family', l.el.parentNode.getAttribute('font-family')); t.setAttribute('font-size', l.el.parentNode.getAttribute('font-size')); t.setAttribute('xml:space', 'preserve'); t.style.visibility = 'hidden';
+      t.textContent = l.unit; svg.append(t); l.w = t.getComputedTextLength(); t.remove();
+      const path = svg.querySelector(l.el.getAttribute('href')); const need = Math.ceil((path.getTotalLength() + l.w) / l.w) + 1;
+      if (need > 0) l.el.textContent = l.unit.repeat(need);
+    }
+  };
+  const draw = () => { for (const l of lanes) if (l.w) l.el.setAttribute('startOffset', f(((s * l.speed) % l.w) - l.w)); };
+  const tick = (now) => { if (last) s += Math.min(0.1, (now - last) / 1000); last = now; draw(); raf = requestAnimationFrame(tick); };
+  const run = () => { cancelAnimationFrame(raf); last = 0; if (!reduce.matches && !document.hidden) raf = requestAnimationFrame(tick); else draw(); };
+  const setup = () => { measure(); draw(); run(); };
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(setup);
+  document.addEventListener('visibilitychange', run);
+  reduce.addEventListener && reduce.addEventListener('change', run);
+};
+
+// the hackathon credit: a tilted, perforated postage-stamp ticket. Text and a hand-drawn mic only, no logos.
+const STAMP = `
+<a class="stamp" href="https://www.wemakedevs.org/wispr" target="_blank" rel="noopener" aria-label="Made for No Hands, The Wispr Challenge, by WeMakeDevs and Wispr Flow, 16 to 31 October 2026">
+  <span class="stamp-in">
+    <span class="st-top"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5" fill="#e0517a" stroke="${INK}" stroke-width="1.8"/><path d="M5 11.5a7 7 0 0 0 14 0M12 18.5v3M8.5 21.5h7" fill="none" stroke="${INK}" stroke-width="1.8" stroke-linecap="round"/></svg>Made for <b>No Hands</b></span>
+    <span class="st-mid">The Wispr Challenge</span>
+    <span class="st-sub">WeMakeDevs &times; Wispr Flow</span>
+    <span class="st-date">16&ndash;31 Oct 2026 &middot; built by voice</span>
+  </span>
+</a>`;
+
 export function mountHome() {
   document.documentElement.classList.add('home');
   document.title = 'Talk-a-bit';
@@ -531,14 +671,17 @@ export function mountHome() {
   document.body.innerHTML = `
     <main class="home-page">
     <header class="hero-head">
+      ${STAMP}
       <p class="kicker">a small game for shy talkers</p>
       <h1>Talk<span>-a-</span>bit</h1>
       <p class="tagline">Practise the language of the street, one small talk at a time.</p>
       <p class="sub">Wander a tiny city, find someone friendly, and say a few words. No pressure, no one is watching.</p>
       <svg class="squig" viewBox="0 0 260 14" aria-hidden="true"><path d="M3 8q16-10 32 0t32 0 32 0 32 0 32 0 32 0 32 0 22-3" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/></svg>
     </header>
+    <div class="flow" role="presentation">${flowSvg()}</div>
     <h2 class="pick">Pick a city to wander</h2>
     <ul class="cards">${WORLDS.map(card).join('')}</ul>
-    <footer>Made with ink, paper and a lot of chai. <span>Tip: press <kbd>H</kbd> twice inside a city to come back here.</span></footer>
+    <footer>Made with ink, paper, a lot of chai, and mostly my voice. <span class="fo-hash">A #NoHandsChallenge entry for WeMakeDevs &times; Wispr Flow.</span> <span>Tip: press <kbd>H</kbd> twice inside a city to come back here.</span></footer>
   </main>`;
+  startFlow();
 }
