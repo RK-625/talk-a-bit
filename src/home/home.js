@@ -610,7 +610,8 @@ const DOT = ' · ';
 const FLOW_FONTS = "'Figtree', 'Baloo Tamma 2', 'Baloo Thambi 2', 'Baloo Tammudu 2', 'Baloo Chettan 2', 'Tiro Devanagari Hindi', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Malayalam', system-ui, sans-serif";
 // one smooth water-wave swell (crest, trough, then easing level into the pill)
 const FLOW_THOUGHT_PATH = 'M-60 28C120 28 180 152 340 152S540 98 640 100';
-const FLOW_RIBBON_PATH = 'M770 100C960 100 1180 98 1320 68S1500 34 1600 26';
+// the ribbon carries the same water wave on from the pill: crest, trough, easing out past the edge
+const FLOW_RIBBON_PATH = 'M770 100C890 100 960 34 1110 34S1330 146 1470 146S1590 116 1640 104';
 const shiftY = (d, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (m, x, y) => `${x} ${f(+y + dy)}`);
 const FLOW_DY = 45; // the viewBox grew by 40 so the edit chips have room above the pill
 const FLOW_H = 210;
