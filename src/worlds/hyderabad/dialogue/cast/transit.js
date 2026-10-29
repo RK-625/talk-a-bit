@@ -69,7 +69,7 @@ export const tollAttendant = P('toll-attendant', 'Hari', 'toll attendant', 'Durg
     ['nadichevallaku ye line', 'nadichevalla ki ye line anna', 'walk cheyadaniki ye line', 'ye line lo nadavali', 'నడిచేవాళ్ళకు ఏ లైన్'],
     ['Ask about the lane.', 'Walkers = "nadichevallu". Which lane = "ye line".'],
     ['నడిచేవాళ్ళకు ఇక్కడ దారి లేదు సార్, ఫుట్‌పాత్ మీద వెళ్ళండి.', 'No path for walkers here sir, go on the footpath.'],
-    ['ఏమన్నావు సార్? కార్ల శబ్దం.', 'What did you say sir? Car noise.']),,
+    ['ఏమన్నావు సార్? కార్ల శబ్దం.', 'What did you say sir? Car noise.']),
   S('stop', ['ఇంకేమైనా సాయం కావాలా సార్?', 'Need any other help, sir?'],
     'Ask where the bus stop is.', 'బస్ స్టాప్ ఎక్కడ ఉంది?',
     ['bus stop ekkada undi', 'bus stop ekkada sir', 'stop ekkada undi', 'bus ekkada aagutundi', 'బస్ స్టాప్ ఎక్కడ ఉంది'],

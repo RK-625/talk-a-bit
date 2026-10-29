@@ -60,6 +60,20 @@ export function population4(h) {
       for (const c of W.colliders.list) { if (c.person || c.update || c.height < 0.5 || c.a) continue; if (d.dot(c.dir) > Math.cos((c.radius + 0.6) / 75)) { console.warn('[hyderabad population4] route ' + id + ' passes a collider at', polarOf(d)); return; } }
     }
   };
+  /** two kids playing tag chase each other round a small loop on clear ground (standing still, their run-on-the-spot faced the nearest stall wall) */
+  const tagKids = (kids, c, r = 1.6) => {
+    const clear = (d) => !W.colliders.list.some((k) => !k.person && !k.update && k.height >= 0.3 && !k.a && d.dot(k.dir) > Math.cos((k.radius + 0.5) / 75));
+    const t = tangentTo(c.dir, POLE), b = new V3().crossVectors(c.dir, t).normalize();
+    const way = (a) => t.clone().multiplyScalar(Math.cos(a)).addScaledVector(b, Math.sin(a)).normalize();
+    const ring = (o) => Array.from({ length: 10 }, (_, i) => stepAlong(o, way((i / 10) * Math.PI * 2), r));
+    let dirs = null; // nearest centre (rings of 1.2 units outward) whose whole loop is clear of stalls, stools and walls
+    for (let s = 0; s <= 6 && !dirs; s++) for (let j = 0; j < (s ? 8 : 1) && !dirs; j++) {
+      const o = s ? stepAlong(c.dir, way((j / 8) * Math.PI * 2), s * 1.2) : c.dir, pts = ring(o);
+      if (clear(o) && pts.every(clear)) dirs = pts;
+    }
+    if (!dirs) { console.warn('[population4] no clear ground for the tag kids'); return; }
+    kids.forEach(([seed, id, tweak], k) => { const n = N.walker('citizen', { kind: 'kid', seed, id, tweak, closed: true }, dirs, 2.4, k * 0.45); n?.g.userData.playLoop('tag'); });
+  };
   const guard = (fn) => { try { fn(); } catch (e) { console.warn('[hyderabad population4]', e?.message ?? e); } };
 
   // =============================== Chowk (the tapri square) ========================================================
@@ -71,8 +85,7 @@ export function population4(h) {
     cit(404, 'elder', 'news', 'chowk-news-reader', ps(news, 'customer'));
     cit(405, 'kid', 'marbles', 'chowk-rangoli-girl', ps(props.get('rangoliChowk'), 'artist'));
     cit(406, 'woman', 'pray', 'chowk-ganpati-devotee', ps(props.get('ganpatiPoster'), 'devotee'));
-    cit(407, 'kid', 'tag', 'chowk-tag-kid-1', sp(8.4, 4.0, 0.4));
-    cit(408, 'kid', 'tag', 'chowk-tag-kid-2', sp(10.4, 5.6, 2.6));
+    tagKids([[407, 'chowk-tag-kid-1', lookOf('chowk-tag-kid-1')?.tweak], [408, 'chowk-tag-kid-2', lookOf('chowk-tag-kid-2')?.tweak]], sp(9.4, 4.8));
   });
 
   // =============================== chawls ==========================================================================

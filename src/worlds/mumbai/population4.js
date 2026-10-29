@@ -73,6 +73,20 @@ export function population4(h) {
       for (const c of W.colliders.list) { if (c.person || c.update || c.height < 0.5 || c.a) continue; if (d.dot(c.dir) > Math.cos((c.radius + 0.6) / 75)) { console.warn('[mumbai population4] route ' + id + ' passes a collider at', polarOf(d)); return; } }
     }
   };
+  /** two kids playing tag chase each other round a small loop on clear ground (standing still, their run-on-the-spot faced the nearest stall wall) */
+  const tagKids = (kids, c, r = 1.6) => {
+    const clear = (d) => !W.colliders.list.some((k) => !k.person && !k.update && k.height >= 0.3 && !k.a && d.dot(k.dir) > Math.cos((k.radius + 0.5) / 75));
+    const t = tangentTo(c.dir, POLE), b = new V3().crossVectors(c.dir, t).normalize();
+    const way = (a) => t.clone().multiplyScalar(Math.cos(a)).addScaledVector(b, Math.sin(a)).normalize();
+    const ring = (o) => Array.from({ length: 10 }, (_, i) => stepAlong(o, way((i / 10) * Math.PI * 2), r));
+    let dirs = null; // nearest centre (rings of 1.2 units outward) whose whole loop is clear of stalls, stools and walls
+    for (let s = 0; s <= 6 && !dirs; s++) for (let j = 0; j < (s ? 8 : 1) && !dirs; j++) {
+      const o = s ? stepAlong(c.dir, way((j / 8) * Math.PI * 2), s * 1.2) : c.dir, pts = ring(o);
+      if (clear(o) && pts.every(clear)) dirs = pts;
+    }
+    if (!dirs) { console.warn('[population4] no clear ground for the tag kids'); return; }
+    kids.forEach(([seed, id, tweak], k) => { const n = N.walker('citizen', { kind: 'kid', seed, id, tweak, closed: true }, dirs, 2.4, k * 0.45); n?.g.userData.playLoop('tag'); });
+  };
   const guard = (fn) => { try { fn(); } catch (e) { console.warn('[mumbai population4]', e?.message ?? e); } };
 
   // =============================== Chowk (the tapri square) ========================================================
@@ -84,8 +98,7 @@ export function population4(h) {
     cit(404, 'elder', 'news', 'chowk-news-reader', ps(news, 'customer'), { ...kurta(P.cream, 0xf3ecd9), hair: { style: 'short', color: GREY }, face: { specs: true, moustache: 'thin' }, acc: [] });
     cit(405, 'kid', 'marbles', 'chowk-rangoli-girl', ps(props.get('rangoliChowk'), 'artist'), { ...kurta(P.pink, P.cream, { sleeves: 'short' }), hair: { style: 'plait', color: 0x2b2330 }, face: { lashes: true, bindi: true, smile: 'big' }, acc: [], footwear: 'bare' });
     cit(406, 'woman', 'pray', 'chowk-ganpati-devotee', ps(props.get('ganpatiPoster'), 'devotee'), { ...saree(P.mint, P.pistachio, P.saffron), hair: { style: 'bun' }, face: { bindi: true }, acc: ['flowerBasket'], footwear: 'bare' });
-    cit(407, 'kid', 'tag', 'chowk-tag-kid-1', sp(8.4, 4.0, 0.4), { ...shirt(P.mint, P.khaki, { outfit: 'shirtShorts' }), hair: { style: 'messy', color: 0x2b2330 }, acc: [], footwear: 'bare' });
-    cit(408, 'kid', 'tag', 'chowk-tag-kid-2', sp(10.4, 5.6, 2.6), { ...kurta(P.lilac, P.denim, { sleeves: 'short' }), hair: { style: 'short', color: 0x2b2330 }, face: { lashes: true }, acc: ['ball'], footwear: 'bare' });
+    tagKids([[407, 'chowk-tag-kid-1', tw({ ...shirt(P.mint, P.khaki, { outfit: 'shirtShorts' }), hair: { style: 'messy', color: 0x2b2330 }, acc: [], footwear: 'bare' })], [408, 'chowk-tag-kid-2', tw({ ...kurta(P.lilac, P.denim, { sleeves: 'short' }), hair: { style: 'short', color: 0x2b2330 }, face: { lashes: true }, acc: ['ball'], footwear: 'bare' })]], sp(9.4, 4.8));
   });
 
   // =============================== chawls ==========================================================================

@@ -33,6 +33,7 @@ export function createCitizen(ink, seed = 1, opts = {}) {
   const p = createPerson(spec);
   p.name = 'citizen-' + kind;
   p.userData.role = 'citizen'; p.userData.kind = kind;
+  p.userData.gender = kind === 'woman' || (kind === 'kid' && spec.face?.lashes) ? 'f' : 'm'; // girls are the kids drawn with lashes (variation.js); picks the greeting voice
   if (loop === 'sit') { p.userData.sit(opts.seatHeight ?? 0.5); p.userData.playLoop(chance(r, 0.5) ? 'chat' : null); }
   else p.userData.playLoop(loop);
   p.userData.citizenLoop = loop;

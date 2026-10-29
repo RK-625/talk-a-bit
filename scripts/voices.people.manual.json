@@ -1,0 +1,232 @@
+{
+ "mumbai/bollywoodHopeful": {
+  "g": "m",
+  "age": "adult",
+  "why": "Rocky, young man"
+ },
+ "mumbai/balloonSeller": {
+  "g": "m",
+  "age": "adult",
+  "why": "Gubbare Wala, vendor man"
+ },
+ "mumbai/bse-guard": {
+  "g": "m",
+  "age": "adult",
+  "why": "Sharma Ji, fatherly guard"
+ },
+ "mumbai/juhu-bhutta-seller": {
+  "g": "m",
+  "age": "adult",
+  "why": "Kishan"
+ },
+ "mumbai/street-3": {
+  "g": "m",
+  "age": "teen",
+  "why": "Sahil, teen"
+ },
+ "mumbai/street-7": {
+  "g": "f",
+  "age": "elder",
+  "why": "Ramabai, elder woman"
+ },
+ "mumbai/rajabai-book-browser": {
+  "g": "m",
+  "age": "teen",
+  "why": "Akshay, college student"
+ },
+ "mumbai/juhu-family-kid": {
+  "g": "m",
+  "age": "kid",
+  "why": "Aarav, child"
+ },
+ "mumbai/marine-jogger-2": {
+  "g": "m",
+  "age": "adult",
+  "why": "Faiz"
+ },
+ "mumbai/juhu-road-ball-teen": {
+  "g": "m",
+  "age": "teen",
+  "why": "Ayaan, teen with a ball"
+ },
+ "bengaluru/chaiwalaUncle": {
+  "g": "m",
+  "age": "adult",
+  "why": "Shankar Anna, man in his 50s"
+ },
+ "chennai/cricketKid": {
+  "g": "m",
+  "age": "kid",
+  "why": "Vicky, boy batter"
+ },
+ "chennai/station-bench-elder": {
+  "g": "m",
+  "age": "elder",
+  "why": "Thaatha"
+ },
+ "chennai/marine-morning-walker": {
+  "g": "m",
+  "age": "elder",
+  "why": "Thaatha"
+ },
+ "delhi/tourist": {
+  "g": "f",
+  "age": "adult",
+  "why": "Olivia"
+ },
+ "delhi/juhu-sand-artist": {
+  "g": "f",
+  "age": "adult",
+  "why": "Anita, woman rangoli artist (doc); placement kind regex hit the wrong line"
+ },
+ "hyderabad/juhu-sand-artist": {
+  "g": "f",
+  "age": "adult",
+  "why": "Sujatha, woman Bathukamma artist (doc)"
+ },
+ "hyderabad/station-ticket-clerk": {
+  "g": "f",
+  "age": "adult",
+  "why": "name Madhavi (female) although the cast doc look says man: FLAG"
+ },
+ "hyderabad/bse-broker": {
+  "g": "f",
+  "age": "adult",
+  "why": "name Mounika (female) although the cast doc look says man: FLAG"
+ },
+ "kerala/station-ticket-clerk": {
+  "g": "f",
+  "age": "adult",
+  "why": "name Jaya Chechi (female) although the cast doc look says man: FLAG"
+ },
+ "hyderabad/rajabai-book-seller": {
+  "g": "m",
+  "age": "adult",
+  "why": "Haribabu, man with grey hair"
+ },
+ "kerala/marine-jogger": {
+  "g": "m",
+  "age": "adult",
+  "why": "Ranjith"
+ },
+ "kerala/marine-walk-student": {
+  "g": "m",
+  "age": "teen",
+  "why": "Midhun, college student"
+ },
+ "mumbai/marine-couple": {
+  "g": "m",
+  "age": "adult",
+  "why": "couple, one voice: first couple male, second female (cast convention)"
+ },
+ "bengaluru/marine-couple": {
+  "g": "m",
+  "age": "adult",
+  "why": "couple"
+ },
+ "chennai/marine-couple": {
+  "g": "m",
+  "age": "adult",
+  "why": "couple"
+ },
+ "delhi/marine-couple": {
+  "g": "m",
+  "age": "adult",
+  "why": "couple"
+ },
+ "hyderabad/marine-couple": {
+  "g": "m",
+  "age": "adult",
+  "why": "couple"
+ },
+ "kerala/marine-couple": {
+  "g": "m",
+  "age": "adult",
+  "why": "couple"
+ },
+ "mumbai/marine-couple-2": {
+  "g": "f",
+  "age": "adult",
+  "why": "couple"
+ },
+ "bengaluru/marine-couple-2": {
+  "g": "f",
+  "age": "adult",
+  "why": "couple"
+ },
+ "chennai/marine-couple-2": {
+  "g": "f",
+  "age": "adult",
+  "why": "couple"
+ },
+ "delhi/marine-couple-2": {
+  "g": "f",
+  "age": "adult",
+  "why": "couple"
+ },
+ "hyderabad/marine-couple-2": {
+  "g": "f",
+  "age": "adult",
+  "why": "couple"
+ },
+ "kerala/marine-couple-2": {
+  "g": "f",
+  "age": "adult",
+  "why": "couple"
+ },
+ "mumbai/chowk-vada-customer": {
+  "g": "m",
+  "age": "teen",
+  "why": "schoolboy (teen) at the stall"
+ },
+ "bengaluru/chowk-vada-customer": {
+  "g": "m",
+  "age": "teen",
+  "why": "schoolboy (teen) at the stall"
+ },
+ "chennai/chowk-vada-customer": {
+  "g": "m",
+  "age": "teen",
+  "why": "schoolboy (teen) at the stall"
+ },
+ "delhi/chowk-vada-customer": {
+  "g": "m",
+  "age": "teen",
+  "why": "schoolboy (teen) at the stall"
+ },
+ "hyderabad/chowk-vada-customer": {
+  "g": "m",
+  "age": "teen",
+  "why": "schoolboy (teen) at the stall"
+ },
+ "kerala/chowk-vada-customer": {
+  "g": "m",
+  "age": "teen",
+  "why": "schoolboy (teen) at the stall"
+ },
+ "mumbai/pilgrim": {
+  "g": "m",
+  "age": "elder",
+  "why": "Hindi lines use masculine forms (aaya hoon), elderly visitor"
+ },
+ "hyderabad/antilia-mali": {
+  "g": "m",
+  "age": "elder",
+  "why": "name Chandraiah (male) although the cast doc look says woman: FLAG"
+ },
+ "hyderabad/gateway-dana-seller": {
+  "g": "m",
+  "age": "elder",
+  "why": "name Sattaiah (male) although the cast doc look says woman: FLAG"
+ },
+ "delhi/commuter": {
+  "g": "f",
+  "age": "adult",
+  "why": "seeded commuter; name is female, office wear"
+ },
+ "hyderabad/commuter": {
+  "g": "f",
+  "age": "adult",
+  "why": "seeded commuter; name is female, office wear"
+ }
+}

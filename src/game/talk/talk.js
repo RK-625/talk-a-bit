@@ -54,6 +54,14 @@ function defaultHints(step) {
   return [words[0] ? `Start with "${words[0]}".` : 'Try a short, simple reply.', words.length > 2 ? `Key words: "${words.slice(0, Math.ceil(words.length / 2)).join(' ')}".` : `Try: "${words.join(' ')}".`, `Say: "${step.suggest?.roman ?? ''}"`];
 }
 
+/** gender and age of an ambient passer-by, for its greeting voice: citizens know (people/citizens.js), named roles are read from the role name */
+function voiceOf(t) {
+  const ud = t.object?.userData ?? {}, role = String(t.role ?? ud.role ?? ''), kind = ud.kind;
+  const g = ud.gender ?? (kind === 'woman' || /woman|wife|aunty|girl|lady|mother|amma|didi|akka|chechi|bai\b|dadi|paati|ajji|ammamma/i.test(role) ? 'f' : 'm');
+  const age = { kid: 'kid', teen: 'teen', elder: 'elder' }[kind] ?? (/kid|boy|girl|child/i.test(role) ? 'kid' : /student|teen/i.test(role) ? 'teen' : /dada|dadi|grand|thatha|paati|ajji|elder|old/i.test(role) ? 'elder' : 'adult');
+  return { g, age };
+}
+
 export function createTalk({ camera, player, cameraRig, input, worldId = 'world', ui = createTalkUI() }) {
   const list = new Set();
   let dialogues = {};
@@ -243,7 +251,8 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
       const pool = t.lang === 'en' ? GREETINGS_EN : greetings;
       const gi = (hash(t.id ?? t.role) + Math.floor(Math.random() * 7)) % pool.length, line = pool[gi];
       amb = { t, until: performance.now() + 3200, line, q0 }; state = 'ambient';
-      const lineId = pool === GREETINGS_EN ? `shared/greetings-en/g${gi}` : pool === GREETINGS ? null : `${worldId}/_greetings/g${gi}`; // ids from scripts/voices.mjs
+      const who = voiceOf(t), base = pool === GREETINGS_EN ? `shared/greetings-en/g${gi}` : pool === GREETINGS ? null : `${worldId}/_greetings/g${gi}`;
+      const lineId = base && `${base}-${who.g}-${who.age}`; // ids from server/voices.js: a voice that matches the passer-by
       speak(line.text, { lang: speechLang(t.lang), voice: { rate: 1, pitch: 1 }, lineId });
       return;
     }
@@ -274,10 +283,10 @@ export function createTalk({ camera, player, cameraRig, input, worldId = 'world'
     c.attempt = 0; state = 'npc';
     ui.resetRow();
     ui.setStep({ instruction: step.instruction, suggest: step.suggest });
-    const lid = (k) => (c.dlg.id ? `${worldId}/${c.dlg.id}/${k}` : null); // pre-generated voice line ids (scripts/voices.mjs)
+    const lid = (k) => (c.dlg.id ? `${worldId}/${c.dlg.id}/${k}` : null); // live voice line ids (server/voices.js)
     const again = c.i === 0 && c.dlg.again && doneIds.has(c.dlg.id);
     say(again ? c.dlg.again : step.npc, { wait: false, id: lid(again ? 'again' : `${step.id}-npc`) }); // "phir aaya?" opener on a repeat visit
-    if (step.onValid) preload(lid(`${step.id}-valid`)); if (step.onRetry) preload(lid(`${step.id}-retry`)); // warm the likely next lines
+    if (step.onValid) preload(lid(`${step.id}-valid`)); // warm the likely next line (the retry line is not warmed: it saves credits)
     ui.setBusy(false); state = 'await';
   }
 

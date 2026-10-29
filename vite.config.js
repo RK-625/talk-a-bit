@@ -56,10 +56,25 @@ const classifyPlugin = (env) => ({
   },
 });
 
+// Dev only: GET /api/tts?id=<lineId> -> live Sarvam Bulbul audio (server/tts.js, same handler as the Vercel function api/tts.js). The key comes from
+// the project-root .env (SARVAM_API_KEY) and never reaches the browser. No key: 503 and the game uses the browser voice.
+const ttsPlugin = (env) => ({
+  name: 'dev-tts-proxy',
+  apply: 'serve',
+  configureServer(server) {
+    let handler = null;
+    server.middlewares.use('/api/tts', async (req, res) => {
+      handler ??= (await import('./server/tts.js')).createTtsHandler({ getKey: () => env.SARVAM_API_KEY });
+      req.url = '/api/tts' + (req.url ?? '');
+      handler(req, res);
+    });
+  },
+});
+
 // three.js alone is ~600 kB minified; that's expected for this project.
 // Multi-page: the game plus two dev-only lab turntables.
 export default defineConfig(({ mode }) => ({
-  plugins: [shotPlugin(), classifyPlugin(loadEnv(mode, process.cwd(), ''))],
+  plugins: [shotPlugin(), classifyPlugin(loadEnv(mode, process.cwd(), '')), ttsPlugin(loadEnv(mode, process.cwd(), ''))],
   build: {
     chunkSizeWarningLimit: 900,
     rollupOptions: {

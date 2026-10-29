@@ -53,7 +53,7 @@ export const palaceDoorman = P('taj-doorman', 'Nawab Ali', 'Falaknuma Palace gat
     ['ticket counter ekkada undi', 'ticket counter ekkada sir', 'counter ekkada undi', 'tickets ekkada istaru', 'టికెట్ కౌంటర్ ఎక్కడ ఉంది'],
     ['Ask where.', 'Counter = "counter". Where = "ekkada".'],
     ['ఆ ఎడమవైపు, తెల్ల స్తంభాల పక్కన సార్.', 'On the left, next to the white pillars, sir.'],
-    ['ఎక్కడ అని అడిగారా సార్?', 'Did you ask where, sir?']),,
+    ['ఎక్కడ అని అడిగారా సార్?', 'Did you ask where, sir?']),
   S('hall', ['లోపల భోజనశాల చూడాలనుకుంటున్నారా?', 'Do you want to see the dining hall inside?'],
     'Say yes, you want to see it.', 'అవును, భోజనశాల చూడాలి.',
     ['avunu bhojanashala chudali', 'bhojanashala chudali', 'avunu dining hall chudali', 'dining hall chudali sir', 'అవును, భోజనశాల చూడాలి'],
