@@ -28,7 +28,7 @@ const SUN_LIGHT_T = 0.5;
 const SKY_DISTANCE = 300; // doodle shell radius around the player (or the planet centre when zoomed out)
 const DEG = Math.PI / 180;
 const SHADOW_HALF = 26; // half-size of the shadow camera box around the player
-const DEFAULT_DOODLES = { sun: true, moon: true, clouds: 10, stars: 44, bunting: true };
+const DEFAULT_DOODLES = { sun: true, moon: true, clouds: 10, stars: 44, bunting: false };
 
 // ---- the doodles ---------------------------------------------------------------
 function sunTexture() {

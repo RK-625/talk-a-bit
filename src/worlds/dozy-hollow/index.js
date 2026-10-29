@@ -51,7 +51,7 @@ export default {
   name: 'Dozy Hollow',
   seed: 1234,
   planet: { radius: 50, detail: 26, heightFn, colorFn, sea: null },
-  sky: { paper: '#ece6d6', doodles: { sun: true, moon: true, clouds: 10, stars: 44, bunting: true }, extra: null },
+  sky: { paper: '#ece6d6', doodles: { sun: true, moon: true, clouds: 10, stars: 44, bunting: false }, extra: null },
   spawn: { dir: [0, 1, 0], facing: [0, 0, -1] },
   scatter: { groups: GROUPS, spawnClear: SPAWN_CLEAR, extraSpacing: EXTRA_SPACING },
   createHero: (ink) => createCharacter(ink),

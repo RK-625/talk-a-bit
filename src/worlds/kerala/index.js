@@ -9,7 +9,7 @@ export default {
   name: 'Nammude Kochi',
   seed: 2026,
   planet: PLANET,
-  sky: { paper: '#eef0e0', doodles: { sun: true, moon: true, clouds: 4, stars: 44, bunting: true }, extra: skyExtras },
+  sky: { paper: '#eef0e0', doodles: { sun: true, moon: true, clouds: 4, stars: 44, bunting: false }, extra: skyExtras },
   spawn: { dir: [0, 1, 0], facing: [0, 0, 1] },
   createHero: (ink) => createHero(ink),
   build(ctx) { return buildWorld(ctx); },
