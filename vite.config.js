@@ -22,36 +22,17 @@ const shotPlugin = () => ({
   },
 });
 
-// Dev only: the classifier proxy. POST /api/classify judges the player's reply with Jev (TypeSafe AI) via server/jev.js, with the
-// key from the project-root .env (JEV_API_KEY, optional JEV_MODEL), so the key never ships to the browser.
-// GET /api/classify/status -> { hasKey, model }. Without a key: 501 and the client falls back to the mock.
+// Dev only: the classifier proxy. POST /api/classify judges the player's reply with Jev (TypeSafe AI) through server/classify.js
+// (the same handler as the Vercel function api/classify/), with the key from the project-root .env (JEV_API_KEY, optional JEV_MODEL),
+// so the key never ships to the browser. GET /api/classify/status -> { hasKey, model }. Without a key: 501 and the client uses the mock.
 const classifyPlugin = (env) => ({
   name: 'dev-classifier-proxy',
   apply: 'serve',
   configureServer(server) {
-    const key = env.JEV_API_KEY, model = env.JEV_MODEL || 'jev-latest';
-    let jev = null;
-    const getJev = async () => (jev ??= (await import('./server/jev.js')).createJev({ apiKey: key, model }));
-    server.middlewares.use('/api/classify', (req, res) => {
-      res.setHeader('Content-Type', 'application/json');
-      if (req.method === 'GET') return res.end(JSON.stringify({ hasKey: !!key, model }));
-      if (req.method !== 'POST') { res.statusCode = 405; return res.end('{}'); }
-      if (!key) { res.statusCode = 501; return res.end(JSON.stringify({ error: 'JEV_API_KEY not set in .env' })); }
-      const chunks = [];
-      const ac = new AbortController();
-      res.on('close', () => { if (!res.writableFinished) ac.abort(); }); // the browser cancelled (Esc / timeout)
-      req.on('data', (c) => chunks.push(c));
-      req.on('end', async () => {
-        try {
-          const payload = JSON.parse(Buffer.concat(chunks).toString() || '{}');
-          const out = await (await getJev()).classify(payload, { signal: ac.signal });
-          const { verdict, confidence, reason, model: used, answers } = out;
-          if (!res.writableEnded) res.end(JSON.stringify({ verdict, confidence, reason, model: used, answers }));
-        } catch (e) {
-          if (ac.signal.aborted || res.writableEnded) return;
-          res.statusCode = 502; res.end(JSON.stringify({ error: String(e?.message ?? e).slice(0, 200) }));
-        }
-      });
+    let handler = null;
+    server.middlewares.use('/api/classify', async (req, res) => {
+      handler ??= (await import('./server/classify.js')).createClassifyHandler({ getKey: () => env.JEV_API_KEY, getModel: () => env.JEV_MODEL || 'jev-latest' });
+      handler(req, res);
     });
   },
 });
