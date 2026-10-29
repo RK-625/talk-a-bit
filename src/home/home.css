@@ -90,10 +90,8 @@ footer kbd { font: inherit; border: 2px solid var(--ink); border-radius: 6px; pa
 /* ---- line of flow ribbon: full-bleed, clipped so it can never cause horizontal scroll. All parts share one svg coordinate system. ---- */
 html.home { overflow-x: hidden; }
 .flow { position: relative; width: 100vw; margin: 6px 0 0 calc(50% - 50vw); overflow: hidden; }
-.flow-svg { display: block; width: 100%; height: clamp(120px, 11.8vw, 190px); }
-.flow-svg .bar { animation: bar 2.6s ease-in-out infinite; transform-origin: 0 0; }
-@keyframes bar { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.5); } }
-.flow-note { margin: 0; text-align: center; font: 500 13px/1.2 'Figtree', system-ui, sans-serif; letter-spacing: .08em; color: #8f897e; }
+.flow-svg { display: block; width: 100%; height: clamp(140px, 14.6vw, 236px); }
+.flow-note { margin: 0; text-align: center; font: 700 15px/1.2 'Figtree', system-ui, sans-serif; letter-spacing: .06em; color: #2b2a33; }
 
 /* ---- hackathon stamp: perforated edge via a mask, tilted, pinned top-right on desktop ---- */
 .hero-head { position: relative; }
@@ -127,5 +125,5 @@ html.home { overflow-x: hidden; }
 .card:hover .bub, .card:focus-visible .bub { transform: scale(1.12) rotate(-2.5deg); }
 footer .fo-hash { font-weight: 700; opacity: 1; }
 @media (max-width: 999px) { .hero-head { display: flex; flex-direction: column; align-items: center; } .hero-head > * { max-width: 100%; } .stamp { order: 1; margin: 20px 0 0; } .squig { order: 2; } }
-@media (max-width: 700px) { .flow-svg { height: 120px; } }
-@media (prefers-reduced-motion: reduce) { .wave, .flow-svg .bar { animation: none; } .bub, .stamp { transition: none; } }
+@media (max-width: 700px) { .flow-svg { height: 140px; } }
+@media (prefers-reduced-motion: reduce) { .wave { animation: none; } .bub, .stamp { transition: none; } }

@@ -6,7 +6,7 @@
  */
 import './home.css';
 
-const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Figtree:wght@400;500&family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&family=Baloo+Thambi+2:wght@400;600&family=Baloo+Tammudu+2:wght@400;600&family=Baloo+Chettan+2:wght@400;600&display=swap';
+const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Figtree:wght@400;500;700&family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&family=Baloo+Thambi+2:wght@400;600&family=Baloo+Tammudu+2:wght@400;600&family=Baloo+Chettan+2:wght@400;600&display=swap';
 const INK = '#2b2a33';
 
 // ---- landmark drawings: storybook gouache, viewBox 640x380 (same 320:190 box). Gradients/shading, thin tonal lines, no heavy outlines.
@@ -604,51 +604,164 @@ const card = (w) => `
 // ---- the line of flow: a quiet thought drifts along one long gentle curve, passes through a small voice pill, and comes out as a slim dark ribbon of greetings.
 // Everything lives in ONE svg coordinate system (viewBox 1440x170), so nothing can drift apart between browsers.
 const THOUGHTS = ['umm, what if I say it wrong…', "they're probably nice…", 'okay, just say hi…'];
-const GREETINGS = ['Kya bolta?', 'Aur bhai!', 'ನಮಸ್ಕಾರ', 'Vanakkam!', 'నమస్కారం', 'Namaskaram!', 'नमस्ते'];
+// Kannada/Telugu script is left romanised: Safari lays textPath out glyph by glyph and breaks their conjuncts
+const GREETINGS = ['Kya bolta?', 'Aur bhai!', 'Namaskara!', 'Vanakkam!', 'Bagunnara?', 'Namaskaram!', 'नमस्ते'];
 const DOT = ' · ';
 const FLOW_FONTS = "'Figtree', 'Baloo Tamma 2', 'Baloo Thambi 2', 'Baloo Tammudu 2', 'Baloo Chettan 2', 'Tiro Devanagari Hindi', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Malayalam', system-ui, sans-serif";
-const FLOW_THOUGHT_PATH = 'M-60 128C200 154 400 74 640 100';
+// one smooth water-wave swell (crest, trough, then easing level into the pill)
+const FLOW_THOUGHT_PATH = 'M-60 28C120 28 180 152 340 152S540 98 640 100';
 const FLOW_RIBBON_PATH = 'M770 100C960 100 1180 98 1320 68S1500 34 1600 26';
 const shiftY = (d, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (m, x, y) => `${x} ${f(+y + dy)}`);
-const BAR_H = [10, 22, 14, 30, 18, 38, 24, 34, 16, 28, 40, 20, 32, 14, 24, 12, 6, 4, 3, 3]; // heights; the last 5 become dots
+const FLOW_DY = 45; // the viewBox grew by 40 so the edit chips have room above the pill
+const FLOW_H = 210;
+const PILL = { x: 636, y: FLOW_DY + 68, w: 136, h: 64, cx: 704, cy: FLOW_DY + 100 };
+const TEAL = '#1f6f68';
+// live waveform: BAR_N bars, BAR_STEP apart, scrolling left one step per ~140ms; clipped to the pill's inner rect
+const BAR_N = 22, BAR_STEP = 5, BAR_X0 = 664, BAR_W = 2.5;
+const BAR_STATIC = [10, 3, 22, 14, 30, 3, 18, 38, 24, 3, 34, 16, 28, 40, 3, 20, 32, 14, 3, 24, 12, 3];
+const randBar = () => { const r = Math.random(); return r < 0.35 ? 3 : r > 0.92 ? 32 + Math.random() * 8 : 8 + Math.pow(Math.random(), 1.5) * 24; };
+// edit events: a word lifts out of the pill, gets edited, then folds into a chip
+const EDITS = [
+  { kind: 'remove', word: 'umm', label: 'Removed umm', lead: 'Removed ' },
+  { kind: 'strike', word: 'what if I say it wrong?', label: 'Dropped the doubt' },
+  { kind: 'replace', word: 'hello', to: 'Namaskara!', label: 'Said it in Kannada' },
+  { kind: 'append', word: 'hi', add: ' :)', label: 'Added a smile' },
+  { kind: 'replace', word: 'hello', to: 'Vanakkam!', label: 'Said it in Tamil' },
+];
+const ET = { lift: 800, edit: 1400, morph: 2200, grow: 450, check: 3100, collapse: 4600, out: 400, period: 7600, idle: -1000 };
+const WORD_FS = 20.8, CHIP_FS = 14, CHIP_Y = FLOW_DY + 13, CHIP_H = 30;
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
+const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+const easeBack = (x) => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
 const flowSvg = () => `
-<svg class="flow-svg" viewBox="0 0 1440 170" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A shy thought, umm what if I say it wrong, flows through a voice pill and comes out as greetings in many Indian languages.">
-  <defs><path id="flow-thought" d="${FLOW_THOUGHT_PATH}"/><path id="flow-ribbon" d="${shiftY(FLOW_RIBBON_PATH, 5.6)}"/></defs>
+<svg class="flow-svg" viewBox="0 0 1440 ${FLOW_H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A shy thought, umm what if I say it wrong, flows through a voice pill that tidies it up and comes out as greetings in many Indian languages.">
+  <defs><path id="flow-thought" d="${shiftY(FLOW_THOUGHT_PATH, FLOW_DY)}"/><path id="flow-ribbon" d="${shiftY(FLOW_RIBBON_PATH, FLOW_DY + 5.6)}"/>
+    <clipPath id="flow-bars-clip"><rect x="${PILL.x + 22}" y="${PILL.y + 4}" width="${PILL.w - 30}" height="${PILL.h - 8}" rx="14"/></clipPath>
+    <clipPath id="fe-clip"><rect id="fe-clip-r" x="-400" y="0" width="800" height="${FLOW_H}"/></clipPath></defs>
   <text font-family="${FLOW_FONTS}" font-size="16" font-weight="400" letter-spacing="1.1" fill="#b3ada3"><textPath id="flow-t1" href="#flow-thought" startOffset="0">${(THOUGHTS.join('   ') + '   ').repeat(3)}</textPath></text>
-  <path d="${FLOW_RIBBON_PATH}" fill="none" stroke="${INK}" stroke-width="30" stroke-linecap="butt"/>
+  <path d="${shiftY(FLOW_RIBBON_PATH, FLOW_DY)}" fill="none" stroke="${INK}" stroke-width="30" stroke-linecap="butt"/>
   <text font-family="${FLOW_FONTS}" font-size="16" font-weight="500" letter-spacing=".6" fill="#fff"><textPath id="flow-t2" href="#flow-ribbon" startOffset="0">${(GREETINGS.join(DOT) + DOT).repeat(2)}</textPath></text>
-  <rect x="636" y="68" width="136" height="64" rx="32" fill="#fffaf0" stroke="${INK}" stroke-width="2"/>
-  <circle cx="654" cy="100" r="3" fill="#e0517a"/>
-  ${BAR_H.map((h, i) => { const x = f(669 + i * 4.8); return i < 15
-    ? `<g transform="translate(${x} 100)"><rect class="bar" x="-1.25" y="${-h / 2}" width="2.5" height="${h}" rx="1.25" fill="${INK}" style="animation-delay:${-(i * 0.43).toFixed(2)}s"/></g>`
-    : `<circle cx="${x}" cy="100" r="${f(1.5 - (i - 15) * 0.1)}" fill="${INK}"/>`; }).join('')}
+  <g id="fe" transform="translate(${PILL.cx} 0)" font-family="${FLOW_FONTS}" pointer-events="none" aria-hidden="true"><g clip-path="url(#fe-clip)">
+    <rect id="fe-rect" x="-5" y="${CHIP_Y - 5}" width="10" height="10" rx="5" fill="${TEAL}" stroke="${INK}" stroke-width="1.5" opacity="0"/>
+    <g id="fe-icon" opacity="0"><circle id="fe-spin" r="5.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-dasharray="14 21"/><path id="fe-check" d="M-4.5 .5L-1.2 3.8L4.6 -3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0"/></g>
+    <text id="fe-label" font-size="${CHIP_FS}" font-weight="600" fill="#fff" opacity="0" xml:space="preserve" style="white-space:pre"></text>
+    <g id="fe-word" font-size="${WORD_FS}" font-weight="500" fill="${INK}"></g>
+    <line id="fe-strike" x1="0" x2="0" y1="0" y2="0" stroke="#e0517a" stroke-width="2.6" stroke-linecap="round" opacity="0"/>
+  </g></g>
+  <rect x="${PILL.x}" y="${PILL.y}" width="${PILL.w}" height="${PILL.h}" rx="32" fill="#fffaf0" stroke="${INK}" stroke-width="2"/>
+  <circle cx="654" cy="${PILL.cy}" r="3" fill="#e0517a"/>
+  <g clip-path="url(#flow-bars-clip)"><g id="flow-bars">${Array.from({ length: BAR_N }, (_, i) => `<rect x="${f(BAR_X0 + i * BAR_STEP - BAR_W / 2)}" y="${PILL.cy - 1.5}" width="${BAR_W}" height="3" rx="1.25" fill="${INK}"/>`).join('')}</g></g>
 </svg>`;
 
-// drift both texts along their paths via startOffset (rAF: SMIL startOffset is flaky in Safari). The text is repeated, and the offset wraps by exactly one repeat, so there is never a gap.
+// everything runs in one rAF loop: the two drifting texts, the live waveform and the edit-chip timeline (pauses when the tab is hidden)
 const startFlow = () => {
   const svg = document.querySelector('.flow-svg'); if (!svg) return;
+  const NS = 'http://www.w3.org/2000/svg', $ = (id) => svg.querySelector('#' + id);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const lanes = [
-    { el: svg.querySelector('#flow-t1'), unit: THOUGHTS.join('   ') + '   ', speed: 16, w: 0 },
-    { el: svg.querySelector('#flow-t2'), unit: GREETINGS.join(DOT) + DOT, speed: 28, w: 0 },
+    { el: $('flow-t1'), unit: THOUGHTS.join('   ') + '   ', speed: 20, w: 0 },
+    { el: $('flow-t2'), unit: GREETINGS.join(DOT) + DOT, speed: 35, w: 0 },
   ];
+  const probe = (size, weight, ls) => { const t = document.createElementNS(NS, 'text'); t.setAttribute('font-family', FLOW_FONTS); t.setAttribute('font-size', size); t.setAttribute('font-weight', weight); if (ls) t.setAttribute('letter-spacing', ls); t.setAttribute('xml:space', 'preserve'); t.style.whiteSpace = 'pre'; t.style.visibility = 'hidden'; svg.append(t); return t; };
+  const len = (t, s) => { t.textContent = s; return t.getComputedTextLength(); };
+  const layout = (t, s) => ({ s, xs: Array.from(s, (_, i) => len(t, s.slice(0, i))), w: len(t, s) });
   let s = 0, last = 0, raf = 0;
   const measure = () => {
     for (const l of lanes) {
-      const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      t.setAttribute('font-family', l.el.parentNode.getAttribute('font-family')); for (const k of ['font-size', 'font-weight', 'letter-spacing']) t.setAttribute(k, l.el.parentNode.getAttribute(k)); t.setAttribute('xml:space', 'preserve'); t.style.visibility = 'hidden';
-      t.textContent = l.unit; svg.append(t); l.w = t.getComputedTextLength(); t.remove();
+      const t = probe(l.el.parentNode.getAttribute('font-size'), l.el.parentNode.getAttribute('font-weight'), l.el.parentNode.getAttribute('letter-spacing'));
+      l.w = len(t, l.unit); t.remove();
       const path = svg.querySelector(l.el.getAttribute('href')); const need = Math.ceil((path.getTotalLength() + l.w) / l.w) + 1;
       if (need > 0) l.el.textContent = l.unit.repeat(need);
     }
+    const tw = probe(WORD_FS, 500), tc = probe(CHIP_FS, 600);
+    for (const e of EDITS) {
+      e.a = layout(tw, e.word); e.b = layout(tw, e.kind === 'replace' ? e.to : e.kind === 'append' ? e.word + e.add : e.word);
+      e.lw = len(tc, e.label); e.lead && (e.leadW = len(tc, e.lead + 'i') - len(tc, 'i') + 4);
+    }
+    tw.remove(); tc.remove();
   };
   const draw = () => { for (const l of lanes) if (l.w) l.el.setAttribute('startOffset', f(((s * l.speed) % l.w) - l.w)); };
-  const tick = (now) => { if (last) s += Math.min(0.1, (now - last) / 1000); last = now; draw(); raf = requestAnimationFrame(tick); };
-  const run = () => { cancelAnimationFrame(raf); last = 0; if (!reduce.matches && !document.hidden) raf = requestAnimationFrame(tick); else draw(); };
+
+  // ---- live waveform: ring buffer of heights, new bar enters from the right, the group glides one step left in between
+  const barsG = $('flow-bars'), bars = [...barsG.children];
+  const heights = Array.from({ length: BAR_N }, randBar);
+  let wAcc = 0, wNext = 140;
+  const paintBars = (h) => bars.forEach((b, i) => { b.setAttribute('height', f(h[i])); b.setAttribute('y', f(PILL.cy - h[i] / 2)); });
+  const stepBars = (dt) => {
+    wAcc += dt;
+    while (wAcc >= wNext) { wAcc -= wNext; heights.shift(); heights.push(randBar()); wNext = 120 + Math.random() * 40; }
+    paintBars(heights); barsG.setAttribute('transform', `translate(${f(-BAR_STEP * wAcc / wNext)} 0)`);
+  };
+
+  // ---- edit chips: a pure function of (event index, ms into the event)
+  const gWord = $('fe-word'), rect = $('fe-rect'), icon = $('fe-icon'), spin = $('fe-spin'), check = $('fe-check'), label = $('fe-label'), strike = $('fe-strike'), clipR = $('fe-clip-r');
+  let letters = [], curKey = '', et = ET.idle;
+  const setLetters = (lay, key) => {
+    if (key === curKey) return; curKey = key; gWord.textContent = ''; letters = [];
+    for (let i = 0; i < lay.s.length; i++) { const c = lay.s[i]; const t = document.createElementNS(NS, 'text'); t.textContent = c; t.setAttribute('xml:space', 'preserve'); if (c === ' ') t.setAttribute('visibility', 'hidden'); gWord.append(t); letters.push({ t, x: lay.xs[i] - lay.w / 2 }); }
+  };
+  const hideEdit = () => { gWord.setAttribute('opacity', 0); rect.setAttribute('opacity', 0); icon.setAttribute('opacity', 0); label.setAttribute('opacity', 0); strike.setAttribute('opacity', 0); };
+  const drawEdit = (idx, t) => {
+    const e = EDITS[idx], wordY = CHIP_Y + 7;
+    if (t < 0) { hideEdit(); return; }
+    const edited = t >= ET.edit, lay = edited ? e.b : e.a;
+    setLetters(lay, idx + (edited ? 'b' : 'a'));
+    const lift = clamp01(t / ET.lift), k = easeOut(lift), amp = 8 * (1 - k * k);
+    const chipT = t - ET.morph, gk = clamp01(chipT / ET.grow);
+    const W = 52 + e.lw; // icon + label (for 'remove' the lifted word itself lands inside the chip after the lead text)
+    const cw = 10 + (W - 10) * easeBack(gk), ch = 10 + (CHIP_H - 10) * easeOut(clamp01(gk * 1.6));
+    // word letters
+    const edK = (t - ET.edit) / 300, absorb = e.kind === 'remove' ? easeOut(clamp01((chipT - 100) / 350)) : 0;
+    const wordA = Math.min(1, t / 250) * (e.kind === 'remove' ? 1 : 1 - clamp01((chipT - 60) / 260));
+    const sc = 1 - absorb * (1 - CHIP_FS / WORD_FS);
+    const r = CHIP_FS / WORD_FS, tx = -W / 2 + 36 + (e.leadW || 0); // landing x of the word inside the chip
+    letters.forEach((L, i) => {
+      const isNew = edited && (e.kind === 'replace' || (e.kind === 'append' && i >= e.word.length));
+      const born = isNew ? clamp01(edK - i * 0.04) : 1;
+      const wave = amp * Math.sin(i * 0.95 - t * 0.014) + (isNew ? -5 * Math.sin(Math.PI * born) : 0);
+      const y0 = wordY + (1 - k) * 46 + wave;
+      const x = (1 - absorb) * L.x + absorb * (tx + (L.x + e.a.w / 2) * r);
+      const y = y0 + absorb * (CHIP_Y + 5 - wordY);
+      L.t.setAttribute('transform', `translate(${f(x)} ${f(y)}) scale(${f(sc)})`);
+      L.t.setAttribute('opacity', f(born));
+    });
+    gWord.setAttribute('opacity', f(Math.max(0, wordA)));
+    gWord.setAttribute('fill', absorb > 0.6 ? '#fff' : INK);
+    // strike-through draws across the word
+    if (e.kind === 'strike' && edited) { const p = easeOut(clamp01((t - ET.edit) / 550)); strike.setAttribute('x1', f(-e.a.w / 2 - 4)); strike.setAttribute('x2', f(-e.a.w / 2 - 4 + (e.a.w + 8) * p)); strike.setAttribute('y1', f(wordY - 7)); strike.setAttribute('y2', f(wordY - 8)); strike.setAttribute('opacity', f(1 - clamp01((chipT - 60) / 260))); } else strike.setAttribute('opacity', 0);
+    // chip blob
+    if (chipT < 0) { rect.setAttribute('opacity', 0); icon.setAttribute('opacity', 0); label.setAttribute('opacity', 0); }
+    else {
+      rect.setAttribute('opacity', 1); rect.setAttribute('x', f(-cw / 2)); rect.setAttribute('width', f(cw)); rect.setAttribute('y', f(CHIP_Y - ch / 2)); rect.setAttribute('height', f(ch)); rect.setAttribute('rx', f(ch / 2));
+      const la = clamp01((chipT - ET.grow * 0.55) / 200);
+      const ix = -W / 2 + 14 + 7;
+      label.setAttribute('x', f(-W / 2 + 36)); label.setAttribute('y', f(CHIP_Y + 5)); label.textContent = e.kind === 'remove' ? e.lead : e.label; label.setAttribute('opacity', f(la));
+      icon.setAttribute('transform', `translate(${f(ix)} ${f(CHIP_Y)})`); icon.setAttribute('opacity', f(la));
+      const ck = clamp01((t - ET.check) / 220);
+      spin.setAttribute('transform', `rotate(${f(t * 0.5)})`); spin.setAttribute('opacity', f(1 - ck));
+      check.setAttribute('opacity', f(ck)); check.setAttribute('transform', `scale(${f(0.5 + 0.5 * easeBack(ck))})`);
+    }
+    // collapse: clip in from both edges toward the centre
+    const cc = clamp01((t - ET.collapse) / ET.out);
+    if (cc > 0) { const half = (W / 2 + 6) * (1 - easeOut(cc)); clipR.setAttribute('x', f(-half)); clipR.setAttribute('width', f(half * 2)); const o = f(1 - cc); rect.setAttribute('opacity', o); label.setAttribute('opacity', o); icon.setAttribute('opacity', o); if (e.kind === 'remove') gWord.setAttribute('opacity', o); }
+    else { clipR.setAttribute('x', -400); clipR.setAttribute('width', 800); }
+  };
+  const drawEv = () => { if (et < 0) return drawEdit(0, -1); const n = Math.floor(et / ET.period); drawEdit(n % EDITS.length, et - n * ET.period); };
+
+  const tick = (now) => {
+    const dt = last ? Math.min(100, now - last) : 16; last = now; s += dt / 1000; et += dt;
+    draw(); stepBars(dt); drawEv(); raf = requestAnimationFrame(tick);
+  };
+  const run = () => {
+    cancelAnimationFrame(raf); last = 0;
+    if (!reduce.matches && !document.hidden) { raf = requestAnimationFrame(tick); return; }
+    draw(); paintBars(BAR_STATIC); barsG.setAttribute('transform', 'translate(0 0)'); drawEdit(0, 3600); // reduced motion: static waveform and one finished chip
+  };
   const setup = () => { measure(); draw(); run(); };
   (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(setup);
   document.addEventListener('visibilitychange', run);
   reduce.addEventListener && reduce.addEventListener('change', run);
+  if (import.meta.env.DEV) window.__flow = { seek: (n, t) => { cancelAnimationFrame(raf); drawEdit(n, t); } };
 };
 
 const WORDMARK = `
