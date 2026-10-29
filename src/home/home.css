@@ -10,17 +10,22 @@ html.home body {
     repeating-linear-gradient(90deg, rgba(120,100,60,.03) 0 1px, transparent 1px 4px),
     #ece6d6;
 }
-.home-page { max-width: 1240px; margin: 0 auto; padding: 56px 28px 40px; box-sizing: border-box; }
+.home-page { max-width: 1240px; margin: 0 auto; padding: 34px 28px 40px; box-sizing: border-box; }
 .hero-head { text-align: center; }
-.kicker { margin: 0; font-size: 22px; letter-spacing: .04em; opacity: .7; transform: rotate(-1.5deg); }
-.hero-head h1 {
-  margin: 4px 0 6px; font: 800 clamp(64px, 11vw, 132px)/1 'Baloo 2', 'Baloo Tamma 2', sans-serif; color: var(--ink);
-  text-shadow: 4px 5px 0 #f6c9d6, 7px 8px 0 rgba(43,42,51,.14); transform: rotate(-1.2deg); letter-spacing: -.01em;
-}
-.hero-head h1 span { color: #e0517a; font-size: .72em; }
-.tagline { margin: 0 auto; max-width: 720px; font: 700 clamp(24px, 3vw, 34px)/1.25 'Kalam', cursive; }
-.sub { margin: 10px auto 0; max-width: 560px; font-size: 22px; opacity: .72; }
-.squig { width: 220px; margin-top: 14px; }
+.kicker { margin: 0; font-size: 20px; letter-spacing: .04em; opacity: .7; transform: rotate(-1.5deg); }
+.hero-head h1.wm { margin: 2px auto 0; width: min(600px, 100%); line-height: 0; transform: none; }
+.wm-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.wm-reply { animation: wm-bob 3.2s ease-in-out infinite; }
+.wm-typing circle { animation: wm-dot 1.4s ease-in-out infinite; }
+.wm-typing .d2 { animation-delay: .2s; } .wm-typing .d3 { animation-delay: .4s; }
+.wm-voice { animation: wm-voice 2.4s ease-in-out infinite; }
+@keyframes wm-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes wm-dot { 0%, 100% { opacity: .25; } 40% { opacity: 1; } }
+@keyframes wm-voice { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .wm-reply, .wm-typing circle, .wm-voice { animation: none; } }
+.tagline { margin: 2px auto 0; max-width: 720px; font: 700 clamp(24px, 3vw, 34px)/1.25 'Kalam', cursive; }
+.sub { margin: 6px auto 0; max-width: 560px; font-size: 22px; opacity: .72; }
+.squig { width: 180px; margin-top: 8px; }
 .pick { margin: 44px 0 6px; text-align: center; font: 700 30px/1 'Kalam', cursive; }
 .pick::after { content: ''; display: block; width: 70px; height: 4px; margin: 8px auto 0; background: #e0517a; border-radius: 3px; transform: rotate(-2deg); }
 
@@ -82,14 +87,13 @@ footer kbd { font: inherit; border: 2px solid var(--ink); border-radius: 6px; pa
 }
 @media (prefers-reduced-motion: reduce) { .card, .tag, .tag span { transition: none; } }
 
-/* ---- line of flow ribbon: full-bleed, clipped so it can never cause horizontal scroll ---- */
+/* ---- line of flow ribbon: full-bleed, clipped so it can never cause horizontal scroll. All parts share one svg coordinate system. ---- */
 html.home { overflow-x: hidden; }
-.flow { position: relative; width: 100vw; margin: 18px 0 0 calc(50% - 50vw); overflow: hidden; }
-.flow-svg { display: block; width: 100%; height: clamp(150px, 15.3vw, 232px); }
-.flow-pill .bar, .flow-pill { transform-box: fill-box; transform-origin: center; }
-.flow-pill .bar { animation: bar 1.3s ease-in-out infinite; }
-@keyframes bar { 0%, 100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
-.flow-cap { transform-box: fill-box; transform-origin: center; transform: rotate(-2deg); }
+.flow { position: relative; width: 100vw; margin: 6px 0 0 calc(50% - 50vw); overflow: hidden; }
+.flow-svg { display: block; width: 100%; height: clamp(120px, 11.8vw, 190px); }
+.flow-svg .bar { animation: bar 2.6s ease-in-out infinite; transform-origin: 0 0; }
+@keyframes bar { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(.5); } }
+.flow-note { margin: 0; text-align: center; font: 500 13px/1.2 'Figtree', system-ui, sans-serif; letter-spacing: .08em; color: #8f897e; }
 
 /* ---- hackathon stamp: perforated edge via a mask, tilted, pinned top-right on desktop ---- */
 .hero-head { position: relative; }
@@ -123,5 +127,5 @@ html.home { overflow-x: hidden; }
 .card:hover .bub, .card:focus-visible .bub { transform: scale(1.12) rotate(-2.5deg); }
 footer .fo-hash { font-weight: 700; opacity: 1; }
 @media (max-width: 999px) { .hero-head { display: flex; flex-direction: column; align-items: center; } .hero-head > * { max-width: 100%; } .stamp { order: 1; margin: 20px 0 0; } .squig { order: 2; } }
-@media (max-width: 700px) { .flow-svg { height: 136px; } }
-@media (prefers-reduced-motion: reduce) { .wave, .flow-pill .bar { animation: none; } .flow-pill .bar { transform: scaleY(.75); } .bub, .stamp { transition: none; } }
+@media (max-width: 700px) { .flow-svg { height: 120px; } }
+@media (prefers-reduced-motion: reduce) { .wave, .flow-svg .bar { animation: none; } .bub, .stamp { transition: none; } }

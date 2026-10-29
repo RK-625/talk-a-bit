@@ -6,7 +6,7 @@
  */
 import './home.css';
 
-const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&family=Baloo+Thambi+2:wght@400;600&family=Baloo+Tammudu+2:wght@400;600&family=Baloo+Chettan+2:wght@400;600&display=swap';
+const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Figtree:wght@400;500&family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&family=Baloo+Thambi+2:wght@400;600&family=Baloo+Tammudu+2:wght@400;600&family=Baloo+Chettan+2:wght@400;600&display=swap';
 const INK = '#2b2a33';
 
 // ---- landmark drawings: storybook gouache, viewBox 640x380 (same 320:190 box). Gradients/shading, thin tonal lines, no heavy outlines.
@@ -601,28 +601,27 @@ const card = (w) => `
 </li>`;
 
 
-// ---- the line of flow: a shy thought drifts along a loose squiggle, passes through a voice-capsule, and comes out as a dark ribbon of greetings.
-const THOUGHTS = ['umm…', 'what if I say it wrong…', 'okay, just say hi…', "they're probably nice…", 'one small word…'];
-const GREETINGS = ['Kya bolta, bhidu?', 'नमस्ते', 'Aur bhai, kya haal?', 'Namaskara, hegiddira?', 'ನಮಸ್ಕಾರ', 'Vanakkam! Eppadi irukeenga?', 'வணக்கம்', 'Bagunnara?', 'నమస్కారం', 'Namaskaram, sukhamano?', 'നമസ്കാരം'];
-const DOT = ' · ';
-const FLOW_FONTS = "'Patrick Hand', 'Baloo Tamma 2', 'Baloo Thambi 2', 'Baloo Tammudu 2', 'Baloo Chettan 2', 'Tiro Devanagari Hindi', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Malayalam', sans-serif";
-const FLOW_THOUGHT_PATH = 'M-40 150C60 160 130 160 200 140C300 112 370 46 312 20C250 -4 150 34 168 104C186 172 330 196 430 144C500 108 560 106 600 108S650 110 700 110';
-const FLOW_RIBBON_PATH = 'M700 110C780 110 790 128 880 130C980 132 1010 70 1110 74S1250 134 1340 100S1480 52 1560 58';
-const BARS = [0.45, 0.8, 0.55, 1, 0.7, 0.95, 0.5, 0.85, 0.6, 1, 0.75, 0.5, 0.9, 0.55];
+// ---- the line of flow: a quiet thought drifts along one long gentle curve, passes through a small voice pill, and comes out as a slim dark ribbon of greetings.
+// Everything lives in ONE svg coordinate system (viewBox 1440x170), so nothing can drift apart between browsers.
+const THOUGHTS = ['umm, what if I say it wrong…', "they're probably nice…", 'okay, just say hi…'];
+const GREETINGS = ['Kya bolta?', 'Aur bhai!', 'ನಮಸ್ಕಾರ', 'Vanakkam!', 'నమస్కారం', 'Namaskaram!', 'नमस्ते'];
+const DOT = ' · ';
+const FLOW_FONTS = "'Figtree', 'Baloo Tamma 2', 'Baloo Thambi 2', 'Baloo Tammudu 2', 'Baloo Chettan 2', 'Tiro Devanagari Hindi', 'Noto Sans Devanagari', 'Noto Sans Kannada', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Malayalam', system-ui, sans-serif";
+const FLOW_THOUGHT_PATH = 'M-60 128C200 154 400 74 640 100';
+const FLOW_RIBBON_PATH = 'M770 100C960 100 1180 98 1320 68S1500 34 1600 26';
+const shiftY = (d, dy) => d.replace(/(-?[\d.]+) (-?[\d.]+)/g, (m, x, y) => `${x} ${f(+y + dy)}`);
+const BAR_H = [10, 22, 14, 30, 18, 38, 24, 34, 16, 28, 40, 20, 32, 14, 24, 12, 6, 4, 3, 3]; // heights; the last 5 become dots
 const flowSvg = () => `
-<svg class="flow-svg" viewBox="0 0 1440 220" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A shy thought, umm what if I say it wrong, flows through a microphone and comes out as greetings in many Indian languages.">
-  <defs><path id="flow-thought" d="${FLOW_THOUGHT_PATH}"/><path id="flow-ribbon" d="${FLOW_RIBBON_PATH}"/></defs>
-  <use href="#flow-thought" fill="none" stroke="${INK}" stroke-opacity=".07" stroke-width="2" stroke-dasharray="2 9" stroke-linecap="round"/>
-  <text class="flow-thought" font-family="${FLOW_FONTS}" font-size="31" fill="${INK}" fill-opacity=".4"><textPath id="flow-t1" href="#flow-thought" startOffset="0">${(THOUGHTS.join(' ') + ' ').repeat(3)}</textPath></text>
-  <use href="#flow-ribbon" fill="none" stroke="${INK}" stroke-width="36" stroke-linecap="butt"/>
-  <text class="flow-greet" font-family="${FLOW_FONTS}" font-size="23" fill="#fffaf0" dy="7.4"><textPath id="flow-t2" href="#flow-ribbon" startOffset="0">${(GREETINGS.join(DOT) + DOT).repeat(2)}</textPath></text>
-  <g class="flow-pill">
-    <rect x="618" y="76" width="204" height="68" rx="34" fill="#fffaf0" stroke="${INK}" stroke-width="3"/>
-    <rect x="626" y="84" width="188" height="52" rx="26" fill="none" stroke="#e0517a" stroke-width="1.6" stroke-opacity=".35" stroke-dasharray="3 6" stroke-linecap="round"/>
-    ${BARS.map((h, i) => `<rect class="bar" x="${651 + i * 11.4}" y="${110 - h * 25}" width="6" height="${h * 50}" rx="3" fill="${i % 4 === 1 ? '#e0517a' : INK}" style="animation-delay:${-((i * 0.37) % 1.3).toFixed(2)}s"/>`).join('')}
-  </g>
-  <text class="flow-cap" x="720" y="176" text-anchor="middle" font-family="Kalam, 'Patrick Hand', cursive" font-size="25" font-weight="700" fill="${INK}" fill-opacity=".8">speak it, don’t type it</text>
-  <path d="M668 184Q720 198 772 184" fill="none" stroke="#e0517a" stroke-width="3" stroke-linecap="round"/>
+<svg class="flow-svg" viewBox="0 0 1440 170" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A shy thought, umm what if I say it wrong, flows through a voice pill and comes out as greetings in many Indian languages.">
+  <defs><path id="flow-thought" d="${FLOW_THOUGHT_PATH}"/><path id="flow-ribbon" d="${shiftY(FLOW_RIBBON_PATH, 5.6)}"/></defs>
+  <text font-family="${FLOW_FONTS}" font-size="16" font-weight="400" letter-spacing="1.1" fill="#b3ada3"><textPath id="flow-t1" href="#flow-thought" startOffset="0">${(THOUGHTS.join('   ') + '   ').repeat(3)}</textPath></text>
+  <path d="${FLOW_RIBBON_PATH}" fill="none" stroke="${INK}" stroke-width="30" stroke-linecap="butt"/>
+  <text font-family="${FLOW_FONTS}" font-size="16" font-weight="500" letter-spacing=".6" fill="#fff"><textPath id="flow-t2" href="#flow-ribbon" startOffset="0">${(GREETINGS.join(DOT) + DOT).repeat(2)}</textPath></text>
+  <rect x="636" y="68" width="136" height="64" rx="32" fill="#fffaf0" stroke="${INK}" stroke-width="2"/>
+  <circle cx="654" cy="100" r="3" fill="#e0517a"/>
+  ${BAR_H.map((h, i) => { const x = f(669 + i * 4.8); return i < 15
+    ? `<g transform="translate(${x} 100)"><rect class="bar" x="-1.25" y="${-h / 2}" width="2.5" height="${h}" rx="1.25" fill="${INK}" style="animation-delay:${-(i * 0.43).toFixed(2)}s"/></g>`
+    : `<circle cx="${x}" cy="100" r="${f(1.5 - (i - 15) * 0.1)}" fill="${INK}"/>`; }).join('')}
 </svg>`;
 
 // drift both texts along their paths via startOffset (rAF: SMIL startOffset is flaky in Safari). The text is repeated, and the offset wraps by exactly one repeat, so there is never a gap.
@@ -630,14 +629,14 @@ const startFlow = () => {
   const svg = document.querySelector('.flow-svg'); if (!svg) return;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const lanes = [
-    { el: svg.querySelector('#flow-t1'), unit: THOUGHTS.join(' ') + ' ', speed: 20, w: 0 },
-    { el: svg.querySelector('#flow-t2'), unit: GREETINGS.join(DOT) + DOT, speed: 34, w: 0 },
+    { el: svg.querySelector('#flow-t1'), unit: THOUGHTS.join('   ') + '   ', speed: 16, w: 0 },
+    { el: svg.querySelector('#flow-t2'), unit: GREETINGS.join(DOT) + DOT, speed: 28, w: 0 },
   ];
   let s = 0, last = 0, raf = 0;
   const measure = () => {
     for (const l of lanes) {
       const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      t.setAttribute('font-family', l.el.parentNode.getAttribute('font-family')); t.setAttribute('font-size', l.el.parentNode.getAttribute('font-size')); t.setAttribute('xml:space', 'preserve'); t.style.visibility = 'hidden';
+      t.setAttribute('font-family', l.el.parentNode.getAttribute('font-family')); for (const k of ['font-size', 'font-weight', 'letter-spacing']) t.setAttribute(k, l.el.parentNode.getAttribute(k)); t.setAttribute('xml:space', 'preserve'); t.style.visibility = 'hidden';
       t.textContent = l.unit; svg.append(t); l.w = t.getComputedTextLength(); t.remove();
       const path = svg.querySelector(l.el.getAttribute('href')); const need = Math.ceil((path.getTotalLength() + l.w) / l.w) + 1;
       if (need > 0) l.el.textContent = l.unit.repeat(need);
@@ -651,6 +650,21 @@ const startFlow = () => {
   document.addEventListener('visibilitychange', run);
   reduce.addEventListener && reduce.addEventListener('change', run);
 };
+
+const WORDMARK = `
+<svg class="wm-svg" viewBox="-14 0 628 250" aria-hidden="true" focusable="false">
+  <g fill="#e0517a" stroke="none"><path id="wm-shadow" transform="translate(9 10)" d="M70 28C150 14 330 16 400 26C436 32 446 52 444 90C442 130 436 154 398 162C330 172 230 168 150 170L92 216L106 168C62 164 40 150 38 108C36 62 40 36 70 28Z"/></g>
+  <path d="M70 28C150 14 330 16 400 26C436 32 446 52 444 90C442 130 436 154 398 162C330 172 230 168 150 170L92 216L106 168C62 164 40 150 38 108C36 62 40 36 70 28Z" fill="#fffaf0" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>
+  <text x="241" y="134" text-anchor="middle" font-family="'Baloo 2', 'Baloo Tamma 2', sans-serif" font-weight="800" font-size="128" fill="${INK}">Talk</text>
+  <g class="wm-voice" fill="none" stroke="#e0517a" stroke-width="5" stroke-linecap="round"><path d="M26 74q-9 17 0 34"/><path d="M13 62q-16 29 0 58"/></g>
+  <g class="wm-typing"><path d="M474 32c0-13 10-20 22-20h54c12 0 22 7 22 20s-10 20-22 20h-40l-14 12 2-13c-14-1-24-8-24-19z" fill="#fffaf0" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>
+    <circle class="d1" cx="500" cy="32" r="5.5" fill="${INK}"/><circle class="d2" cx="523" cy="32" r="5.5" fill="${INK}"/><circle class="d3" cx="546" cy="32" r="5.5" fill="${INK}"/></g>
+  <g transform="translate(466 190) rotate(4)"><g class="wm-reply">
+    <path transform="translate(6 7)" d="M-92 -8C-92 -32 -70 -42 -40 -42H60C88 -42 104 -30 104 -4C104 22 86 34 56 34H44L52 54L22 34H-42C-74 34 -92 20 -92 -8Z" fill="${INK}"/>
+    <path d="M-92 -8C-92 -32 -70 -42 -40 -42H60C88 -42 104 -30 104 -4C104 22 86 34 56 34H44L52 54L22 34H-42C-74 34 -92 20 -92 -8Z" fill="#e0517a" stroke="${INK}" stroke-width="4.5" stroke-linejoin="round"/>
+    <text x="6" y="14" text-anchor="middle" font-family="'Baloo 2', 'Baloo Tamma 2', sans-serif" font-weight="800" font-size="50" fill="#fffaf0">a bit</text>
+  </g></g>
+</svg>`;
 
 // the hackathon credit: a tilted, perforated postage-stamp ticket. Text and a hand-drawn mic only, no logos.
 const STAMP = `
@@ -675,12 +689,12 @@ export function mountHome() {
     <header class="hero-head">
       ${STAMP}
       <p class="kicker">a small game for shy talkers</p>
-      <h1>Talk<span>-a-</span>bit</h1>
+      <h1 class="wm" aria-label="Talk-a-bit">${WORDMARK}</h1>
       <p class="tagline">Practise the language of the street, one small talk at a time.</p>
       <p class="sub">Wander a tiny city, find someone friendly, and say a few words. No pressure, no one is watching.</p>
       <svg class="squig" viewBox="0 0 260 14" aria-hidden="true"><path d="M3 8q16-10 32 0t32 0 32 0 32 0 32 0 32 0 32 0 22-3" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/></svg>
     </header>
-    <div class="flow" role="presentation">${flowSvg()}</div>
+    <div class="flow" role="presentation">${flowSvg()}<p class="flow-note">speak it, don’t type it</p></div>
     <h2 class="pick">Pick a city to wander</h2>
     <ul class="cards">${WORLDS.map(card).join('')}</ul>
     <footer>Made with ink, paper, a lot of chai, and mostly my voice. <span class="fo-hash">A #NoHandsChallenge entry for WeMakeDevs &times; Wispr Flow.</span> <span>Tip: press <kbd>H</kbd> twice inside a city to come back here.</span></footer>
