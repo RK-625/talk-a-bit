@@ -639,9 +639,9 @@ const flowSvg = () => `
   <defs><path id="flow-thought" d="${shiftY(FLOW_THOUGHT_PATH, FLOW_DY)}"/><path id="flow-ribbon" d="${shiftY(FLOW_RIBBON_PATH, FLOW_DY + 5.6)}"/>
     <clipPath id="flow-bars-clip"><rect x="${PILL.x + 22}" y="${PILL.y + 4}" width="${PILL.w - 30}" height="${PILL.h - 8}" rx="14"/></clipPath>
     <clipPath id="fe-clip"><rect id="fe-clip-r" x="-400" y="0" width="800" height="${FLOW_H}"/></clipPath></defs>
-  <text font-family="${FLOW_FONTS}" font-size="16" font-weight="400" letter-spacing="1.1" fill="#b3ada3"><textPath id="flow-t1" href="#flow-thought" startOffset="0">${(THOUGHTS.join('   ') + '   ').repeat(3)}</textPath></text>
+  <text font-family="${FLOW_FONTS}" font-size="16" font-weight="400" letter-spacing="1.1" fill="#b3ada3" xml:space="preserve" style="white-space:pre"><textPath id="flow-t1" href="#flow-thought" startOffset="0">${(THOUGHTS.join('   ') + '   ').repeat(3)}</textPath></text>
   <path d="${shiftY(FLOW_RIBBON_PATH, FLOW_DY)}" fill="none" stroke="${INK}" stroke-width="30" stroke-linecap="butt"/>
-  <text font-family="${FLOW_FONTS}" font-size="16" font-weight="500" letter-spacing=".6" fill="#fff"><textPath id="flow-t2" href="#flow-ribbon" startOffset="0">${(GREETINGS.join(DOT) + DOT).repeat(2)}</textPath></text>
+  <text font-family="${FLOW_FONTS}" font-size="16" font-weight="500" letter-spacing=".6" fill="#fff" xml:space="preserve" style="white-space:pre"><textPath id="flow-t2" href="#flow-ribbon" startOffset="0">${(GREETINGS.join(DOT) + DOT).repeat(2)}</textPath></text>
   <g id="fe" transform="translate(${PILL.cx} 0)" font-family="${FLOW_FONTS}" pointer-events="none" aria-hidden="true"><g clip-path="url(#fe-clip)">
     <rect id="fe-rect" x="-5" y="${CHIP_Y - 5}" width="10" height="10" rx="5" fill="${TEAL}" stroke="${INK}" stroke-width="1.5" opacity="0"/>
     <g id="fe-icon" opacity="0"><circle id="fe-spin" r="5.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-dasharray="14 21"/><path id="fe-check" d="M-4.5 .5L-1.2 3.8L4.6 -3" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0"/></g>
@@ -670,7 +670,7 @@ const startFlow = () => {
   const measure = () => {
     for (const l of lanes) {
       const t = probe(l.el.parentNode.getAttribute('font-size'), l.el.parentNode.getAttribute('font-weight'), l.el.parentNode.getAttribute('letter-spacing'));
-      l.w = len(t, l.unit); t.remove();
+      l.w = len(t, l.unit + l.unit) - len(t, l.unit); t.remove(); // one unit's advance, including kerning across the seam
       const path = svg.querySelector(l.el.getAttribute('href')); const need = Math.ceil((path.getTotalLength() + l.w) / l.w) + 1;
       if (need > 0) l.el.textContent = l.unit.repeat(need);
     }
@@ -809,7 +809,7 @@ export function mountHome() {
       <svg class="squig" viewBox="0 0 260 14" aria-hidden="true"><path d="M3 8q16-10 32 0t32 0 32 0 32 0 32 0 32 0 32 0 22-3" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/></svg>
     </header>
     <div class="flow" role="presentation">${flowSvg()}<p class="flow-note">speak it, don’t type it</p></div>
-    <h2 class="pick">Pick a city to wander</h2>
+    <h2 class="pick">Pick a city to play</h2>
     <ul class="cards">${WORLDS.map(card).join('')}</ul>
     <footer>Made with ink, paper, a lot of chai, and mostly my voice. <span class="fo-hash">A #NoHandsChallenge entry for WeMakeDevs &times; Wispr Flow.</span> <span>Tip: press <kbd>H</kbd> twice inside a city to come back here.</span></footer>
   </main>`;
