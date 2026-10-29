@@ -4,3 +4,5 @@ docs/screens/
 
 .env.local
 .env
+.vercel
+.env*

@@ -1,0 +1,9 @@
+# never upload secrets or local-only files to Vercel (keys live in the project's Environment Variables instead)
+.env
+.env.*
+!.env.example
+.worktreeinclude
+.claude
+docs/screens
+node_modules
+dist
