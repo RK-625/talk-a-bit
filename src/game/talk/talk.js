@@ -62,7 +62,11 @@ function voiceOf(t) {
   return { g, age };
 }
 
+// word-by-word English per romanised line (src/worlds/<world>/dialogue/gloss.json), loaded lazily for the current world only
+const GLOSS = import.meta.glob('../../worlds/*/dialogue/gloss.json', { import: 'default' });
+
 export function createTalk({ camera, player, cameraRig, input, worldId = 'world', ui = createTalkUI() }) {
+  GLOSS[`../../worlds/${worldId}/dialogue/gloss.json`]?.().then((g) => ui.setGloss?.(g)).catch(() => {});
   const list = new Set();
   let dialogues = {};
   let greetings = GREETINGS;

@@ -7,8 +7,11 @@
  *     setNpc(line, { react }) , setStep({ instruction, suggest, attempt, max }) , setHint(text, n) , setBusy(b)
  *     flashValid() , flashRetry(), showReward({ learned, outro }) , onSubmit(fn) , onEscape ...
  *     focusInput() / clearInput() / inputFocused() / toggleSuggest()
+ *     Dictated or pasted replies (Wispr Flow etc.) send themselves 0.6 s after they land; typed replies wait for Enter.
  *     phrasebook: toggleBook(entries) / bookOpen()
  *   }
+ *     setGloss(map)   { roman line: [English per word] } (src/worlds/<world>/dialogue/gloss.json): glossed romanised lines show as word chips,
+ *                     each word with its literal English under it; the free English translation stays in the line's tooltip
  *   Lines are { text (Devanagari or English), roman, en }.
  */
 const FONT_HREF = 'https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Kalam:wght@400;700&family=Tiro+Devanagari+Hindi&family=Baloo+Tamma+2:wght@400;600&family=Baloo+Thambi+2:wght@400;600&family=Baloo+Tammudu+2:wght@400;600&family=Baloo+Chettan+2:wght@400;600&display=swap';
@@ -51,6 +54,10 @@ const CSS = `
 .t-npc .dv{font-family:'Tiro Devanagari Hindi','Kalam',serif;font-size:28px;line-height:1.3}
 .t-npc .ro{font-size:21px;margin-top:2px}
 .t-npc .en{font-size:16px;opacity:.62;font-style:italic;margin-top:2px}
+.w{display:inline-flex;flex-direction:column;align-items:center;margin:0 9px 6px 0;vertical-align:top;line-height:1.15}
+.w i{font-style:normal;font-size:14px;opacity:.62;white-space:nowrap;margin-top:1px;padding:0 4px;border-top:1.5px dotted rgba(43,42,51,.35)}
+.t-sug .w i{font-size:13px}
+.w b{font-weight:inherit}
 .t-npc.react .dv{color:#9a3b52}
 .t-rule{height:0;border-top:2px dashed rgba(43,42,51,.35);margin:6px 0 10px}
 .t-instr{font-size:20px;line-height:1.25}
@@ -163,7 +170,7 @@ export function createTalkUI() {
     <div class="t-think" aria-live="polite">…</div>
     <div class="t-hint"></div><div class="t-reason"></div>
     <div class="t-reward-slot"></div>
-    <div class="t-keys"><span>Enter = send &nbsp;·&nbsp; Tab = hide/show phrase &nbsp;·&nbsp; Esc = leave</span><span class="pb">Phrasebook [P]</span></div>`, 11);
+    <div class="t-keys"><span>Enter = send (dictation sends itself) &nbsp;·&nbsp; Tab = hide/show phrase &nbsp;·&nbsp; Esc = leave</span><span class="pb">Phrasebook [P]</span></div>`, 11);
   const guide = paper('t-guide', `<span class="txt"></span> <kbd>E</kbd><svg class="arr" viewBox="0 0 60 30"><path d="M4 15 C 18 12, 34 18, 52 15 M42 6 C 48 10, 52 13, 54 15 C 52 18, 47 22, 41 25" fill="none" stroke="#2b2a33" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`, 41);
   const book = paper('t-book', `<h3>Phrasebook</h3><div class="body"></div>`, 21);
   const hot = document.createElement('div'); hot.className = 't-paper t-hotkey'; hot.innerHTML = `<svg class="bd"></svg><div class="in">Phrasebook [P]</div>`; hot._seed = 31; root.appendChild(hot); papers.push(hot); ro.observe(hot);
@@ -173,24 +180,45 @@ export function createTalkUI() {
   const input = q('.t-input'), sug = q('.t-sug'), tog = q('.tog');
   let suggestShown = true, hasSuggest = false;
 
+  let gloss = null; // { roman line: [English per word] }
+  /** a romanised line as word chips (each word with its literal English under it) when it has a gloss, else as plain text */
+  function setRoman(el, roman, en = '') {
+    const words = roman ? roman.trim().split(/\s+/) : [], g = roman && gloss?.[roman.trim()];
+    el.title = g && en ? `Meaning: ${en}` : '';
+    if (g && g.length === words.length) el.innerHTML = words.map((w, i) => `<span class="w"><b>${esc(w)}</b><i>${esc(g[i])}</i></span>`).join('');
+    else el.textContent = roman ?? '';
+    return !!(g && g.length === words.length);
+  }
   function setLine(el, line, extraCls) {
     if (!line) { setText(el.querySelector('.dv'), ''); el.querySelector('.ro').textContent = ''; el.querySelector('.en').textContent = ''; return; }
     setText(el.querySelector('.dv'), line.text);
     // English NPCs: text, roman and en are the same sentence, show it once
-    el.querySelector('.ro').textContent = line.roman && line.roman !== line.text ? line.roman : '';
-    el.querySelector('.en').textContent = line.en && line.en !== line.text ? line.en : '';
+    const chips = setRoman(el.querySelector('.ro'), line.roman && line.roman !== line.text ? line.roman : '', line.en);
+    // glossed: the word chips carry the literal English, the free translation moves to the tooltip
+    el.querySelector('.en').textContent = !chips && line.en && line.en !== line.text ? line.en : '';
   }
   const position = (el, x, y) => { el.style.left = x + 'px'; el.style.top = y + 'px'; };
   const syncSuggest = () => { sug.classList.toggle('hidden', !suggestShown); tog.textContent = suggestShown ? 'hide' : 'show'; };
   tog.addEventListener('click', () => { api.toggleSuggest(); input.focus(); });
   q('.t-go').addEventListener('click', () => { cbs.submit?.(input.value); });
+  // dictation (Wispr Flow, macOS dictation...) drops the whole reply in at once: send it by itself once the text settles.
+  // Typing by hand (including Indic keyboards, which commit a few letters at a time) still waits for Enter.
+  const BULK = new Set(['insertFromPaste', 'insertFromDrop', 'insertReplacementText', 'insertFromYank']);
+  let autoT = 0;
+  input.addEventListener('input', (e) => {
+    clearTimeout(autoT);
+    const d = e.data ?? '', bulk = BULK.has(e.inputType) || (e.inputType === 'insertText' && !e.isComposing && (d.includes(' ') || d.length >= 8));
+    if (bulk && input.value.trim()) autoT = setTimeout(() => { if (input.value.trim() && !input.disabled && document.activeElement === input) cbs.submit?.(input.value); }, 600);
+  });
   input.addEventListener('keydown', (e) => {
+    clearTimeout(autoT); // any key by hand (editing the dictated text, or Enter itself) cancels the pending auto-send
     if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); cbs.submit?.(input.value); }
     else if (e.key === 'Tab') { e.preventDefault(); api.toggleSuggest(); }
   });
   input.addEventListener('blur', () => { setTimeout(() => { if (card.classList.contains('show') && !input.disabled && (document.activeElement === document.body || !document.activeElement)) input.focus(); }, 0); });
 
   const api = {
+    setGloss(map) { gloss = map && typeof map === 'object' ? map : null; },
     /** { difficulty?: 1..5, tutorial?: bool } adds the difficulty dots (and a "start here" star) to the prompt */
     showBubble(x, y, o = {}) {
       position(bubble, x, y);
@@ -225,7 +253,7 @@ export function createTalkUI() {
     setStep({ instruction, suggest }) {
       q('.t-instr').innerHTML = instruction ? `<b>Your turn:</b> ${esc(instruction)}` : '';
       hasSuggest = !!suggest; sug.style.display = hasSuggest ? '' : 'none';
-      if (suggest) { q('.ro', sug).textContent = suggest.roman ?? ''; setText(q('.dv', sug), suggest.text !== suggest.roman ? suggest.text : ''); } // English: once
+      if (suggest) { setRoman(q('.ro', sug), suggest.roman ?? '', suggest.en); setText(q('.dv', sug), suggest.text !== suggest.roman ? suggest.text : ''); } // English: once
       card.classList.remove('ok', 'thinking'); api.setReason(null); api.setHint(null, 0, 3); input.value = ''; syncSuggest();
       requestAnimationFrame(() => draw(card));
     },
